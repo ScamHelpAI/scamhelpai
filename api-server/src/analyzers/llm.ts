@@ -1,3 +1,4 @@
+import { openai } from "@ai-sdk/openai";
 import { generateText, Output } from "ai";
 import { z } from "zod";
 import type { AnalyzerResult, AnalyzeRequest, ScamCategory } from "../types/analyze.js";
@@ -14,8 +15,6 @@ const llmSchema = z.object({
   reasons: z.array(z.string()).max(4),
 });
 
-const MODEL = "openai/gpt-5.6-luna";
-
 function buildPrompt(request: AnalyzeRequest): string {
   return `You are a scam-detection classifier. Score only whether the content looks like a scam or phishing. Be conservative: only mark suspicious when there is clear social-engineering or impersonation signal.
 
@@ -28,13 +27,13 @@ Return structured output only.`;
 export async function analyzeWithLlm(
   request: AnalyzeRequest,
 ): Promise<AnalyzerResult> {
-  if (!process.env.AI_GATEWAY_API_KEY) {
+  if (!process.env.OPENAI_API_KEY) {
     return { findings: [] };
   }
 
   try {
     const { output } = await generateText({
-      model: MODEL,
+      model: openai("gpt-5.6-luna"),
       output: Output.object({ schema: llmSchema }),
       prompt: buildPrompt(request),
       maxOutputTokens: 300,
