@@ -1,14 +1,20 @@
-import { Hono } from 'hono'
+import { serve } from "@hono/node-server";
+import { Hono } from "hono";
+import { cors } from "hono/cors";
+import { analyzeRoutes } from "./routes/analyze.js";
 
-const app = new Hono()
+const app = new Hono();
 
-const welcomeStrings = [
-  'Hello Hono!',
-  'To learn more about Hono on Vercel, visit https://vercel.com/docs/frameworks/backend/hono'
-]
+app.use("*", cors());
 
-app.get('/', (c) => {
-  return c.text(welcomeStrings.join('\n\n'))
-})
+app.get("/health", (c) => c.json({ ok: true }));
 
-export default app
+app.route("/analyze", analyzeRoutes);
+
+const port = Number(process.env.PORT) || 3000;
+
+serve({ fetch: app.fetch, port }, (info) => {
+  console.log(`Server running on http://localhost:${info.port}`);
+});
+
+export default app;
