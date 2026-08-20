@@ -1,7 +1,11 @@
 import { openai } from "@ai-sdk/openai";
 import { generateText, Output } from "ai";
 import { z } from "zod";
-import type { AnalyzerResult, AnalyzeRequest, ScamCategory } from "../types/analyze.js";
+import type {
+  AnalyzerResult,
+  AnalyzeRequest,
+  ScamCategory,
+} from "../types/analyze.js";
 
 const llmSchema = z.object({
   suspicious: z.boolean(),
@@ -36,7 +40,7 @@ export async function analyzeWithLlm(
       model: openai("gpt-5.6-luna"),
       output: Output.object({ schema: llmSchema }),
       prompt: buildPrompt(request),
-      maxOutputTokens: 300,
+      maxOutputTokens: 1000,
     });
 
     if (!output?.suspicious) {
