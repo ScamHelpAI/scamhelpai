@@ -9,22 +9,37 @@ import { lookupPhoneTool } from "./lookup-phone.js";
 import { scanFileTool } from "./scan-file.js";
 import { traceRedirectsTool } from "./trace-redirects.js";
 import { verifyBrandIdentityTool } from "./verify-brand-identity.js";
+import { verifyEvidenceTool } from "./verify-evidence.js";
 import { webVerifyTool } from "./web-verify.js";
 
-export const scannerTools = {
-  inspect_url: inspectUrlTool,
-  lookup_domain: lookupDomainTool,
-  check_threat_intel: checkThreatIntelTool,
-  verify_brand_identity: verifyBrandIdentityTool,
-  inspect_page: inspectPageTool,
-  trace_redirects: traceRedirectsTool,
-  inspect_email: inspectEmailTool,
-  scan_file: scanFileTool,
-  decode_qr: decodeQrTool,
-  lookup_phone: lookupPhoneTool,
-  lookup_crypto_address: lookupCryptoAddressTool,
-  web_verify: webVerifyTool,
-};
+export function createScannerTools() {
+  return {
+    inspect_url: inspectUrlTool,
+    lookup_domain: lookupDomainTool,
+    check_threat_intel: checkThreatIntelTool,
+    verify_brand_identity: verifyBrandIdentityTool,
+    inspect_page: inspectPageTool,
+    trace_redirects: traceRedirectsTool,
+    inspect_email: inspectEmailTool,
+    scan_file: scanFileTool,
+    decode_qr: decodeQrTool,
+    lookup_phone: lookupPhoneTool,
+    lookup_crypto_address: lookupCryptoAddressTool,
+    web_verify: webVerifyTool,
+  };
+}
+
+export function createReviewerTools() {
+  return {
+    verify_evidence: verifyEvidenceTool,
+    inspect_url: inspectUrlTool,
+    lookup_domain: lookupDomainTool,
+    check_threat_intel: checkThreatIntelTool,
+    verify_brand_identity: verifyBrandIdentityTool,
+    inspect_email: inspectEmailTool,
+    web_verify: webVerifyTool,
+  };
+}
 
 export {
   checkThreatIntel,
@@ -49,4 +64,5 @@ export {
   verifyBrandIdentity,
   verifyBrandIdentityTool,
 } from "./verify-brand-identity.js";
+export { verifyEvidence, verifyEvidenceTool } from "./verify-evidence.js";
 export { webVerify, webVerifyTool } from "./web-verify.js";
