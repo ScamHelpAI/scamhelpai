@@ -1,0 +1,11 @@
+{
+  "manifest_version": 3,
+  "name": "ScamHelp AI",
+  "version": "0.1.0",
+  "description": "Check suspicious messages and URLs for scam signals.",
+  "action": {
+    "default_popup": "index.html",
+    "default_title": "ScamHelp AI"
+  },
+  "host_permissions": ["http://localhost:3000/*"]
+}
