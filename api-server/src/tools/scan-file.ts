@@ -55,13 +55,8 @@ export const scanFileTool = tool({
   description:
     "Returns file type, hashes, embedded URLs, suspicious macro indicators, and malware scan results.",
   inputSchema: z.object({
-    file: z
-      .string()
-      .describe("Base64-encoded file content"),
-    filename: z
-      .string()
-      .optional()
-      .describe("Original filename, if known"),
+    file: z.string().describe("Base64-encoded file content"),
+    filename: z.string().optional().describe("Original filename, if known"),
   }),
   execute: async ({ file, filename }) => scanFile(file, filename),
 });

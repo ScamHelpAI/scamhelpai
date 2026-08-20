@@ -27,7 +27,10 @@ async function checkChainabuse(address: string) {
 
   if (!response.ok) return null;
 
-  const json = (await response.json()) as { count?: number; reports?: unknown[] };
+  const json = (await response.json()) as {
+    count?: number;
+    reports?: unknown[];
+  };
   return {
     reportCount: json.count ?? json.reports?.length ?? 0,
     reported: (json.count ?? json.reports?.length ?? 0) > 0,

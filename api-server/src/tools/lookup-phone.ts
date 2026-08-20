@@ -52,5 +52,6 @@ export const lookupPhoneTool = tool({
       .optional()
       .describe("ISO 3166-1 alpha-2 country code, e.g. US"),
   }),
-  execute: async ({ phone, defaultCountry }) => lookupPhone(phone, defaultCountry),
+  execute: async ({ phone, defaultCountry }) =>
+    lookupPhone(phone, defaultCountry),
 });

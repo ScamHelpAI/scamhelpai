@@ -1,9 +1,9 @@
 {
-  "name": "hono",
+  "name": "scamhelpai-api",
   "type": "module",
+  "packageManager": "bun@1.4.0",
   "dependencies": {
     "@ai-sdk/openai": "^4.0.37",
-    "@hono/node-server": "^2.1.0",
     "ai": "^7.0.59",
     "cheerio": "^1.2.0",
     "hono": "^4.13.1",
@@ -15,15 +15,19 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@types/bun": "latest",
     "@types/mailparser": "^3.4.6",
-    "@types/node": "^26.1.1",
-    "tsx": "^4.23.0",
+    "oxlint": "^1.75.0",
+    "prettier": "^3.6.2",
     "typescript": "^7.0.2"
   },
   "scripts": {
-    "dev": "tsx watch --env-file=.env src/index.ts",
-    "build": "tsc",
-    "start": "node --env-file=.env dist/index.js",
-    "typecheck": "tsc --noEmit"
+    "dev": "bun run --hot --env-file=.env src/index.ts",
+    "start": "bun run --env-file=.env src/index.ts",
+    "typecheck": "tsc --noEmit",
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   }
 }

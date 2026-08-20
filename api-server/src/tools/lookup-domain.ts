@@ -7,7 +7,9 @@ import {
   type DomainLookupResult,
 } from "../schemas/tool-result.js";
 
-export async function lookupDomain(domain: string): Promise<DomainLookupResult> {
+export async function lookupDomain(
+  domain: string,
+): Promise<DomainLookupResult> {
   const normalized = domain.toLowerCase().replace(/^www\./, "");
 
   const [whoisResult, aRecords, nsRecords] = await Promise.allSettled([
@@ -21,8 +23,7 @@ export async function lookupDomain(domain: string): Promise<DomainLookupResult> 
 
   if (whoisResult.status === "fulfilled") {
     const entry = Object.values(whoisResult.value)[0] as
-      | Record<string, unknown>
-      | undefined;
+      Record<string, unknown> | undefined;
     if (entry) {
       registrar =
         (entry["Registrar"] as string | undefined) ??

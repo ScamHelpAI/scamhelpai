@@ -94,11 +94,7 @@ export {
   type ScannerOutput,
 } from "./scanner.js";
 
-export {
-  confidenceSchema,
-  idSchema,
-  timestampSchema,
-} from "./shared.js";
+export { confidenceSchema, idSchema, timestampSchema } from "./shared.js";
 
 export {
   domainLookupResultSchema,

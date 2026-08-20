@@ -24,8 +24,8 @@ export async function inspectPage(url: string) {
         action: form.attr("action") ?? null,
         method: (form.attr("method") ?? "get").toLowerCase(),
         hasPasswordField: form.find('input[type="password"]').length > 0,
-        hasEmailField: form.find('input[type="email"], input[name*="email" i]')
-          .length > 0,
+        hasEmailField:
+          form.find('input[type="email"], input[name*="email" i]').length > 0,
         inputCount: form.find("input").length,
       };
     })
@@ -43,7 +43,11 @@ export async function inspectPage(url: string) {
     .filter(Boolean)
     .slice(0, 50);
 
-  const visibleText = $("body").text().replace(/\s+/g, " ").trim().slice(0, 8000);
+  const visibleText = $("body")
+    .text()
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 8000);
 
   const parsedUrl = new URL(url);
   const externalLinks = links.filter((href) => {

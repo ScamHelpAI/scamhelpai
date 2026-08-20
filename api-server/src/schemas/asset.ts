@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { confidenceSchema, idSchema, timestampSchema } from "./shared.js";
+import { idSchema, timestampSchema } from "./shared.js";
 
 export const assetStatusSchema = z.enum([
   "pending",

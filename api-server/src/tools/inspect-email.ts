@@ -27,8 +27,7 @@ export async function inspectEmail(headers: string, body: string) {
   const replyParts = replyTo ? extractDisplayName(replyTo) : null;
 
   const authResults = parsed.headers.get("authentication-results") as
-    | string
-    | undefined;
+    string | undefined;
   const spf = authResults?.match(/\bspf=(\w+)/i)?.[1]?.toLowerCase() ?? null;
   const dkim = authResults?.match(/\bdkim=(\w+)/i)?.[1]?.toLowerCase() ?? null;
   const dmarc =

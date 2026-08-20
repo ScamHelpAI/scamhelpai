@@ -19,7 +19,8 @@ function parseVtStats(data: Record<string, unknown>): VtReport {
   const stats = (data.attributes as Record<string, unknown> | undefined)
     ?.last_analysis_stats as Record<string, number> | undefined;
   const results = (data.attributes as Record<string, unknown> | undefined)
-    ?.last_analysis_results as Record<string, Record<string, string>> | undefined;
+    ?.last_analysis_results as
+    Record<string, Record<string, string>> | undefined;
 
   const sources: VtSource[] = [];
   if (results) {
@@ -43,7 +44,10 @@ function parseVtStats(data: Record<string, unknown>): VtReport {
   };
 }
 
-async function vtFetch(path: string, init?: RequestInit): Promise<VtReport | null> {
+async function vtFetch(
+  path: string,
+  init?: RequestInit,
+): Promise<VtReport | null> {
   if (!env.VIRUSTOTAL_API_KEY) return null;
 
   const response = await fetch(`https://www.virustotal.com/api/v3${path}`, {

@@ -34,7 +34,9 @@ export async function verifyEvidence(input: {
       return { type, verified: await checkThreatIntel(value) };
     case "brand":
       if (!brandName) {
-        throw new Error("brandName is required for brand evidence verification");
+        throw new Error(
+          "brandName is required for brand evidence verification",
+        );
       }
       return { type, verified: await verifyBrandIdentity(brandName, value) };
     case "email":
@@ -60,19 +62,12 @@ export const verifyEvidenceTool = tool({
     type: evidenceTypeSchema.describe("Kind of evidence to verify"),
     value: z
       .string()
-      .describe("Primary value: URL, domain, indicator, domain for brand check, or web claim query"),
-    brandName: z
-      .string()
-      .optional()
-      .describe("Required when type is brand"),
-    emailHeaders: z
-      .string()
-      .optional()
-      .describe("Required when type is email"),
-    emailBody: z
-      .string()
-      .optional()
-      .describe("Required when type is email"),
+      .describe(
+        "Primary value: URL, domain, indicator, domain for brand check, or web claim query",
+      ),
+    brandName: z.string().optional().describe("Required when type is brand"),
+    emailHeaders: z.string().optional().describe("Required when type is email"),
+    emailBody: z.string().optional().describe("Required when type is email"),
   }),
   execute: async (input) => verifyEvidence(input),
 });

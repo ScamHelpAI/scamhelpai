@@ -16,11 +16,18 @@ function certField(value: string | string[] | undefined): string | undefined {
 async function getTlsSubject(domain: string): Promise<string | null> {
   return new Promise((resolve) => {
     const socket = connect(
-      { host: domain, port: 443, servername: domain, rejectUnauthorized: false },
+      {
+        host: domain,
+        port: 443,
+        servername: domain,
+        rejectUnauthorized: false,
+      },
       () => {
         const cert = socket.getPeerCertificate();
         socket.end();
-        resolve(certField(cert?.subject?.O) ?? certField(cert?.subject?.CN) ?? null);
+        resolve(
+          certField(cert?.subject?.O) ?? certField(cert?.subject?.CN) ?? null,
+        );
       },
     );
     socket.setTimeout(5000, () => {
@@ -42,7 +49,8 @@ export async function verifyBrandIdentity(name: string, domain: string) {
   let whoisSimilarity = 0;
   try {
     const whois = await whoisDomain(normalizedDomain);
-    const entry = Object.values(whois)[0] as Record<string, unknown> | undefined;
+    const entry = Object.values(whois)[0] as
+      Record<string, unknown> | undefined;
     whoisOrg =
       (entry?.["Registrant Organization"] as string | undefined) ??
       (entry?.["Organization"] as string | undefined) ??
@@ -75,11 +83,7 @@ export async function verifyBrandIdentity(name: string, domain: string) {
     brand: name,
     domain: normalizedDomain,
     likelyLegitimate,
-    confidence: exactMatch
-      ? "high"
-      : likelyLegitimate
-        ? "medium"
-        : "low",
+    confidence: exactMatch ? "high" : likelyLegitimate ? "medium" : "low",
     signals,
   };
 }
