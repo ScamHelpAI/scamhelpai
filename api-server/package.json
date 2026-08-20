@@ -5,10 +5,17 @@
     "@ai-sdk/openai": "^4.0.37",
     "@hono/node-server": "^2.1.0",
     "ai": "^7.0.59",
+    "cheerio": "^1.2.0",
     "hono": "^4.13.1",
+    "jsqr": "^1.4.0",
+    "libphonenumber-js": "^1.13.11",
+    "mailparser": "^3.9.15",
+    "sharp": "^0.35.3",
+    "whoiser": "^2.0.0-beta.10",
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@types/mailparser": "^3.4.6",
     "@types/node": "^26.1.1",
     "tsx": "^4.23.0",
     "typescript": "^7.0.2"
