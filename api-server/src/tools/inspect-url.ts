@@ -3,6 +3,10 @@ import { toASCII } from "node:punycode";
 import { traceRedirects } from "./shared/redirect-tracer.js";
 import { tool } from "ai";
 import { z } from "zod";
+import {
+  type UrlInspectionResult,
+  urlInspectionResultSchema,
+} from "../schemas/tool-result.js";
 
 const SUSPICIOUS_TLDS = new Set([
   "xyz",
@@ -23,35 +27,23 @@ function countSubdomains(hostname: string): number {
   return Math.max(0, parts.length - 2);
 }
 
-function certField(value: string | string[] | undefined): string | undefined {
-  if (Array.isArray(value)) return value[0];
-  return value;
-}
-
-async function getTlsInfo(hostname: string): Promise<{
-  valid: boolean;
-  issuer?: string;
-  subject?: string;
-  validFrom?: string;
-  validTo?: string;
-} | null> {
+async function getTlsValid(hostname: string): Promise<boolean | null> {
   return new Promise((resolve) => {
     const socket = connect(
-      { host: hostname, port: 443, servername: hostname, rejectUnauthorized: false },
+      {
+        host: hostname,
+        port: 443,
+        servername: hostname,
+        rejectUnauthorized: false,
+      },
       () => {
         const cert = socket.getPeerCertificate();
         socket.end();
         if (!cert || Object.keys(cert).length === 0) {
-          resolve({ valid: false });
+          resolve(false);
           return;
         }
-        resolve({
-          valid: socket.authorized,
-          issuer: certField(cert.issuer?.O) ?? certField(cert.issuer?.CN),
-          subject: certField(cert.subject?.CN),
-          validFrom: cert.valid_from,
-          validTo: cert.valid_to,
-        });
+        resolve(socket.authorized);
       },
     );
     socket.setTimeout(5000, () => {
@@ -62,42 +54,58 @@ async function getTlsInfo(hostname: string): Promise<{
   });
 }
 
-export async function inspectUrl(url: string) {
+export async function inspectUrl(url: string): Promise<UrlInspectionResult> {
   const parsed = new URL(url);
   const hostname = parsed.hostname.toLowerCase();
   const asciiHostname = toASCII(hostname);
-  const flags: string[] = [];
+  const suspiciousFeatures: string[] = [];
 
-  if (parsed.username || parsed.password) flags.push("embedded_credentials");
-  if (url.includes("@")) flags.push("at_symbol_in_url");
-  if (/^\d{1,3}(\.\d{1,3}){3}$/.test(hostname)) flags.push("ip_hostname");
-  if (asciiHostname !== hostname) flags.push("punycode_hostname");
-  if (countSubdomains(hostname) >= 3) flags.push("excessive_subdomains");
+  if (parsed.username || parsed.password) {
+    suspiciousFeatures.push("embedded_credentials");
+  }
+  if (url.includes("@")) suspiciousFeatures.push("at_symbol_in_url");
+  if (/^\d{1,3}(\.\d{1,3}){3}$/.test(hostname)) {
+    suspiciousFeatures.push("ip_hostname");
+  }
+  if (asciiHostname !== hostname) suspiciousFeatures.push("punycode_hostname");
+  if (countSubdomains(hostname) >= 3) {
+    suspiciousFeatures.push("excessive_subdomains");
+  }
 
   const tld = hostname.split(".").pop();
-  if (tld && SUSPICIOUS_TLDS.has(tld)) flags.push("suspicious_tld");
+  if (tld && SUSPICIOUS_TLDS.has(tld)) {
+    suspiciousFeatures.push("suspicious_tld");
+  }
 
   const { hops, finalUrl } = await traceRedirects(url);
+  const redirectChain = hops.map((hop) => hop.url);
+  if (redirectChain.at(-1) !== finalUrl) {
+    redirectChain.push(finalUrl);
+  }
 
-  const tls =
-    parsed.protocol === "https:" ? await getTlsInfo(hostname) : null;
+  const usesHttps = parsed.protocol === "https:";
+  if (!usesHttps) {
+    suspiciousFeatures.push("no_https");
+  } else {
+    const tlsValid = await getTlsValid(hostname);
+    if (tlsValid === false) suspiciousFeatures.push("invalid_tls_certificate");
+    if (tlsValid === null) suspiciousFeatures.push("tls_check_failed");
+  }
 
-  return {
-    normalized: parsed.toString(),
+  return urlInspectionResultSchema.parse({
+    originalUrl: url,
+    normalizedUrl: parsed.toString(),
+    finalUrl: finalUrl !== url ? finalUrl : undefined,
+    redirectChain,
     hostname,
-    asciiHostname,
-    scheme: parsed.protocol.replace(":", ""),
-    port: parsed.port || (parsed.protocol === "https:" ? "443" : "80"),
-    flags,
-    redirectCount: Math.max(0, hops.length - 1),
-    finalDestination: finalUrl,
-    tls,
-  };
+    usesHttps,
+    suspiciousFeatures,
+  });
 }
 
 export const inspectUrlTool = tool({
   description:
-    "Returns normalized URL, redirect chain summary, final destination, HTTPS/certificate info, and suspicious URL features.",
+    "Returns normalized URL, redirect chain, final destination, HTTPS status, and suspicious URL features.",
   inputSchema: z.object({
     url: z.string().url().describe("The URL to inspect"),
   }),

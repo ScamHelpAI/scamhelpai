@@ -1,23 +1,23 @@
-import { lookup, resolveMx, resolveNs, resolveTxt } from "node:dns/promises";
+import { lookup, resolveNs } from "node:dns/promises";
 import { whoisDomain } from "whoiser";
 import { tool } from "ai";
 import { z } from "zod";
+import {
+  domainLookupResultSchema,
+  type DomainLookupResult,
+} from "../schemas/tool-result.js";
 
-export async function lookupDomain(domain: string) {
+export async function lookupDomain(domain: string): Promise<DomainLookupResult> {
   const normalized = domain.toLowerCase().replace(/^www\./, "");
 
-  const [whoisResult, aRecords, mxRecords, nsRecords, txtRecords] =
-    await Promise.allSettled([
-      whoisDomain(normalized),
-      lookup(normalized, { all: true }),
-      resolveMx(normalized),
-      resolveNs(normalized),
-      resolveTxt(normalized),
-    ]);
+  const [whoisResult, aRecords, nsRecords] = await Promise.allSettled([
+    whoisDomain(normalized),
+    lookup(normalized, { all: true }),
+    resolveNs(normalized),
+  ]);
 
   let registrar: string | undefined;
-  let creationDate: string | undefined;
-  let updatedDate: string | undefined;
+  let registeredAt: string | undefined;
 
   if (whoisResult.status === "fulfilled") {
     const entry = Object.values(whoisResult.value)[0] as
@@ -27,45 +27,45 @@ export async function lookupDomain(domain: string) {
       registrar =
         (entry["Registrar"] as string | undefined) ??
         (entry["registrar"] as string | undefined);
-      creationDate =
+      registeredAt =
         (entry["Created Date"] as string | undefined) ??
         (entry["Creation Date"] as string | undefined) ??
         (entry["created"] as string | undefined);
-      updatedDate =
-        (entry["Updated Date"] as string | undefined) ??
-        (entry["updated"] as string | undefined);
     }
   }
 
-  const created = creationDate ? new Date(creationDate) : null;
+  const created = registeredAt ? new Date(registeredAt) : null;
   const ageDays =
     created && !Number.isNaN(created.getTime())
       ? Math.floor((Date.now() - created.getTime()) / 86_400_000)
-      : null;
+      : undefined;
 
-  return {
+  const ipAddresses =
+    aRecords.status === "fulfilled"
+      ? aRecords.value.map((r) => r.address)
+      : undefined;
+
+  const nameservers =
+    nsRecords.status === "fulfilled" ? nsRecords.value : undefined;
+
+  const suspicious = ageDays !== undefined ? ageDays < 30 : undefined;
+  const reputation =
+    suspicious === true
+      ? ("suspicious" as const)
+      : ageDays !== undefined
+        ? ("safe" as const)
+        : ("unknown" as const);
+
+  return domainLookupResultSchema.parse({
     domain: normalized,
-    registrar: registrar ?? null,
-    creationDate: creationDate ?? null,
-    updatedDate: updatedDate ?? null,
+    registeredAt,
     ageDays,
-    newlyRegistered: ageDays !== null ? ageDays < 30 : null,
-    dns: {
-      a:
-        aRecords.status === "fulfilled"
-          ? aRecords.value.map((r) => r.address)
-          : [],
-      mx:
-        mxRecords.status === "fulfilled"
-          ? mxRecords.value.map((r) => ({ exchange: r.exchange, priority: r.priority }))
-          : [],
-      ns: nsRecords.status === "fulfilled" ? nsRecords.value : [],
-      txt:
-        txtRecords.status === "fulfilled"
-          ? txtRecords.value.map((records) => records.join(""))
-          : [],
-    },
-  };
+    registrar,
+    nameservers,
+    ipAddresses,
+    suspicious,
+    reputation,
+  });
 }
 
 export const lookupDomainTool = tool({

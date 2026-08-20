@@ -12,6 +12,12 @@ import {
 } from "./shared/virustotal.js";
 import { tool } from "ai";
 import { z } from "zod";
+import {
+  type ThreatIntelIndicatorType,
+  type ThreatIntelResult,
+  type ThreatIntelVerdict,
+  threatIntelResultSchema,
+} from "../schemas/tool-result.js";
 
 type ThreatSource = {
   name: string;
@@ -121,6 +127,35 @@ function vtToSource(report: VtReport): ThreatSource {
   };
 }
 
+function toIndicatorType(type: IndicatorType): ThreatIntelIndicatorType {
+  switch (type) {
+    case "url":
+    case "domain":
+    case "ip":
+    case "hash":
+      return type;
+    case "unknown":
+      return "domain";
+    default: {
+      const _exhaustive: never = type;
+      return _exhaustive;
+    }
+  }
+}
+
+function sourceVerdict(source: ThreatSource): string {
+  if (source.malicious) return "malicious";
+  if ((source.score ?? 0) > 0) return "suspicious";
+  return "clean";
+}
+
+function aggregateVerdict(sources: ThreatSource[]): ThreatIntelVerdict {
+  if (sources.length === 0) return "unknown";
+  if (sources.some((s) => s.malicious)) return "malicious";
+  if (sources.some((s) => (s.score ?? 0) > 0)) return "suspicious";
+  return "clean";
+}
+
 async function queryByType(
   indicator: string,
   type: IndicatorType,
@@ -164,16 +199,21 @@ async function queryByType(
   return sources;
 }
 
-export async function checkThreatIntel(indicator: string) {
+export async function checkThreatIntel(
+  indicator: string,
+): Promise<ThreatIntelResult> {
   const type = detectIndicatorType(indicator);
-  const sources = await queryByType(indicator, type);
+  const rawSources = await queryByType(indicator, type);
 
-  return {
+  return threatIntelResultSchema.parse({
     indicator,
-    type,
-    malicious: sources.some((s) => s.malicious),
-    sources,
-  };
+    type: toIndicatorType(type),
+    verdict: aggregateVerdict(rawSources),
+    sources: rawSources.map((source) => ({
+      name: source.name,
+      verdict: sourceVerdict(source),
+    })),
+  });
 }
 
 export const checkThreatIntelTool = tool({
