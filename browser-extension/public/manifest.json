@@ -7,5 +7,13 @@
     "default_popup": "index.html",
     "default_title": "ScamHelp AI"
   },
-  "host_permissions": ["http://localhost:3000/*"]
+  "permissions": ["activeTab", "scripting"],
+  "host_permissions": ["http://*/*", "https://*/*"],
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ]
 }
