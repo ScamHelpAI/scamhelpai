@@ -14,6 +14,20 @@ cp .env.example .env
 # fill in OPENAI_API_KEY and optional provider keys
 ```
 
+From the repo root, start local Postgres, Redis, and MinIO:
+
+```sh
+docker compose up -d postgres redis minio minio-init
+```
+
+Host ports: Postgres `5432`, Redis `6380`, MinIO `9000` / console `9001`.
+
+Push the Drizzle schema to Postgres:
+
+```sh
+bun run db:push
+```
+
 ## Development
 
 ```sh
@@ -21,6 +35,14 @@ bun run dev
 ```
 
 Open http://localhost:3000/health
+
+## Database
+
+```sh
+bun run db:push      # sync schema to the database (dev)
+bun run db:generate  # generate SQL migrations
+bun run db:studio    # open Drizzle Studio
+```
 
 ## Production
 

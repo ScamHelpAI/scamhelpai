@@ -1,17 +1,12 @@
 import { Hono } from "hono";
 import { env } from "./config/env.js";
-import { analyzeRequestSchema } from "./schemas/analysis-input.js";
-import { runAnalysis } from "./services/analysis.server.js";
+import { errorHandler } from "./middleware/error-handler.js";
+import { createRoutes } from "./routes/index.js";
 
 const app = new Hono();
 
-app.get("/health", (c) => c.json({ status: "ok" }));
-
-app.post("/analyze", async (c) => {
-  const body = analyzeRequestSchema.parse(await c.req.json());
-  const result = await runAnalysis(body);
-  return c.json(result);
-});
+app.onError(errorHandler);
+app.route("/", createRoutes());
 
 export default {
   port: env.PORT,

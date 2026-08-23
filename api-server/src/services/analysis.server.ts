@@ -12,9 +12,6 @@ import type {
 } from "../schemas/analysis-input.js";
 import type { Evidence } from "../schemas/evidence.js";
 
-const scanner = createScannerAgent();
-const reviewer = createReviewerAgent();
-
 export type RunAnalysisResult = {
   evidences: Evidence[];
   assessment: ReviewerOutput;
@@ -68,7 +65,11 @@ function buildReviewerPrompt(evidences: Evidence[]): string {
 
 export async function runAnalysis(
   request: AnalyzeRequest,
+  model: string,
 ): Promise<RunAnalysisResult> {
+  const scanner = createScannerAgent(model);
+  const reviewer = createReviewerAgent(model);
+
   const scannerResult = await scanner.generate({
     prompt: buildScannerPrompt(request),
   });

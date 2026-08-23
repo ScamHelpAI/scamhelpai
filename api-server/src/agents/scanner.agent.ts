@@ -25,10 +25,10 @@ Each evidence item must follow the evidence schema:
 
 Collect evidence only. Do not render a final scam verdict, risk score, or recommended actions.`;
 
-export function createScannerAgent() {
+export function createScannerAgent(model: string) {
   return new ToolLoopAgent({
     id: "scanner",
-    model: openai("gpt-5.6-luna"),
+    model: openai(model),
     instructions: SCANNER_INSTRUCTIONS,
     tools: createScannerTools(),
     output: Output.object({

@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:ext": "vite build --watch --mode extension",
     "build": "tsc -b && vite build --mode extension",
     "lint": "oxlint",
     "preview": "vite preview"

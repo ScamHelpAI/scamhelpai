@@ -1,0 +1,579 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "ScamHelpAI API",
+    "version": "1.0.0",
+    "description": "API for fast link safety checks and full scam analysis powered by agent pipelines."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "Local development"
+    }
+  ],
+  "tags": [
+    { "name": "Health", "description": "Liveness and readiness probes" },
+    { "name": "Check", "description": "Fast deterministic URL safety checks" },
+    { "name": "Analyses", "description": "Full agent-based scam analysis" }
+  ],
+  "paths": {
+    "/health": {
+      "get": {
+        "tags": ["Health"],
+        "summary": "Liveness probe",
+        "description": "Returns ok when the API process is running.",
+        "operationId": "getHealth",
+        "responses": {
+          "200": {
+            "description": "Service is alive",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HealthResponse" },
+                "example": { "status": "ok" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ready": {
+      "get": {
+        "tags": ["Health"],
+        "summary": "Readiness probe",
+        "description": "Checks connectivity to Postgres and optional Redis/S3 configuration.",
+        "operationId": "getReady",
+        "responses": {
+          "200": {
+            "description": "Service is ready or degraded",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ReadinessResponse" },
+                "example": {
+                  "status": "ready",
+                  "checks": {
+                    "postgres": "ok",
+                    "redis": "ok",
+                    "s3": "ok"
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service is not ready",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ReadinessResponse" },
+                "example": {
+                  "status": "not_ready",
+                  "checks": {
+                    "postgres": "error",
+                    "redis": "skipped",
+                    "s3": "skipped"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/check/url": {
+      "post": {
+        "tags": ["Check"],
+        "summary": "Check a single URL",
+        "description": "Runs fast deterministic checks (threat intel, URL inspection, domain lookup) without invoking LLM agents.",
+        "operationId": "checkUrl",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CheckUrlRequest" },
+              "example": {
+                "url": "https://example.com/login",
+                "context": {
+                  "source": "browser_extension",
+                  "pageUrl": "https://example.com"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "URL check result",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/CheckUrlResult" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/ValidationError" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    },
+    "/v1/check/urls": {
+      "post": {
+        "tags": ["Check"],
+        "summary": "Check multiple URLs",
+        "description": "Batch version of the single URL check. Accepts 1–100 unique URLs.",
+        "operationId": "checkUrls",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CheckUrlsRequest" },
+              "example": {
+                "urls": ["https://example.com", "https://google.com"],
+                "context": {
+                  "source": "browser_extension",
+                  "pageUrl": "https://news.example.com"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Batch URL check results",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/CheckUrlsResponse" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/ValidationError" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    },
+    "/v1/analyses": {
+      "post": {
+        "tags": ["Analyses"],
+        "summary": "Create a full analysis",
+        "description": "Runs the scanner and reviewer agent pipeline, persists the result, and returns a public AnalysisResult.",
+        "operationId": "createAnalysis",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/AnalyzeRequest" },
+              "example": {
+                "inputs": [
+                  {
+                    "type": "url",
+                    "url": "https://suspicious-site.example/login"
+                  }
+                ],
+                "context": {
+                  "source": "browser_extension",
+                  "pageUrl": "https://referrer.example"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Analysis completed",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AnalysisResult" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/ValidationError" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    },
+    "/v1/analyses/{id}": {
+      "get": {
+        "tags": ["Analyses"],
+        "summary": "Get analysis by ID",
+        "description": "Returns a completed analysis by its ID.",
+        "operationId": "getAnalysis",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Analysis identifier",
+            "schema": { "type": "string", "minLength": 1 }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Analysis result",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AnalysisResult" }
+              }
+            }
+          },
+          "404": {
+            "description": "Analysis not found or not yet completed",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" },
+                "example": { "message": "Analysis not found" }
+              }
+            }
+          },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "ValidationError": {
+        "description": "Request validation failed",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/ValidationErrorResponse" }
+          }
+        }
+      },
+      "InternalError": {
+        "description": "Unexpected server error",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/InternalErrorResponse" }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "HealthResponse": {
+        "type": "object",
+        "required": ["status"],
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": ["ok"]
+          }
+        }
+      },
+      "ReadinessStatus": {
+        "type": "string",
+        "enum": ["ready", "degraded", "not_ready"]
+      },
+      "DependencyCheckStatus": {
+        "type": "string",
+        "enum": ["ok", "error", "skipped"]
+      },
+      "ReadinessChecks": {
+        "type": "object",
+        "required": ["postgres", "redis", "s3"],
+        "properties": {
+          "postgres": { "$ref": "#/components/schemas/DependencyCheckStatus" },
+          "redis": { "$ref": "#/components/schemas/DependencyCheckStatus" },
+          "s3": { "$ref": "#/components/schemas/DependencyCheckStatus" }
+        }
+      },
+      "ReadinessResponse": {
+        "type": "object",
+        "required": ["status", "checks"],
+        "properties": {
+          "status": { "$ref": "#/components/schemas/ReadinessStatus" },
+          "checks": { "$ref": "#/components/schemas/ReadinessChecks" }
+        }
+      },
+      "AnalysisSource": {
+        "type": "string",
+        "enum": ["browser_extension", "web_app", "mobile_app", "api"]
+      },
+      "AnalysisContext": {
+        "type": "object",
+        "properties": {
+          "source": { "$ref": "#/components/schemas/AnalysisSource" },
+          "pageUrl": { "type": "string", "format": "uri" },
+          "referrer": { "type": "string" },
+          "locale": { "type": "string" }
+        }
+      },
+      "CheckUrlRequest": {
+        "type": "object",
+        "required": ["url"],
+        "properties": {
+          "url": { "type": "string", "format": "uri" },
+          "context": { "$ref": "#/components/schemas/AnalysisContext" }
+        }
+      },
+      "CheckStatus": {
+        "type": "string",
+        "enum": ["safe", "warning", "danger"]
+      },
+      "CheckUrlResult": {
+        "type": "object",
+        "required": [
+          "url",
+          "status",
+          "score",
+          "reasons",
+          "checkedAt",
+          "cached"
+        ],
+        "properties": {
+          "url": { "type": "string", "format": "uri" },
+          "status": { "$ref": "#/components/schemas/CheckStatus" },
+          "score": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100,
+            "description": "Risk score from 0 (safe) to 100 (dangerous)"
+          },
+          "reasons": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "checkedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "cached": { "type": "boolean" }
+        }
+      },
+      "CheckUrlsRequest": {
+        "type": "object",
+        "required": ["urls"],
+        "properties": {
+          "urls": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 100,
+            "items": { "type": "string", "format": "uri" }
+          },
+          "context": { "$ref": "#/components/schemas/AnalysisContext" }
+        }
+      },
+      "CheckUrlsResponse": {
+        "type": "object",
+        "required": ["results"],
+        "properties": {
+          "results": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/CheckUrlResult" }
+          }
+        }
+      },
+      "TextInput": {
+        "type": "object",
+        "required": ["type", "content"],
+        "properties": {
+          "type": { "type": "string", "const": "text" },
+          "content": { "type": "string", "minLength": 1 }
+        }
+      },
+      "UrlInput": {
+        "type": "object",
+        "required": ["type", "url"],
+        "properties": {
+          "type": { "type": "string", "const": "url" },
+          "url": { "type": "string", "format": "uri" }
+        }
+      },
+      "ImageInput": {
+        "type": "object",
+        "required": ["type", "assetId"],
+        "properties": {
+          "type": { "type": "string", "const": "image" },
+          "assetId": { "type": "string", "minLength": 1 }
+        }
+      },
+      "AudioInput": {
+        "type": "object",
+        "required": ["type", "assetId"],
+        "properties": {
+          "type": { "type": "string", "const": "audio" },
+          "assetId": { "type": "string", "minLength": 1 }
+        }
+      },
+      "PdfInput": {
+        "type": "object",
+        "required": ["type", "assetId"],
+        "properties": {
+          "type": { "type": "string", "const": "pdf" },
+          "assetId": { "type": "string", "minLength": 1 }
+        }
+      },
+      "EmailInput": {
+        "type": "object",
+        "required": ["type"],
+        "properties": {
+          "type": { "type": "string", "const": "email" },
+          "raw": { "type": "string" },
+          "headers": {
+            "type": "object",
+            "additionalProperties": { "type": "string" }
+          },
+          "body": { "type": "string" },
+          "assetIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          }
+        }
+      },
+      "AnalysisInput": {
+        "oneOf": [
+          { "$ref": "#/components/schemas/TextInput" },
+          { "$ref": "#/components/schemas/UrlInput" },
+          { "$ref": "#/components/schemas/ImageInput" },
+          { "$ref": "#/components/schemas/AudioInput" },
+          { "$ref": "#/components/schemas/PdfInput" },
+          { "$ref": "#/components/schemas/EmailInput" }
+        ],
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "text": "#/components/schemas/TextInput",
+            "url": "#/components/schemas/UrlInput",
+            "image": "#/components/schemas/ImageInput",
+            "audio": "#/components/schemas/AudioInput",
+            "pdf": "#/components/schemas/PdfInput",
+            "email": "#/components/schemas/EmailInput"
+          }
+        }
+      },
+      "AnalyzeRequest": {
+        "type": "object",
+        "required": ["inputs"],
+        "properties": {
+          "inputs": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "$ref": "#/components/schemas/AnalysisInput" }
+          },
+          "context": { "$ref": "#/components/schemas/AnalysisContext" }
+        }
+      },
+      "AnalysisStatus": {
+        "type": "string",
+        "enum": ["queued", "analyzing", "reviewing", "completed", "failed"]
+      },
+      "RiskLevel": {
+        "type": "string",
+        "enum": ["low", "medium", "high", "critical"]
+      },
+      "ScamType": {
+        "type": "string",
+        "enum": [
+          "credential_phishing",
+          "impersonation",
+          "tech_support",
+          "investment",
+          "romance",
+          "job",
+          "invoice",
+          "payment",
+          "crypto",
+          "account_takeover",
+          "malware",
+          "other",
+          "unknown"
+        ]
+      },
+      "RiskSummary": {
+        "type": "object",
+        "required": ["score", "level", "confidence"],
+        "properties": {
+          "score": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Scam probability from 0 to 1"
+          },
+          "level": { "$ref": "#/components/schemas/RiskLevel" },
+          "confidence": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          }
+        }
+      },
+      "Classification": {
+        "type": "object",
+        "required": ["primary"],
+        "properties": {
+          "primary": { "$ref": "#/components/schemas/ScamType" },
+          "secondary": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/ScamType" }
+          }
+        }
+      },
+      "EvidenceSeverity": {
+        "type": "string",
+        "enum": ["low", "medium", "high"]
+      },
+      "PublicEvidence": {
+        "type": "object",
+        "required": ["id", "summary", "severity"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "summary": { "type": "string", "minLength": 1 },
+          "severity": { "$ref": "#/components/schemas/EvidenceSeverity" }
+        }
+      },
+      "AnalysisResult": {
+        "type": "object",
+        "required": [
+          "id",
+          "status",
+          "risk",
+          "classification",
+          "summary",
+          "evidence",
+          "createdAt"
+        ],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "status": { "$ref": "#/components/schemas/AnalysisStatus" },
+          "risk": { "$ref": "#/components/schemas/RiskSummary" },
+          "classification": { "$ref": "#/components/schemas/Classification" },
+          "claimedIdentity": { "type": "string" },
+          "summary": { "type": "string", "minLength": 1 },
+          "evidence": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/PublicEvidence" }
+          },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "completedAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "message": { "type": "string" }
+        }
+      },
+      "ValidationErrorResponse": {
+        "type": "object",
+        "required": ["error", "details"],
+        "properties": {
+          "error": {
+            "type": "string",
+            "enum": ["validation_error"]
+          },
+          "details": {
+            "type": "object",
+            "description": "Zod flatten() output",
+            "additionalProperties": true
+          }
+        }
+      },
+      "InternalErrorResponse": {
+        "type": "object",
+        "required": ["error"],
+        "properties": {
+          "error": {
+            "type": "string",
+            "enum": ["internal_server_error"]
+          }
+        }
+      }
+    }
+  }
+}

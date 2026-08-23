@@ -23,6 +23,19 @@ export {
 } from "./analysis-input.js";
 
 export {
+  checkStatusSchema,
+  checkUrlRequestSchema,
+  checkUrlResultSchema,
+  checkUrlsRequestSchema,
+  checkUrlsResponseSchema,
+  type CheckStatus,
+  type CheckUrlRequest,
+  type CheckUrlResult,
+  type CheckUrlsRequest,
+  type CheckUrlsResponse,
+} from "./check.js";
+
+export {
   analysisResultSchema,
   analysisStatusSchema,
   classificationSchema,

@@ -1,71 +1,104 @@
-const MARKER_HOST_ATTRIBUTE = "data-scamhelp-test-marker";
+const DECORATED_ATTRIBUTE = "data-scamhelp-decorated";
 const WRAPPER_ATTRIBUTE = "data-scamhelp-link-wrapper";
+const MARKER_HOST_ATTRIBUTE = "data-scamhelp-marker";
 
-function isHttpUrl(href: string | null): boolean {
-  if (!href) return false;
-
-  try {
-    const url = new URL(href, window.location.href);
-    return url.protocol === "http:" || url.protocol === "https:";
-  } catch {
-    return false;
-  }
-}
-
-function createMarker(anchor: HTMLAnchorElement): HTMLSpanElement {
+function createMarker(): HTMLSpanElement {
   const host = document.createElement("span");
   host.setAttribute(MARKER_HOST_ATTRIBUTE, "");
-  host.setAttribute("aria-label", "ScamHelp test marker");
+  host.setAttribute("aria-label", "ScamHelp link marker");
 
   const shadow = host.attachShadow({ mode: "open" });
   const style = document.createElement("style");
   style.textContent = `
-    :host { display: inline-flex; align-items: center; gap: 4px; margin: 0 0 2px; }
-    .pill { padding: 1px 5px; border-radius: 999px; color: #064e3b; background: #bbf7d0; font: 600 10px/1.4 system-ui, sans-serif; letter-spacing: .02em; }
-    input { width: 12px; height: 12px; margin: 0; accent-color: #16a34a; }
+    :host { display: inline-flex; align-items: center; margin: 0 0 2px; }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      padding: 1px 6px;
+      border-radius: 999px;
+      color: #064e3b;
+      background: #bbf7d0;
+      font: 600 10px/1.4 system-ui, sans-serif;
+      letter-spacing: .02em;
+    }
+    .check { font-size: 9px; line-height: 1; }
   `;
 
   const pill = document.createElement("span");
   pill.className = "pill";
-  pill.textContent = "Test";
+  pill.innerHTML = `<span class="check" aria-hidden="true">✓</span>`;
 
-  const checkbox = document.createElement("input");
-  checkbox.type = "checkbox";
-  checkbox.setAttribute("aria-label", `Select ${anchor.href}`);
-
-  shadow.append(style, pill, checkbox);
+  shadow.append(style, pill);
   return host;
 }
 
-function decorateLinks(): number {
-  let count = 0;
-
-  for (const anchor of document.querySelectorAll<HTMLAnchorElement>("a[href]")) {
-    if (
-      !isHttpUrl(anchor.getAttribute("href")) ||
-      anchor.closest(`[${WRAPPER_ATTRIBUTE}]`) ||
-      anchor.previousElementSibling?.hasAttribute(MARKER_HOST_ATTRIBUTE)
-    ) {
-      continue;
-    }
-
-    const wrapper = document.createElement("span");
-    wrapper.setAttribute(WRAPPER_ATTRIBUTE, "");
-    wrapper.style.display = "inline-flex";
-    wrapper.style.flexDirection = "column";
-    wrapper.style.alignItems = "flex-start";
-    wrapper.style.verticalAlign = "baseline";
-
-    anchor.parentNode?.insertBefore(wrapper, anchor);
-    wrapper.append(createMarker(anchor), anchor);
-    count += 1;
+function decorateAnchor(anchor: HTMLAnchorElement): void {
+  if (
+    !anchor.getAttribute("href") ||
+    anchor.hasAttribute(DECORATED_ATTRIBUTE) ||
+    anchor.closest(`[${WRAPPER_ATTRIBUTE}]`)
+  ) {
+    return;
   }
 
-  return count;
+  anchor.setAttribute(DECORATED_ATTRIBUTE, "");
+  anchor.style.outline = "2px solid #4ade80";
+  anchor.style.outlineOffset = "2px";
+  anchor.style.borderRadius = "3px";
+
+  const wrapper = document.createElement("span");
+  wrapper.setAttribute(WRAPPER_ATTRIBUTE, "");
+  wrapper.style.display = "inline-flex";
+  wrapper.style.flexDirection = "column";
+  wrapper.style.alignItems = "flex-start";
+  wrapper.style.verticalAlign = "baseline";
+
+  anchor.parentNode?.insertBefore(wrapper, anchor);
+  wrapper.append(createMarker(), anchor);
 }
 
-chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
-  if (message?.type === "analyze-page") {
-    sendResponse({ count: decorateLinks() });
+function decorateLinks(root: ParentNode = document): void {
+  for (const anchor of root.querySelectorAll<HTMLAnchorElement>(
+    `a[href]:not([${DECORATED_ATTRIBUTE}])`,
+  )) {
+    decorateAnchor(anchor);
   }
-});
+}
+
+function startAutoDecoration(): void {
+  decorateLinks();
+
+  let pending = false;
+  const observer = new MutationObserver((mutations) => {
+    if (pending) return;
+    pending = true;
+
+    requestAnimationFrame(() => {
+      pending = false;
+
+      for (const mutation of mutations) {
+        for (const node of mutation.addedNodes) {
+          if (node instanceof HTMLAnchorElement) {
+            decorateAnchor(node);
+          } else if (node instanceof Element) {
+            decorateLinks(node);
+          }
+        }
+      }
+    });
+  });
+
+  observer.observe(document.documentElement, {
+    childList: true,
+    subtree: true,
+  });
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", startAutoDecoration, {
+    once: true,
+  });
+} else {
+  startAutoDecoration();
+}

@@ -6,10 +6,12 @@
     "@ai-sdk/openai": "^4.0.37",
     "ai": "^7.0.59",
     "cheerio": "^1.2.0",
+    "drizzle-orm": "^0.45.2",
     "hono": "^4.13.1",
     "jsqr": "^1.4.0",
     "libphonenumber-js": "^1.13.11",
     "mailparser": "^3.9.15",
+    "postgres": "^3.4.9",
     "sharp": "^0.35.3",
     "whoiser": "^2.0.0-beta.10",
     "zod": "^4.4.3"
@@ -17,6 +19,7 @@
   "devDependencies": {
     "@types/bun": "latest",
     "@types/mailparser": "^3.4.6",
+    "drizzle-kit": "^0.31.10",
     "oxlint": "^1.75.0",
     "prettier": "^3.6.2",
     "typescript": "^7.0.2"
@@ -28,6 +31,9 @@
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "db:generate": "bunx --env-file=.env drizzle-kit generate",
+    "db:push": "bunx --env-file=.env drizzle-kit push --force",
+    "db:studio": "bunx --env-file=.env drizzle-kit studio"
   }
 }

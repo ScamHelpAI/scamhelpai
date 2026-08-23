@@ -40,7 +40,6 @@ export const analysisResultSchema = z.object({
   claimedIdentity: z.string().optional(),
   summary: z.string().min(1),
   evidence: z.array(publicEvidenceSchema),
-  recommendedActions: z.array(z.string()),
   createdAt: timestampSchema,
   completedAt: timestampSchema.optional(),
 });

@@ -23,10 +23,10 @@ Return a structured assessment with:
 
 Ground every claim in evidence ids from the scanner. Be conservative when evidence is weak.`;
 
-export function createReviewerAgent() {
+export function createReviewerAgent(model: string) {
   return new ToolLoopAgent({
     id: "reviewer",
-    model: openai("gpt-5.6-luna"),
+    model: openai(model),
     instructions: REVIEWER_INSTRUCTIONS,
     tools: createReviewerTools(),
     output: Output.object({
