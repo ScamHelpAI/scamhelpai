@@ -1,12 +1,39 @@
-export type RiskLevel = "low" | "medium" | "high";
+export type RiskLevel = "low" | "medium" | "high" | "critical";
 
-export type ScamCategory =
-  "phishing" | "social_engineering" | "malware" | "legitimate" | "unknown";
+export type AnalysisStatus =
+  | "queued"
+  | "analyzing"
+  | "reviewing"
+  | "completed"
+  | "failed";
 
-export type AnalyzeResponse = {
-  riskScore: number;
-  level: RiskLevel;
-  category: ScamCategory;
-  reasons: string[];
-  recommendation: string;
+export type AnalysisResult = {
+  id: string;
+  status: AnalysisStatus;
+  risk: {
+    score: number;
+    level: RiskLevel;
+    confidence: number;
+  };
+  classification: {
+    primary: string;
+    secondary?: string[];
+  };
+  claimedIdentity?: string;
+  summary: string;
+  evidence: {
+    id: string;
+    summary: string;
+    severity: "low" | "medium" | "high";
+  }[];
+  createdAt: string;
+  completedAt?: string;
+};
+
+export type AnalyzeRequest = {
+  inputs: Array<{ type: "url"; url: string }>;
+  context?: {
+    source: "browser_extension";
+    pageUrl?: string;
+  };
 };

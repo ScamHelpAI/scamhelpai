@@ -1,5 +1,4 @@
-import { openai } from "@ai-sdk/openai";
-import { Output, ToolLoopAgent } from "ai";
+import { Output, ToolLoopAgent, gateway, type GatewayModelId } from "ai";
 import {
   reviewerAssessmentSchema,
   type ReviewerAssessment,
@@ -23,10 +22,10 @@ Return a structured assessment with:
 
 Ground every claim in evidence ids from the scanner. Be conservative when evidence is weak.`;
 
-export function createReviewerAgent(model: string) {
+export function createReviewerAgent(model: GatewayModelId) {
   return new ToolLoopAgent({
     id: "reviewer",
-    model: openai(model),
+    model: gateway(model),
     instructions: REVIEWER_INSTRUCTIONS,
     tools: createReviewerTools(),
     output: Output.object({

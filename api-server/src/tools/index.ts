@@ -10,7 +10,7 @@ import { scanFileTool } from "./scan-file.js";
 import { traceRedirectsTool } from "./trace-redirects.js";
 import { verifyBrandIdentityTool } from "./verify-brand-identity.js";
 import { verifyEvidenceTool } from "./verify-evidence.js";
-import { webVerifyTool } from "./web-verify.js";
+import { parallelSearchTool } from "./web-verify.js";
 
 export function createScannerTools() {
   return {
@@ -25,7 +25,7 @@ export function createScannerTools() {
     decode_qr: decodeQrTool,
     lookup_phone: lookupPhoneTool,
     lookup_crypto_address: lookupCryptoAddressTool,
-    web_verify: webVerifyTool,
+    parallel_search: parallelSearchTool,
   };
 }
 
@@ -37,7 +37,7 @@ export function createReviewerTools() {
     check_threat_intel: checkThreatIntelTool,
     verify_brand_identity: verifyBrandIdentityTool,
     inspect_email: inspectEmailTool,
-    web_verify: webVerifyTool,
+    parallel_search: parallelSearchTool,
   };
 }
 
@@ -65,4 +65,4 @@ export {
   verifyBrandIdentityTool,
 } from "./verify-brand-identity.js";
 export { verifyEvidence, verifyEvidenceTool } from "./verify-evidence.js";
-export { webVerify, webVerifyTool } from "./web-verify.js";
+export { parallelSearchTool, webVerify } from "./web-verify.js";

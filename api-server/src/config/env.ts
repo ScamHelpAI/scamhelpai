@@ -2,8 +2,8 @@ import { z } from "zod";
 
 const envSchema = z.object({
   PORT: z.coerce.number().int().positive().default(3000),
-  OPENAI_API_KEY: z.string().min(1, "OPENAI_API_KEY is required"),
   DATABASE_URL: z.string().min(1, "DATABASE_URL is required"),
+  AI_GATEWAY_API_KEY: z.string().optional(),
 
   REDIS_URL: z.string().optional(),
   S3_ENDPOINT: z.string().optional(),
@@ -17,19 +17,17 @@ const envSchema = z.object({
     .transform((value) => value === "true"),
 
   VIRUSTOTAL_API_KEY: z.string().optional(),
-  TAVILY_API_KEY: z.string().optional(),
   PHISHTANK_API_KEY: z.string().optional(),
   ABUSEIPDB_API_KEY: z.string().optional(),
   URLHAUS_AUTH_KEY: z.string().optional(),
   CHAINABUSE_API_KEY: z.string().optional(),
   ETHERSCAN_API_KEY: z.string().optional(),
-  SERPER_API_KEY: z.string().optional(),
 });
 
 export const env = envSchema.parse({
   PORT: process.env.PORT,
-  OPENAI_API_KEY: process.env.OPENAI_API_KEY,
   DATABASE_URL: process.env.DATABASE_URL,
+  AI_GATEWAY_API_KEY: process.env.AI_GATEWAY_API_KEY,
   REDIS_URL: process.env.REDIS_URL,
   S3_ENDPOINT: process.env.S3_ENDPOINT,
   S3_ACCESS_KEY: process.env.S3_ACCESS_KEY,
@@ -38,11 +36,9 @@ export const env = envSchema.parse({
   S3_REGION: process.env.S3_REGION,
   S3_FORCE_PATH_STYLE: process.env.S3_FORCE_PATH_STYLE,
   VIRUSTOTAL_API_KEY: process.env.VIRUSTOTAL_API_KEY,
-  TAVILY_API_KEY: process.env.TAVILY_API_KEY,
   PHISHTANK_API_KEY: process.env.PHISHTANK_API_KEY,
   ABUSEIPDB_API_KEY: process.env.ABUSEIPDB_API_KEY,
   URLHAUS_AUTH_KEY: process.env.URLHAUS_AUTH_KEY,
   CHAINABUSE_API_KEY: process.env.CHAINABUSE_API_KEY,
   ETHERSCAN_API_KEY: process.env.ETHERSCAN_API_KEY,
-  SERPER_API_KEY: process.env.SERPER_API_KEY,
 });

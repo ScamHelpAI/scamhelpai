@@ -1,5 +1,4 @@
-import { openai } from "@ai-sdk/openai";
-import { Output, ToolLoopAgent } from "ai";
+import { Output, ToolLoopAgent, gateway, type GatewayModelId } from "ai";
 import {
   normalizeScannerOutput,
   scannerOutputSchema,
@@ -25,10 +24,10 @@ Each evidence item must follow the evidence schema:
 
 Collect evidence only. Do not render a final scam verdict, risk score, or recommended actions.`;
 
-export function createScannerAgent(model: string) {
+export function createScannerAgent(model: GatewayModelId) {
   return new ToolLoopAgent({
     id: "scanner",
-    model: openai(model),
+    model: gateway(model),
     instructions: SCANNER_INSTRUCTIONS,
     tools: createScannerTools(),
     output: Output.object({

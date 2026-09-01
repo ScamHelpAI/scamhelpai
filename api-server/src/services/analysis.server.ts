@@ -1,3 +1,4 @@
+import type { GatewayModelId } from "ai";
 import {
   createReviewerAgent,
   type ReviewerOutput,
@@ -65,7 +66,7 @@ function buildReviewerPrompt(evidences: Evidence[]): string {
 
 export async function runAnalysis(
   request: AnalyzeRequest,
-  model: string,
+  model: GatewayModelId,
 ): Promise<RunAnalysisResult> {
   const scanner = createScannerAgent(model);
   const reviewer = createReviewerAgent(model);

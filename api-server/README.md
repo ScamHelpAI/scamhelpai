@@ -11,7 +11,7 @@ Hono API on the [Bun](https://bun.com) runtime.
 ```sh
 bun install
 cp .env.example .env
-# fill in OPENAI_API_KEY and optional provider keys
+# fill in AI_GATEWAY_API_KEY and optional provider keys
 ```
 
 From the repo root, start local Postgres, Redis, and MinIO:
@@ -71,4 +71,4 @@ bun run format:check
 
 1. Create a Railway service pointing at `api-server/`
 2. Set the start command to `bun run start`
-3. Add environment variables from `.env.example`
+3. Add environment variables from `.env.example` (use an AI Gateway API key)

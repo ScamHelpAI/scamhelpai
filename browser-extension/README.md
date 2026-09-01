@@ -2,10 +2,6 @@
 
 This folder is the React + TypeScript + Vite project for the browser extension.
 
-The popup confirms the extension is active. The content script automatically
-outlines every link and adds a green check pill above it on `http`/`https`
-pages — no API or analyzer calls.
-
 Install dependencies and build the Manifest V3 extension:
 
 ```bash
@@ -28,12 +24,6 @@ Leave that running in a terminal. After each rebuild:
 1. Go to `chrome://extensions`
 2. Click the reload icon on the ScamHelp card
 
-You only need to load unpacked once. Reload the extension after code changes, and refresh any open tabs to pick up content-script updates.
+You only need to load unpacked once. Reload the extension after code changes.
 
 `npm run dev` is only for the popup UI in a normal browser tab — it does not load as an extension.
-
-## Link marking
-
-On every `http`/`https` page, all links are automatically outlined in green and
-get a green check pill above them. This is a local DOM pass only — no analyzer
-or backend calls.

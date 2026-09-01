@@ -1,6 +1,4 @@
-import { env } from "../config/env.js";
-import { tool } from "ai";
-import { z } from "zod";
+import { generateText, gateway } from "ai";
 
 type SearchSnippet = {
   title: string;
@@ -8,83 +6,65 @@ type SearchSnippet = {
   snippet: string;
 };
 
-async function searchTavily(query: string): Promise<SearchSnippet[]> {
-  if (!env.TAVILY_API_KEY) return [];
+const PARALLEL_MODEL = "openai/gpt-5.6-luna" as Parameters<typeof gateway>[0];
 
-  const response = await fetch("https://api.tavily.com/search", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      api_key: env.TAVILY_API_KEY,
-      query,
-      search_depth: "basic",
-      max_results: 5,
-      include_answer: false,
-    }),
-  });
+export const parallelSearchTool = gateway.tools.parallelSearch({
+  mode: "agentic",
+  maxResults: 5,
+  excerpts: {
+    maxCharsPerResult: 2000,
+    maxCharsTotal: 7500,
+  },
+});
 
-  if (!response.ok) return [];
+function isSearchResponse(output: unknown): output is {
+  results: Array<{ title: string; url: string; excerpt: string }>;
+} {
+  if (!output || typeof output !== "object" || !("results" in output)) {
+    return false;
+  }
 
-  const json = (await response.json()) as {
-    results?: Array<{ title: string; url: string; content: string }>;
-  };
-
-  return (json.results ?? []).map((r) => ({
-    title: r.title,
-    url: r.url,
-    snippet: r.content,
-  }));
-}
-
-async function searchSerper(query: string): Promise<SearchSnippet[]> {
-  if (!env.SERPER_API_KEY) return [];
-
-  const response = await fetch("https://google.serper.dev/search", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "X-API-KEY": env.SERPER_API_KEY,
-    },
-    body: JSON.stringify({ q: query, num: 5 }),
-  });
-
-  if (!response.ok) return [];
-
-  const json = (await response.json()) as {
-    organic?: Array<{ title: string; link: string; snippet: string }>;
-  };
-
-  return (json.organic ?? []).map((r) => ({
-    title: r.title,
-    url: r.link,
-    snippet: r.snippet,
-  }));
+  const results = (output as { results?: unknown }).results;
+  return (
+    Array.isArray(results) &&
+    results.every(
+      (result) =>
+        result &&
+        typeof result === "object" &&
+        typeof (result as { title?: unknown }).title === "string" &&
+        typeof (result as { url?: unknown }).url === "string" &&
+        typeof (result as { excerpt?: unknown }).excerpt === "string",
+    )
+  );
 }
 
 export async function webVerify(query: string) {
-  let results = await searchTavily(query);
-  let provider: "tavily" | "serper" | "none" =
-    results.length > 0 ? "tavily" : "none";
+  const search = await generateText({
+    model: gateway(PARALLEL_MODEL),
+    prompt: `Use web search to verify this claim: ${query}`,
+    tools: {
+      parallel_search: parallelSearchTool,
+    },
+    toolChoice: { type: "tool", toolName: "parallel_search" },
+  });
 
-  if (results.length === 0) {
-    results = await searchSerper(query);
-    if (results.length > 0) provider = "serper";
-  }
+  const toolResult = [...search.toolResults, ...search.staticToolResults].find(
+    (result) => result.toolName === "parallel_search",
+  );
+  const output = toolResult?.output;
+  const results: SearchSnippet[] = isSearchResponse(output)
+    ? output.results.map((result) => ({
+        title: result.title,
+        url: result.url,
+        snippet: result.excerpt,
+      }))
+    : [];
 
   return {
     query,
-    provider,
+    provider: "parallel" as const,
     resultCount: results.length,
     results,
     urls: results.map((r) => r.url),
   };
 }
-
-export const webVerifyTool = tool({
-  description:
-    'Constrained web search for factual verification, e.g. "Does Apple request gift card payments?" or "Is this Microsoft support number official?"',
-  inputSchema: z.object({
-    query: z.string().describe("Factual verification query to search for"),
-  }),
-  execute: async ({ query }) => webVerify(query),
-});
