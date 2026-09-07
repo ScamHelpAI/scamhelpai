@@ -2,7 +2,11 @@ import { z } from "zod";
 import { evidenceSchema, type Evidence } from "./evidence.js";
 
 export const scannerOutputSchema = z.object({
-  evidences: z.array(evidenceSchema),
+  evidences: z
+    .array(evidenceSchema)
+    .describe(
+      "Every distinct piece of factual evidence found from user inputs and tool results",
+    ),
 });
 
 export type ScannerOutput = z.infer<typeof scannerOutputSchema>;

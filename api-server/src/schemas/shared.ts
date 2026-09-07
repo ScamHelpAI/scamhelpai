@@ -1,10 +1,11 @@
 import { z } from "zod";
 
-/** ISO-8601 timestamp string. */
-export const timestampSchema = z.iso.datetime();
+export const timestampSchema = z.iso.datetime().describe("ISO-8601 timestamp");
 
-/** Identifier for domain entities (UUID or similar). */
-export const idSchema = z.string().min(1);
+export const idSchema = z.string().min(1).describe("Non-empty identifier");
 
-/** Normalized probability in the range [0, 1]. */
-export const confidenceSchema = z.number().min(0).max(1);
+export const confidenceSchema = z
+  .number()
+  .min(0)
+  .max(1)
+  .describe("Number from 0 to 1");

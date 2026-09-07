@@ -1,21 +1,23 @@
 import { z } from "zod";
 import { confidenceSchema, idSchema } from "./shared.js";
 
-export const scamTypeSchema = z.enum([
-  "credential_phishing",
-  "impersonation",
-  "tech_support",
-  "investment",
-  "romance",
-  "job",
-  "invoice",
-  "payment",
-  "crypto",
-  "account_takeover",
-  "malware",
-  "other",
-  "unknown",
-]);
+export const scamTypeSchema = z
+  .enum([
+    "credential_phishing",
+    "impersonation",
+    "tech_support",
+    "investment",
+    "romance",
+    "job",
+    "invoice",
+    "payment",
+    "crypto",
+    "account_takeover",
+    "malware",
+    "other",
+    "unknown",
+  ])
+  .describe("Best-fit scam classification");
 
 export type ScamType = z.infer<typeof scamTypeSchema>;
 
