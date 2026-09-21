@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>ScamHelp.AI</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <h1>ScamHelp.AI</h1>
+    <p class="lede">Not sure about an email? Let's check it together.</p>
+
+    <button id="check-open" type="button" class="primary">
+      Check the email I have open
+    </button>
+
+    <p class="or">or paste the message here</p>
+    <label class="visually-hidden" for="pasted">Paste a suspicious message</label>
+    <textarea id="pasted" rows="6" placeholder="Paste the email text here..."></textarea>
+    <button id="check-pasted" type="button" class="primary">Check this text</button>
+
+    <div id="result" role="status" aria-live="polite"></div>
+
+    <a id="settings" href="#">Settings</a>
+    <script src="popup.js"></script>
+  </body>
+</html>

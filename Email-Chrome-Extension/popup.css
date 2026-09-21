@@ -1,0 +1,97 @@
+:root { color-scheme: light; }
+
+body {
+  width: 360px;
+  margin: 0;
+  padding: 20px;
+  font: 17px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+  color: #111827;
+  background: #ffffff;
+}
+
+h1 { margin: 0 0 4px; font-size: 24px; }
+.lede { margin: 0 0 16px; color: #374151; }
+.or { margin: 20px 0 8px; font-weight: 600; text-align: center; }
+
+button.primary {
+  width: 100%;
+  padding: 16px;
+  font: 600 18px/1.2 inherit;
+  color: #ffffff;
+  background: #1d4ed8;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+button.primary:hover { background: #1e40af; }
+button.primary:focus-visible, textarea:focus-visible, a:focus-visible {
+  outline: 4px solid #f59e0b;
+  outline-offset: 2px;
+}
+
+textarea {
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 12px;
+  padding: 12px;
+  font: 16px/1.4 inherit;
+  border: 2px solid #9ca3af;
+  border-radius: 10px;
+  resize: vertical;
+}
+
+#result { margin-top: 20px; }
+
+#result .card {
+  padding: 16px;
+  border: 3px solid #6b7280;
+  border-radius: 12px;
+}
+
+#result .danger { border-color: #b91c1c; background: #fef2f2; }
+#result .warn { border-color: #b45309; background: #fffbeb; }
+#result .safe { border-color: #15803d; background: #f0fdf4; }
+
+#result h2 { margin: 0 0 8px; font-size: 20px; }
+#result p { margin: 0 0 10px; }
+#result ul { margin: 0 0 10px; padding-left: 22px; }
+#result li { margin-bottom: 6px; }
+
+#result .read {
+  width: 100%;
+  padding: 12px;
+  font: 600 16px/1.2 inherit;
+  color: #ffffff;
+  background: #374151;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+#settings {
+  display: inline-block;
+  margin-top: 18px;
+  color: #1d4ed8;
+  font-size: 15px;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+input[type="url"] {
+  width: 100%;
+  box-sizing: border-box;
+  margin: 8px 0 12px;
+  padding: 12px;
+  font: 16px/1.4 inherit;
+  border: 2px solid #9ca3af;
+  border-radius: 10px;
+}
+
+label { font-weight: 600; }
