@@ -9,7 +9,8 @@ import {
   saveCompletedAnalysis,
 } from "../services/analysis.repository.js";
 
-const ANALYSIS_MODEL = "openai/gpt-5.6-luna";
+const REVIEWER_MODEL = "openai/gpt-5.6-luna";
+const CLASSIFIER_MODEL = "typesafe-ai/jev";
 
 export async function createAnalysisHandler(c: Context) {
   const body = analyzeRequestSchema.parse(await c.req.json());
@@ -18,13 +19,19 @@ export async function createAnalysisHandler(c: Context) {
   const createdAt = await createPendingAnalysis(id, body);
 
   try {
-    const { evidences, assessment } = await runAnalysis(body, ANALYSIS_MODEL);
+    const { evidences, assessment, classifier, classifierModel, reviewerModel } =
+      await runAnalysis(body, {
+        reviewerModel: REVIEWER_MODEL,
+        classifierModel: CLASSIFIER_MODEL,
+      });
     const result = await saveCompletedAnalysis({
       id,
       createdAt,
       assessment,
       evidences,
-      model: ANALYSIS_MODEL,
+      reviewerModel,
+      classifier,
+      classifierModel,
     });
 
     return c.json(result, 201);

@@ -37,6 +37,8 @@ export function createReviewerTools() {
     check_threat_intel: checkThreatIntelTool,
     verify_brand_identity: verifyBrandIdentityTool,
     inspect_email: inspectEmailTool,
+    decode_qr: decodeQrTool,
+    scan_file: scanFileTool,
     parallel_search: parallelSearchTool,
   };
 }

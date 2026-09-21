@@ -2,6 +2,7 @@ import { eq } from "drizzle-orm";
 import type { AnalyzeRequest } from "../schemas/analysis-input.js";
 import type { AnalysisResult } from "../schemas/analysis-result.js";
 import type { Evidence } from "../schemas/evidence.js";
+import type { ClassifierResult } from "../schemas/classifier.js";
 import type { ReviewerAssessment } from "../schemas/reviewer.js";
 import { db } from "../db/index.js";
 import { agentRuns, analyses, analysisInputs, evidence } from "../db/schema.js";
@@ -39,7 +40,9 @@ export async function saveCompletedAnalysis(params: {
   createdAt: string;
   assessment: ReviewerAssessment;
   evidences: Evidence[];
-  model: string;
+  reviewerModel: string;
+  classifier?: ClassifierResult;
+  classifierModel?: string;
 }): Promise<AnalysisResult> {
   const completedAt = new Date().toISOString();
   const result = toAnalysisResult({
@@ -81,11 +84,22 @@ export async function saveCompletedAnalysis(params: {
       );
     }
 
+    if (params.classifier) {
+      await tx.insert(agentRuns).values({
+        id: crypto.randomUUID(),
+        analysisId: params.id,
+        role: "analyst",
+        model: params.classifierModel ?? "typesafe-ai/jev",
+        resultJson: params.classifier,
+        createdAt: completedAt,
+      });
+    }
+
     await tx.insert(agentRuns).values({
       id: crypto.randomUUID(),
       analysisId: params.id,
       role: "reviewer",
-      model: params.model,
+      model: params.reviewerModel,
       resultJson: params.assessment,
       createdAt: completedAt,
     });
