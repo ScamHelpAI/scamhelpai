@@ -10,6 +10,6 @@
 
 @layer base {
   body {
-    @apply m-0 w-[340px] min-h-[180px] font-sans text-ink;
+    @apply m-0 w-[360px] min-h-[180px] font-sans text-ink;
   }
 }

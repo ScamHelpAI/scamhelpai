@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { evidenceSchema, type Evidence } from "./evidence.js";
+import { createSequentialId } from "../services/ids.js";
 
 export const scannerOutputSchema = z.object({
   evidences: z

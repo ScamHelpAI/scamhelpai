@@ -11,6 +11,7 @@ import { lookupDomain } from "../tools/lookup-domain.js";
 import { lookupPhone } from "../tools/lookup-phone.js";
 import { BRAND_DOMAINS } from "../tools/shared/brands.js";
 import { verifyBrandIdentity } from "../tools/verify-brand-identity.js";
+import { createSequentialId } from "./ids.js";
 
 const URL_RE = /https?:\/\/[^\s"'<>]+/gi;
 const EMAIL_RE = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/g;

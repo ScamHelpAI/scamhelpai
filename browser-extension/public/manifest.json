@@ -2,11 +2,28 @@
   "manifest_version": 3,
   "name": "ScamHelp AI",
   "version": "0.1.0",
-  "description": "Check suspicious messages and URLs for scam signals.",
+  "description": "Check suspicious emails, messages, and URLs for scam signals.",
   "action": {
     "default_popup": "index.html",
     "default_title": "ScamHelp AI"
   },
-  "permissions": ["activeTab"],
-  "host_permissions": ["http://localhost:3000/*"]
+  "options_page": "options.html",
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "permissions": ["storage", "activeTab"],
+  "host_permissions": [
+    "https://mail.google.com/*",
+    "http://localhost:3000/*",
+    "http://127.0.0.1:3000/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["https://mail.google.com/*"],
+      "js": ["content/gmail.js"],
+      "css": ["content/panel.css"],
+      "run_at": "document_idle"
+    }
+  ]
 }

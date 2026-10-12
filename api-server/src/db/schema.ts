@@ -125,20 +125,24 @@ export const assets = pgTable("assets", {
   metadata: jsonb("metadata"),
 });
 
-export const evidence = pgTable("evidence", {
-  id: text("id").primaryKey(),
-  analysisId: text("analysis_id")
-    .notNull()
-    .references(() => analyses.id, { onDelete: "cascade" }),
-  type: evidenceTypeEnum("type").notNull(),
-  source: evidenceSourceEnum("source").notNull(),
-  summary: text("summary").notNull(),
-  confidence: real("confidence").notNull(),
-  data: jsonb("data"),
-  sourceInputId: text("source_input_id"),
-  toolName: text("tool_name"),
-  createdAt,
-});
+export const evidence = pgTable(
+  "evidence",
+  {
+    id: text("id").notNull(),
+    analysisId: text("analysis_id")
+      .notNull()
+      .references(() => analyses.id, { onDelete: "cascade" }),
+    type: evidenceTypeEnum("type").notNull(),
+    source: evidenceSourceEnum("source").notNull(),
+    summary: text("summary").notNull(),
+    confidence: real("confidence").notNull(),
+    data: jsonb("data"),
+    sourceInputId: text("source_input_id"),
+    toolName: text("tool_name"),
+    createdAt,
+  },
+  (table) => [primaryKey({ columns: [table.analysisId, table.id] })],
+);
 
 export const agentRuns = pgTable("agent_runs", {
   id: text("id").primaryKey(),

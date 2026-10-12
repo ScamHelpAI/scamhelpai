@@ -30,10 +30,30 @@ export type AnalysisResult = {
   completedAt?: string;
 };
 
+export type AnalysisInput =
+  | { type: "text"; content: string }
+  | { type: "url"; url: string }
+  | {
+      type: "email";
+      raw?: string;
+      headers?: Record<string, string>;
+      body?: string;
+      assetIds?: string[];
+    };
+
 export type AnalyzeRequest = {
-  inputs: Array<{ type: "url"; url: string }>;
+  inputs: AnalysisInput[];
   context?: {
     source: "browser_extension";
     pageUrl?: string;
   };
 };
+
+export type AnalyzeMessage = {
+  type: "analyze";
+  request: AnalyzeRequest;
+};
+
+export type AnalyzeResponse =
+  | { ok: true; result: AnalysisResult }
+  | { ok: false; error: string };

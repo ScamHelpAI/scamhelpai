@@ -1,37 +1,101 @@
-import { useState } from "react";
-import { getActiveTabUrl, scanPageUrl } from "./api.ts";
-import type { AnalysisResult, RiskLevel } from "./types.ts";
+import { useEffect, useState } from "react";
+import {
+  analyze,
+  checkOpenEmail,
+  getActiveTab,
+  getActiveTabUrl,
+  isGmailUrl,
+} from "./api.ts";
+import { textToAnalyzeRequest, urlToAnalyzeRequest } from "./email-request.ts";
+import type { AnalysisResult } from "./types.ts";
+import { toVerdict, type VerdictTone } from "./verdict.ts";
 
-const riskStyles: Record<RiskLevel, string> = {
-  low: "bg-emerald-100 text-emerald-800",
-  medium: "bg-amber-100 text-amber-800",
-  high: "bg-orange-100 text-orange-800",
-  critical: "bg-red-100 text-red-800",
-};
+function toneClass(tone: VerdictTone): string {
+  switch (tone) {
+    case "danger":
+      return "border-red-700 bg-red-50";
+    case "warn":
+      return "border-amber-700 bg-amber-50";
+    case "safe":
+      return "border-green-700 bg-green-50";
+    default: {
+      const _exhaustive: never = tone;
+      return _exhaustive;
+    }
+  }
+}
 
-function formatRiskLevel(level: RiskLevel): string {
-  return level.charAt(0).toUpperCase() + level.slice(1);
+function speak(text: string): void {
+  speechSynthesis.cancel();
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.rate = 0.85;
+  speechSynthesis.speak(utterance);
+}
+
+function VerdictCard({ result }: { result: AnalysisResult }) {
+  const verdict = toVerdict(result);
+
+  return (
+    <section
+      className={`mt-5 rounded-xl border-[3px] p-4 ${toneClass(verdict.tone)}`}
+      role="status"
+      aria-live="polite"
+    >
+      <h2 className="mb-2 pr-2 text-xl font-bold leading-tight">
+        {verdict.icon} {verdict.title}
+      </h2>
+      <p className="mb-3 text-base font-semibold leading-snug">
+        {verdict.recommendation}
+      </p>
+      {verdict.reasons.length > 0 ? (
+        <>
+          <h3 className="mb-1 text-base font-bold">Why we think so</h3>
+          <ul className="mb-3 list-disc space-y-1.5 pl-5 text-[15px] leading-snug">
+            {verdict.reasons.slice(0, 6).map((reason) => (
+              <li key={reason}>{reason}</li>
+            ))}
+          </ul>
+        </>
+      ) : null}
+      <p className="mb-3 text-sm text-muted">
+        Risk score: {verdict.riskScore} out of 100
+      </p>
+      <button
+        type="button"
+        className="w-full rounded-[10px] bg-slate-700 px-3 py-3 text-base font-semibold text-white hover:bg-slate-800 focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-amber-500"
+        onClick={() => speak(verdict.spoken)}
+      >
+        Read this to me
+      </button>
+    </section>
+  );
 }
 
 export default function App() {
+  const [onGmail, setOnGmail] = useState(false);
+  const [pasted, setPasted] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  async function handleScan() {
+  useEffect(() => {
+    void getActiveTab().then((tab) => {
+      setOnGmail(isGmailUrl(tab?.url));
+    });
+  }, []);
+
+  async function run(action: () => Promise<AnalysisResult>) {
     setLoading(true);
     setResult(null);
     setError(null);
 
     try {
-      const pageUrl = await getActiveTabUrl();
-      const analysis = await scanPageUrl(pageUrl);
-      setResult(analysis);
+      setResult(await action());
     } catch (err) {
       setError(
         err instanceof Error
           ? err.message
-          : "Could not scan this page. Try again.",
+          : "Could not check this. Try again.",
       );
     } finally {
       setLoading(false);
@@ -39,51 +103,85 @@ export default function App() {
   }
 
   return (
-    <main className="p-6">
-      <h1 className="mb-2 text-xl font-semibold leading-tight">ScamHelp AI</h1>
-      <p className="text-sm leading-relaxed text-muted">
-        Check suspicious messages and URLs for scam signals.
+    <main className="p-5">
+      <h1 className="mb-1 text-2xl font-semibold leading-tight">ScamHelp AI</h1>
+      <p className="mb-4 text-[15px] leading-relaxed text-muted">
+        {onGmail
+          ? "Not sure about an email? Let's check it together."
+          : "Check suspicious messages and URLs for scam signals."}
       </p>
 
+      {onGmail ? (
+        <button
+          type="button"
+          onClick={() => void run(checkOpenEmail)}
+          disabled={loading}
+          className="w-full rounded-xl bg-brand px-4 py-3.5 text-[17px] font-semibold text-white hover:bg-brand-hover focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-amber-500 disabled:cursor-wait disabled:opacity-60"
+        >
+          {loading ? "Checking…" : "Check the email I have open"}
+        </button>
+      ) : (
+        <button
+          type="button"
+          onClick={() =>
+            void run(async () => {
+              const pageUrl = await getActiveTabUrl();
+              return analyze(urlToAnalyzeRequest(pageUrl));
+            })
+          }
+          disabled={loading}
+          className="w-full rounded-xl bg-brand px-4 py-3.5 text-[17px] font-semibold text-white hover:bg-brand-hover focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-amber-500 disabled:cursor-wait disabled:opacity-60"
+        >
+          {loading ? "Scanning…" : "Scan this page"}
+        </button>
+      )}
+
+      <p className="my-3 text-center text-sm font-semibold text-muted">
+        or paste the message here
+      </p>
+      <label className="sr-only" htmlFor="pasted">
+        Paste a suspicious message
+      </label>
+      <textarea
+        id="pasted"
+        rows={5}
+        value={pasted}
+        placeholder="Paste the email text here..."
+        onChange={(event) => setPasted(event.target.value)}
+        className="mb-3 w-full resize-y rounded-[10px] border-2 border-slate-400 p-3 text-base leading-snug focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-amber-500"
+      />
       <button
         type="button"
-        onClick={handleScan}
+        onClick={() => {
+          const text = pasted.trim();
+          if (!text) {
+            setError("Paste the email text into the box first.");
+            setResult(null);
+            return;
+          }
+          void run(() => analyze(textToAnalyzeRequest(text)));
+        }}
         disabled={loading}
-        className="mt-4 w-full rounded-md bg-brand px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-hover disabled:cursor-wait disabled:opacity-60"
+        className="w-full rounded-xl bg-brand px-4 py-3.5 text-[17px] font-semibold text-white hover:bg-brand-hover focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-amber-500 disabled:cursor-wait disabled:opacity-60"
       >
-        {loading ? "Scanning…" : "Scan this page"}
+        {loading ? "Checking…" : "Check this text"}
       </button>
 
       {error ? (
-        <p className="mt-3 text-sm font-medium text-red-600" role="alert">
+        <p className="mt-3 text-[15px] font-medium text-red-600" role="alert">
           {error}
         </p>
       ) : null}
 
-      {result ? (
-        <section className="mt-4 space-y-3 border-t border-slate-200 pt-4">
-          <div className="flex items-center justify-between gap-2">
-            <span
-              className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${riskStyles[result.risk.level]}`}
-            >
-              {formatRiskLevel(result.risk.level)} risk
-            </span>
-            <span className="text-xs text-muted">
-              {Math.round(result.risk.score * 100)}% score
-            </span>
-          </div>
-          <p className="text-sm leading-relaxed">{result.summary}</p>
-          {result.evidence.length > 0 ? (
-            <ul className="space-y-1.5 text-xs text-muted">
-              {result.evidence.slice(0, 3).map((item) => (
-                <li key={item.id} className="leading-snug">
-                  {item.summary}
-                </li>
-              ))}
-            </ul>
-          ) : null}
-        </section>
-      ) : null}
+      {result ? <VerdictCard result={result} /> : null}
+
+      <button
+        type="button"
+        className="mt-4 text-[15px] font-medium text-brand hover:underline focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-amber-500"
+        onClick={() => chrome.runtime.openOptionsPage()}
+      >
+        Settings
+      </button>
     </main>
   );
 }
