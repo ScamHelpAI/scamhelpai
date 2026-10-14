@@ -1,4 +1,4 @@
-import { copyFile, mkdir } from "node:fs/promises";
+import { mkdir } from "node:fs/promises";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import * as esbuild from "esbuild";
@@ -18,7 +18,7 @@ function bundleExtensionScripts(): Plugin {
 
       await esbuild.build({
         absWorkingDir: root,
-        entryPoints: [resolve(root, "src/background.ts")],
+        entryPoints: [resolve(root, "src/background/index.ts")],
         bundle: true,
         format: "esm",
         outfile: resolve(outDir, "background.js"),
@@ -29,19 +29,14 @@ function bundleExtensionScripts(): Plugin {
 
       await esbuild.build({
         absWorkingDir: root,
-        entryPoints: [resolve(root, "src/content/gmail.ts")],
+        entryPoints: [resolve(root, "src/content/page/index.ts")],
         bundle: true,
         format: "iife",
-        outfile: resolve(outDir, "content/gmail.js"),
+        outfile: resolve(outDir, "content/page.js"),
         platform: "browser",
         target: "es2022",
         logLevel: "info",
       });
-
-      await copyFile(
-        resolve(root, "src/content/panel.css"),
-        resolve(outDir, "content/panel.css"),
-      );
     },
   };
 }

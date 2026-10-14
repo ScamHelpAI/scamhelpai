@@ -58,12 +58,3 @@ export type AnalyzeRequest = {
     pageUrl?: string;
   };
 };
-
-export type AnalyzeMessage = {
-  type: "analyze";
-  request: AnalyzeRequest;
-};
-
-export type AnalyzeResponse =
-  | { ok: true; result: AnalysisResult }
-  | { ok: false; error: string };

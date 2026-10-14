@@ -1,0 +1,38 @@
+import type { AnalysisResult, AnalyzeRequest } from "./types.ts";
+
+export type ReadPageMessage = {
+  type: "readPageContents";
+};
+
+export type ReadPageResponse =
+  | { ok: true; url: string; title: string; html: string }
+  | { ok: false; error: string };
+
+export type AnalyzeMessage = {
+  type: "analyze";
+  request: AnalyzeRequest;
+};
+
+export type AnalyzeResponse =
+  | { ok: true; result: AnalysisResult }
+  | { ok: false; error: string };
+
+export type GetAnalysisMessage = {
+  type: "getAnalysis";
+  id: string;
+};
+
+export type ReadActivePageMessage = {
+  type: "readActivePage";
+};
+
+export type ScanActivePageMessage = {
+  type: "scanActivePage";
+};
+
+export type ExtensionRequest =
+  | ReadPageMessage
+  | AnalyzeMessage
+  | GetAnalysisMessage
+  | ReadActivePageMessage
+  | ScanActivePageMessage;

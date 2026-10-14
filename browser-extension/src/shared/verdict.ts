@@ -9,7 +9,8 @@ export type Verdict = {
   recommendation: string;
   reasons: string[];
   riskScore: number;
-  spoken: string;
+  status: AnalysisResult["status"];
+  reviewNote?: string;
 };
 
 function copyForLevel(level: RiskLevel): {
@@ -35,10 +36,10 @@ function copyForLevel(level: RiskLevel): {
 export function toVerdict(result: AnalysisResult): Verdict {
   const copy = copyForLevel(result.risk.level);
   const reasons = result.evidence.map((item) => item.summary);
-  const spokenParts = [copy.title + ".", result.summary];
-  if (reasons.length > 0) {
-    spokenParts.push("Warning signs: " + reasons.join(". "));
-  }
+  const reviewNote =
+    result.review && result.review.verdict !== "agree"
+      ? `Reviewer: ${result.review.verdict.replaceAll("_", " ")}`
+      : undefined;
 
   return {
     title: copy.title,
@@ -47,6 +48,7 @@ export function toVerdict(result: AnalysisResult): Verdict {
     recommendation: result.summary,
     reasons,
     riskScore: Math.round(result.risk.score * 100),
-    spoken: spokenParts.join(" "),
+    status: result.status,
+    reviewNote,
   };
 }
