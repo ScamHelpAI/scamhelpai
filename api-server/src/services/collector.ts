@@ -193,9 +193,9 @@ function summarizeThreatIntel(
 async function investigateIndicators(
   indicators: CollectorState["indicators"],
   createdAt: string,
+  nextId: () => string,
 ): Promise<Evidence[]> {
   const evidences: Evidence[] = [];
-  let counter = 1;
 
   const tasks: Array<Promise<void>> = [];
 
@@ -204,7 +204,7 @@ async function investigateIndicators(
       inspectUrl(url).then((result) => {
         evidences.push(
           createEvidence({
-            id: `ev-${String(counter++).padStart(3, "0")}`,
+            id: nextId(),
             type: "url",
             source: "tool",
             summary: summarizeUrlInspection(result),
@@ -220,7 +220,7 @@ async function investigateIndicators(
       checkThreatIntel(url).then((result) => {
         evidences.push(
           createEvidence({
-            id: `ev-${String(counter++).padStart(3, "0")}`,
+            id: nextId(),
             type: "threat_intel",
             source: "tool",
             summary: summarizeThreatIntel(result),
@@ -239,7 +239,7 @@ async function investigateIndicators(
       lookupDomain(domain).then((result) => {
         evidences.push(
           createEvidence({
-            id: `ev-${String(counter++).padStart(3, "0")}`,
+            id: nextId(),
             type: "domain",
             source: "tool",
             summary: summarizeDomainLookup(result),
@@ -255,7 +255,7 @@ async function investigateIndicators(
       checkThreatIntel(domain).then((result) => {
         evidences.push(
           createEvidence({
-            id: `ev-${String(counter++).padStart(3, "0")}`,
+            id: nextId(),
             type: "threat_intel",
             source: "tool",
             summary: summarizeThreatIntel(result),
@@ -274,7 +274,7 @@ async function investigateIndicators(
       Promise.resolve(lookupPhone(phone)).then((result) => {
         evidences.push(
           createEvidence({
-            id: `ev-${String(counter++).padStart(3, "0")}`,
+            id: nextId(),
             type: "external",
             source: "tool",
             summary: `Phone ${result.input} is ${result.valid ? "valid" : "invalid"}${result.flags.length ? `; flags: ${result.flags.join(", ")}` : ""}`,
@@ -293,7 +293,7 @@ async function investigateIndicators(
       lookupCryptoAddress(address).then((result) => {
         evidences.push(
           createEvidence({
-            id: `ev-${String(counter++).padStart(3, "0")}`,
+            id: nextId(),
             type: "external",
             source: "tool",
             summary: `Crypto address ${result.address} on ${result.chain}${result.reportedScam ? " has abuse reports" : " has no known abuse reports"}`,
@@ -314,7 +314,7 @@ async function investigateIndicators(
       verifyBrandIdentity(brand, domain).then((result) => {
         evidences.push(
           createEvidence({
-            id: `ev-${String(counter++).padStart(3, "0")}`,
+            id: nextId(),
             type: "identity",
             source: "tool",
             summary: `Brand check for ${brand} on ${domain}: ${result.likelyLegitimate ? "likely legitimate" : "likely impersonation"}`,
@@ -376,7 +376,7 @@ export function buildCollectorState(
 export async function collect(request: AnalyzeRequest): Promise<Evidence[]> {
   const createdAt = new Date().toISOString();
   const evidences: Evidence[] = [];
-  let counter = 1;
+  const nextId = createSequentialId("ev");
 
   let indicators = {
     urls: [] as string[],
@@ -398,7 +398,7 @@ export async function collect(request: AnalyzeRequest): Promise<Evidence[]> {
     if (text.trim()) {
       evidences.push(
         createEvidence({
-          id: `ev-${String(counter++).padStart(3, "0")}`,
+          id: nextId(),
           type: "text",
           source: "user_input",
           summary: `Submission includes ${input.type} content (${text.length} characters)`,
@@ -421,7 +421,7 @@ export async function collect(request: AnalyzeRequest): Promise<Evidence[]> {
         );
         evidences.push(
           createEvidence({
-            id: `ev-${String(counter++).padStart(3, "0")}`,
+            id: nextId(),
             type: "email",
             source: "tool",
             summary: `Email from ${emailResult.from}${emailResult.flags.length ? `; flags: ${emailResult.flags.join(", ")}` : ""}`,
@@ -446,7 +446,11 @@ export async function collect(request: AnalyzeRequest): Promise<Evidence[]> {
     }
   }
 
-  const toolEvidences = await investigateIndicators(indicators, createdAt);
+  const toolEvidences = await investigateIndicators(
+    indicators,
+    createdAt,
+    nextId,
+  );
   evidences.push(...toolEvidences);
 
   return evidences;

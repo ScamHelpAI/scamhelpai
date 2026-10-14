@@ -37,11 +37,13 @@ export {
 
 export {
   analysisResultSchema,
+  analysisReviewSchema,
   analysisStatusSchema,
   classificationSchema,
   riskLevelSchema,
   riskSummarySchema,
   type AnalysisResult,
+  type AnalysisReview,
   type AnalysisStatus,
   type Classification,
   type RiskLevel,

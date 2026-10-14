@@ -26,6 +26,16 @@ export type AnalysisResult = {
     summary: string;
     severity: "low" | "medium" | "high";
   }[];
+  review?: {
+    verdict:
+      | "agree"
+      | "agree_with_adjustments"
+      | "disagree"
+      | "insufficient_evidence";
+    unsupportedClaims: string[];
+    contradictions: string[];
+    confidenceAdjustment: number;
+  };
   createdAt: string;
   completedAt?: string;
 };

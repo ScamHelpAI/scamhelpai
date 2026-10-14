@@ -1,16 +1,56 @@
 import type { Context } from "hono";
 import { HTTPException } from "hono/http-exception";
+import type { AnalyzeRequest } from "../schemas/analysis-input.js";
 import { analyzeRequestSchema } from "../schemas/analysis-input.js";
-import { runAnalysis } from "../services/analysis.server.js";
+import type { ClassifierResult } from "../schemas/classifier.js";
+import type { Evidence } from "../schemas/evidence.js";
+import {
+  runInitialAnalysis,
+  runVerifierReview,
+  type OpenAILanguageModelId,
+} from "../services/analysis.server.js";
 import {
   createPendingAnalysis,
   getAnalysisById,
+  markAnalysisCompletedWithoutReview,
   markAnalysisFailed,
-  saveCompletedAnalysis,
+  saveInitialAnalysis,
+  saveReviewCompletion,
 } from "../services/analysis.repository.js";
 
-const REVIEWER_MODEL = "gpt-6-luna";
+const REVIEWER_MODEL: OpenAILanguageModelId = "gpt-6-luna";
 const CLASSIFIER_MODEL = "gpt-6-luna";
+
+function startBackgroundReview(params: {
+  id: string;
+  createdAt: string;
+  request: AnalyzeRequest;
+  evidences: Evidence[];
+  classifier: ClassifierResult;
+  reviewerModel: OpenAILanguageModelId;
+}): void {
+  void (async () => {
+    try {
+      const assessment = await runVerifierReview(
+        params.request,
+        params.evidences,
+        params.classifier,
+        params.reviewerModel,
+      );
+      await saveReviewCompletion({
+        id: params.id,
+        createdAt: params.createdAt,
+        assessment,
+        evidences: params.evidences,
+        reviewerModel: params.reviewerModel,
+      });
+    } catch (error) {
+      console.error(`Background review failed for ${params.id}:`, error);
+      // Keep the initial decision-model result available instead of failing the analysis.
+      await markAnalysisCompletedWithoutReview(params.id);
+    }
+  })();
+}
 
 export async function createAnalysisHandler(c: Context) {
   const body = analyzeRequestSchema.parse(await c.req.json());
@@ -20,18 +60,27 @@ export async function createAnalysisHandler(c: Context) {
 
   try {
     const { evidences, assessment, classifier, classifierModel, reviewerModel } =
-      await runAnalysis(body, {
+      await runInitialAnalysis(body, {
         reviewerModel: REVIEWER_MODEL,
         classifierModel: CLASSIFIER_MODEL,
       });
-    const result = await saveCompletedAnalysis({
+
+    const result = await saveInitialAnalysis({
       id,
       createdAt,
       assessment,
       evidences,
-      reviewerModel,
       classifier,
       classifierModel,
+    });
+
+    startBackgroundReview({
+      id,
+      createdAt,
+      request: body,
+      evidences,
+      classifier,
+      reviewerModel,
     });
 
     return c.json(result, 201);

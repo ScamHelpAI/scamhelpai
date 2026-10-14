@@ -2,6 +2,7 @@ import { z } from "zod";
 import { confidenceSchema, idSchema, timestampSchema } from "./shared.js";
 import { scamTypeSchema } from "./analyst.js";
 import { publicEvidenceSchema } from "./evidence.js";
+import { reviewVerdictSchema } from "./reviewer.js";
 
 export const analysisStatusSchema = z.enum([
   "queued",
@@ -32,6 +33,15 @@ export const classificationSchema = z.object({
 
 export type Classification = z.infer<typeof classificationSchema>;
 
+export const analysisReviewSchema = z.object({
+  verdict: reviewVerdictSchema,
+  unsupportedClaims: z.array(z.string()),
+  contradictions: z.array(z.string()),
+  confidenceAdjustment: z.number(),
+});
+
+export type AnalysisReview = z.infer<typeof analysisReviewSchema>;
+
 export const analysisResultSchema = z.object({
   id: idSchema,
   status: analysisStatusSchema,
@@ -40,6 +50,7 @@ export const analysisResultSchema = z.object({
   claimedIdentity: z.string().optional(),
   summary: z.string().min(1),
   evidence: z.array(publicEvidenceSchema),
+  review: analysisReviewSchema.optional(),
   createdAt: timestampSchema,
   completedAt: timestampSchema.optional(),
 });

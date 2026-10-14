@@ -152,7 +152,7 @@
       "post": {
         "tags": ["Analyses"],
         "summary": "Create a full analysis",
-        "description": "Runs the scanner and reviewer agent pipeline, persists the result, and returns a public AnalysisResult.",
+        "description": "Runs the decision model, returns an initial AnalysisResult with status reviewing, and continues verifier review asynchronously. Poll GET /v1/analyses/{id} for corrections.",
         "operationId": "createAnalysis",
         "requestBody": {
           "required": true,
@@ -176,7 +176,7 @@
         },
         "responses": {
           "201": {
-            "description": "Analysis completed",
+            "description": "Initial decision-model analysis ready; verifier may still be running",
             "content": {
               "application/json": {
                 "schema": { "$ref": "#/components/schemas/AnalysisResult" }
@@ -192,7 +192,7 @@
       "get": {
         "tags": ["Analyses"],
         "summary": "Get analysis by ID",
-        "description": "Returns a completed analysis by its ID.",
+        "description": "Returns a reviewing or completed analysis by its ID. When status is completed, risk/summary reflect verifier corrections and review metadata is included when available.",
         "operationId": "getAnalysis",
         "parameters": [
           {
@@ -213,7 +213,7 @@
             }
           },
           "404": {
-            "description": "Analysis not found or not yet completed",
+            "description": "Analysis not found",
             "content": {
               "application/json": {
                 "schema": { "$ref": "#/components/schemas/ErrorResponse" },
@@ -517,6 +517,35 @@
           "severity": { "$ref": "#/components/schemas/EvidenceSeverity" }
         }
       },
+      "AnalysisReview": {
+        "type": "object",
+        "required": [
+          "verdict",
+          "unsupportedClaims",
+          "contradictions",
+          "confidenceAdjustment"
+        ],
+        "properties": {
+          "verdict": {
+            "type": "string",
+            "enum": [
+              "agree",
+              "agree_with_adjustments",
+              "disagree",
+              "insufficient_evidence"
+            ]
+          },
+          "unsupportedClaims": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "contradictions": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "confidenceAdjustment": { "type": "number" }
+        }
+      },
       "AnalysisResult": {
         "type": "object",
         "required": [
@@ -539,6 +568,7 @@
             "type": "array",
             "items": { "$ref": "#/components/schemas/PublicEvidence" }
           },
+          "review": { "$ref": "#/components/schemas/AnalysisReview" },
           "createdAt": { "type": "string", "format": "date-time" },
           "completedAt": { "type": "string", "format": "date-time" }
         }

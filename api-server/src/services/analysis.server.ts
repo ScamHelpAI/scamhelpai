@@ -8,32 +8,28 @@ import {
   DEFAULT_CLASSIFIER_MODEL,
   classifySubmission,
 } from "./classifier.js";
-import {
-  assessmentFromClassifier,
-  shouldReview,
-} from "./classifier-gate.js";
+import { assessmentFromClassifier } from "./classifier-gate.js";
 import { runLlmReview } from "./reviewer.js";
 
-type OpenAILanguageModelId = Parameters<typeof openai>[0];
+export type OpenAILanguageModelId = Parameters<typeof openai>[0];
 
 export type RunAnalysisOptions = {
   reviewerModel: OpenAILanguageModelId;
   classifierModel?: OpenAIDecisionModelId;
 };
 
-export type RunAnalysisResult = {
+export type InitialAnalysisResult = {
   evidences: Evidence[];
   assessment: ReviewerAssessment;
   classifier: ClassifierResult;
   classifierModel: string;
   reviewerModel: OpenAILanguageModelId;
-  usedLlmReviewer: boolean;
 };
 
-export async function runAnalysis(
+export async function runInitialAnalysis(
   request: AnalyzeRequest,
   options: RunAnalysisOptions,
-): Promise<RunAnalysisResult> {
+): Promise<InitialAnalysisResult> {
   const evidences = await collect(request);
   const classifierModel = options.classifierModel ?? DEFAULT_CLASSIFIER_MODEL;
   const classifier = await classifySubmission(
@@ -42,22 +38,20 @@ export async function runAnalysis(
     openai.decisionModel(classifierModel),
   );
 
-  const needsReview = shouldReview(request, classifier, evidences);
-  const assessment = needsReview
-    ? await runLlmReview(
-        request,
-        evidences,
-        classifier,
-        options.reviewerModel,
-      )
-    : assessmentFromClassifier(classifier, evidences);
-
   return {
     evidences,
-    assessment,
+    assessment: assessmentFromClassifier(classifier, evidences),
     classifier,
     classifierModel,
     reviewerModel: options.reviewerModel,
-    usedLlmReviewer: needsReview,
   };
+}
+
+export async function runVerifierReview(
+  request: AnalyzeRequest,
+  evidences: Evidence[],
+  classifier: ClassifierResult,
+  reviewerModel: OpenAILanguageModelId,
+): Promise<ReviewerAssessment> {
+  return runLlmReview(request, evidences, classifier, reviewerModel);
 }

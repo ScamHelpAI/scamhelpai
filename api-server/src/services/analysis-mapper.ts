@@ -1,7 +1,11 @@
-import type { RiskLevel } from "../schemas/analysis-result.js";
+import type {
+  AnalysisResult,
+  AnalysisReview,
+  AnalysisStatus,
+  RiskLevel,
+} from "../schemas/analysis-result.js";
 import type { Evidence, PublicEvidence } from "../schemas/evidence.js";
 import type { ReviewerAssessment } from "../schemas/reviewer.js";
-import type { AnalysisResult } from "../schemas/analysis-result.js";
 
 export function toRiskLevel(score: number): RiskLevel {
   if (score >= 0.85) return "critical";
@@ -28,17 +32,19 @@ export function toPublicEvidence(evidence: Evidence): PublicEvidence {
 
 export function toAnalysisResult(params: {
   id: string;
+  status: Extract<AnalysisStatus, "reviewing" | "completed">;
   assessment: ReviewerAssessment;
   evidences: Evidence[];
   createdAt: string;
-  completedAt: string;
+  completedAt?: string;
+  review?: AnalysisReview;
 }): AnalysisResult {
   const score = params.assessment.finalScamProbability;
   const riskLevel = toRiskLevel(score);
 
   return {
     id: params.id,
-    status: "completed",
+    status: params.status,
     risk: {
       score,
       level: riskLevel,
@@ -52,6 +58,7 @@ export function toAnalysisResult(params: {
     },
     summary: params.assessment.reasoningSummary,
     evidence: params.evidences.map(toPublicEvidence),
+    ...(params.review ? { review: params.review } : {}),
     createdAt: params.createdAt,
     completedAt: params.completedAt,
   };

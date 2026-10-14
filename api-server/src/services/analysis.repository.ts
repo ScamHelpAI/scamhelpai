@@ -1,9 +1,15 @@
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import type { AnalyzeRequest } from "../schemas/analysis-input.js";
-import type { AnalysisResult } from "../schemas/analysis-result.js";
+import type {
+  AnalysisResult,
+  AnalysisReview,
+} from "../schemas/analysis-result.js";
 import type { Evidence } from "../schemas/evidence.js";
 import type { ClassifierResult } from "../schemas/classifier.js";
-import type { ReviewerAssessment } from "../schemas/reviewer.js";
+import {
+  reviewerAssessmentSchema,
+  type ReviewerAssessment,
+} from "../schemas/reviewer.js";
 import { db } from "../db/index.js";
 import { agentRuns, analyses, analysisInputs, evidence } from "../db/schema.js";
 import { toAnalysisResult } from "./analysis-mapper.js";
@@ -35,35 +41,34 @@ export async function createPendingAnalysis(
   return createdAt;
 }
 
-export async function saveCompletedAnalysis(params: {
+export async function saveInitialAnalysis(params: {
   id: string;
   createdAt: string;
   assessment: ReviewerAssessment;
   evidences: Evidence[];
-  reviewerModel: string;
-  classifier?: ClassifierResult;
-  classifierModel?: string;
+  classifier: ClassifierResult;
+  classifierModel: string;
 }): Promise<AnalysisResult> {
-  const completedAt = new Date().toISOString();
+  const savedAt = new Date().toISOString();
   const result = toAnalysisResult({
     id: params.id,
+    status: "reviewing",
     assessment: params.assessment,
     evidences: params.evidences,
     createdAt: params.createdAt,
-    completedAt,
   });
 
   await db.transaction(async (tx) => {
     await tx
       .update(analyses)
       .set({
-        status: "completed",
+        status: "reviewing",
         riskScore: result.risk.score,
         riskLevel: result.risk.level,
         confidence: result.risk.confidence,
         scamType: result.classification.primary,
         summary: result.summary,
-        completedAt,
+        completedAt: null,
       })
       .where(eq(analyses.id, params.id));
 
@@ -84,16 +89,51 @@ export async function saveCompletedAnalysis(params: {
       );
     }
 
-    if (params.classifier) {
-      await tx.insert(agentRuns).values({
-        id: crypto.randomUUID(),
-        analysisId: params.id,
-        role: "analyst",
-        model: params.classifierModel ?? "gpt-6-luna",
-        resultJson: params.classifier,
-        createdAt: completedAt,
-      });
-    }
+    await tx.insert(agentRuns).values({
+      id: crypto.randomUUID(),
+      analysisId: params.id,
+      role: "analyst",
+      model: params.classifierModel,
+      resultJson: params.classifier,
+      createdAt: savedAt,
+    });
+  });
+
+  return result;
+}
+
+export async function saveReviewCompletion(params: {
+  id: string;
+  createdAt: string;
+  assessment: ReviewerAssessment;
+  evidences: Evidence[];
+  reviewerModel: string;
+}): Promise<AnalysisResult> {
+  const completedAt = new Date().toISOString();
+  const review = toPublicReview(params.assessment);
+  const result = toAnalysisResult({
+    id: params.id,
+    status: "completed",
+    assessment: params.assessment,
+    evidences: params.evidences,
+    createdAt: params.createdAt,
+    completedAt,
+    review,
+  });
+
+  await db.transaction(async (tx) => {
+    await tx
+      .update(analyses)
+      .set({
+        status: "completed",
+        riskScore: result.risk.score,
+        riskLevel: result.risk.level,
+        confidence: result.risk.confidence,
+        scamType: result.classification.primary,
+        summary: result.summary,
+        completedAt,
+      })
+      .where(eq(analyses.id, params.id));
 
     await tx.insert(agentRuns).values({
       id: crypto.randomUUID(),
@@ -118,6 +158,43 @@ export async function markAnalysisFailed(id: string): Promise<void> {
     .where(eq(analyses.id, id));
 }
 
+export async function markAnalysisCompletedWithoutReview(
+  id: string,
+): Promise<void> {
+  await db
+    .update(analyses)
+    .set({
+      status: "completed",
+      completedAt: new Date().toISOString(),
+    })
+    .where(eq(analyses.id, id));
+}
+
+function toPublicReview(assessment: ReviewerAssessment): AnalysisReview {
+  return {
+    verdict: assessment.verdict,
+    unsupportedClaims: assessment.unsupportedClaims,
+    contradictions: assessment.contradictions,
+    confidenceAdjustment: assessment.confidenceAdjustment,
+  };
+}
+
+async function loadReview(analysisId: string): Promise<AnalysisReview | undefined> {
+  const [row] = await db
+    .select()
+    .from(agentRuns)
+    .where(
+      and(eq(agentRuns.analysisId, analysisId), eq(agentRuns.role, "reviewer")),
+    )
+    .limit(1);
+
+  if (!row) return undefined;
+
+  const parsed = reviewerAssessmentSchema.safeParse(row.resultJson);
+  if (!parsed.success) return undefined;
+  return toPublicReview(parsed.data);
+}
+
 export async function getAnalysisById(
   id: string,
 ): Promise<AnalysisResult | null> {
@@ -127,7 +204,10 @@ export async function getAnalysisById(
     .where(eq(analyses.id, id))
     .limit(1);
 
-  if (!analysis || analysis.status !== "completed") {
+  if (
+    !analysis ||
+    (analysis.status !== "completed" && analysis.status !== "reviewing")
+  ) {
     return null;
   }
 
@@ -146,9 +226,12 @@ export async function getAnalysisById(
     return null;
   }
 
+  const review =
+    analysis.status === "completed" ? await loadReview(id) : undefined;
+
   return {
     id: analysis.id,
-    status: "completed",
+    status: analysis.status,
     risk: {
       score: analysis.riskScore,
       level: analysis.riskLevel,
@@ -168,6 +251,7 @@ export async function getAnalysisById(
             ? "medium"
             : "low",
     })),
+    ...(review ? { review } : {}),
     createdAt: analysis.createdAt,
     completedAt: analysis.completedAt ?? undefined,
   };
