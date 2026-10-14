@@ -1,7 +1,7 @@
+import { openai, type OpenAIDecisionModelId } from "@ai-sdk/openai";
 import {
-  experimental_evaluate as evaluate,
-  gateway,
-  type Experimental_EvaluationModel,
+  experimental_decide as decide,
+  type Experimental_DecisionModel,
 } from "ai";
 import type { AnalyzeRequest } from "../schemas/analysis-input.js";
 import {
@@ -12,7 +12,7 @@ import {
 import type { Evidence } from "../schemas/evidence.js";
 import { buildCollectorState } from "./collector.js";
 
-export const DEFAULT_CLASSIFIER_MODEL = "typesafe-ai/jev";
+export const DEFAULT_CLASSIFIER_MODEL: OpenAIDecisionModelId = "gpt-6-luna";
 
 const BOOLEAN_CRITERIA = {
   impersonation: {
@@ -92,30 +92,39 @@ function buildQuestions() {
   };
 }
 
+function confidenceFromProviderMetadata(
+  providerMetadata: Record<string, Record<string, unknown>> | undefined,
+): Record<string, number> | undefined {
+  const confidence = providerMetadata?.openai?.confidence;
+  if (!confidence || typeof confidence !== "object") return undefined;
+
+  const entries = Object.entries(confidence).filter(
+    (entry): entry is [string, number] => typeof entry[1] === "number",
+  );
+  return entries.length > 0 ? Object.fromEntries(entries) : undefined;
+}
+
 export async function classifySubmission(
   request: AnalyzeRequest,
   evidences: Evidence[],
-  model: Experimental_EvaluationModel = gateway.evaluationModel(
+  model: Experimental_DecisionModel = openai.decisionModel(
     DEFAULT_CLASSIFIER_MODEL,
   ),
 ): Promise<ClassifierResult> {
   const state = buildCollectorState(request, evidences);
-  const result = await evaluate({
+  const result = await decide({
     model,
     state,
     questions: buildQuestions(),
-    providerOptions: {
-      gateway: { zeroDataRetention: true },
-    },
   });
-
-  const providerConfidence = result.providerMetadata?.typesafe?.confidence as
-    | Record<string, number>
-    | undefined;
 
   return {
     answers: result.answers as Record<string, unknown>,
-    providerConfidence,
+    providerConfidence: confidenceFromProviderMetadata(
+      result.providerMetadata as
+        | Record<string, Record<string, unknown>>
+        | undefined,
+    ),
     modelId: result.response?.modelId,
   };
 }

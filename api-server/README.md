@@ -11,7 +11,7 @@ Hono API on the [Bun](https://bun.com) runtime.
 ```sh
 bun install
 cp .env.example .env
-# fill in AI_GATEWAY_API_KEY and optional provider keys
+# fill in OPENAI_API_KEY and optional provider keys
 ```
 
 From the repo root, start local Postgres, Redis, and MinIO:

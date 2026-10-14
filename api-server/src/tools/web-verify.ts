@@ -1,4 +1,5 @@
-import { generateText, gateway } from "ai";
+import { openai } from "@ai-sdk/openai";
+import { generateText } from "ai";
 
 type SearchSnippet = {
   title: string;
@@ -6,63 +7,62 @@ type SearchSnippet = {
   snippet: string;
 };
 
-const PARALLEL_MODEL = "openai/gpt-5.6-luna" as Parameters<typeof gateway>[0];
+const WEB_VERIFY_MODEL = "gpt-6-luna" as const;
 
-export const parallelSearchTool = gateway.tools.parallelSearch({
-  mode: "agentic",
-  maxResults: 5,
-  excerpts: {
-    maxCharsPerResult: 2000,
-    maxCharsTotal: 7500,
-  },
+export const webSearchTool = openai.tools.webSearch({
+  searchContextSize: "medium",
 });
 
-function isSearchResponse(output: unknown): output is {
-  results: Array<{ title: string; url: string; excerpt: string }>;
+function isWebSearchOutput(output: unknown): output is {
+  action?: {
+    type: string;
+    query?: string;
+    queries?: string[];
+  };
+  sources?: Array<{ type: string; url?: string; name?: string }>;
 } {
-  if (!output || typeof output !== "object" || !("results" in output)) {
-    return false;
-  }
-
-  const results = (output as { results?: unknown }).results;
-  return (
-    Array.isArray(results) &&
-    results.every(
-      (result) =>
-        result &&
-        typeof result === "object" &&
-        typeof (result as { title?: unknown }).title === "string" &&
-        typeof (result as { url?: unknown }).url === "string" &&
-        typeof (result as { excerpt?: unknown }).excerpt === "string",
-    )
-  );
+  return !!output && typeof output === "object";
 }
 
 export async function webVerify(query: string) {
   const search = await generateText({
-    model: gateway(PARALLEL_MODEL),
+    model: openai(WEB_VERIFY_MODEL),
     prompt: `Use web search to verify this claim: ${query}`,
     tools: {
-      parallel_search: parallelSearchTool,
+      web_search: webSearchTool,
     },
-    toolChoice: { type: "tool", toolName: "parallel_search" },
+    toolChoice: { type: "tool", toolName: "web_search" },
   });
 
   const toolResult = [...search.toolResults, ...search.staticToolResults].find(
-    (result) => result.toolName === "parallel_search",
+    (result) => result.toolName === "web_search",
   );
   const output = toolResult?.output;
-  const results: SearchSnippet[] = isSearchResponse(output)
-    ? output.results.map((result) => ({
-        title: result.title,
-        url: result.url,
-        snippet: result.excerpt,
-      }))
-    : [];
+  const sourceUrls = new Set<string>();
+
+  if (isWebSearchOutput(output) && Array.isArray(output.sources)) {
+    for (const source of output.sources) {
+      if (source.type === "url" && typeof source.url === "string") {
+        sourceUrls.add(source.url);
+      }
+    }
+  }
+
+  for (const source of search.sources) {
+    if ("url" in source && typeof source.url === "string") {
+      sourceUrls.add(source.url);
+    }
+  }
+
+  const results: SearchSnippet[] = [...sourceUrls].map((url) => ({
+    title: url,
+    url,
+    snippet: "",
+  }));
 
   return {
     query,
-    provider: "parallel" as const,
+    provider: "openai_web_search" as const,
     resultCount: results.length,
     results,
     urls: results.map((r) => r.url),

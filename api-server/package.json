@@ -3,7 +3,8 @@
   "type": "module",
   "packageManager": "bun@1.4.0",
   "dependencies": {
-    "ai": "^7.0.105",
+    "@ai-sdk/openai": "^4.0.91",
+    "ai": "^7.0.137",
     "cheerio": "^1.2.0",
     "drizzle-orm": "^0.45.2",
     "hono": "^4.13.1",

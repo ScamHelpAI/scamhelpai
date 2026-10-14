@@ -1,4 +1,4 @@
-import { Experimental_EvaluationMockModelV4 as MockEvaluationModel } from "ai/test";
+import { Experimental_DecisionMockModelV4 as MockDecisionModel } from "ai/test";
 import { describe, expect, it } from "vitest";
 import type { AnalyzeRequest } from "../schemas/analysis-input.js";
 import type { ClassifierResult } from "../schemas/classifier.js";
@@ -168,19 +168,19 @@ describe("assessmentFromClassifier", () => {
   });
 });
 
-describe("mock evaluation model injection", () => {
-  it("allows tests to substitute a mock evaluation model", () => {
-    const mock = new MockEvaluationModel({
-      doEvaluate: async () =>
+describe("mock decision model injection", () => {
+  it("allows tests to substitute a mock decision model", () => {
+    const mock = new MockDecisionModel({
+      doDecide: async () =>
         ({
           answers: clearClassifier.answers,
           warnings: [],
           providerMetadata: {
-            typesafe: { confidence: clearClassifier.providerConfidence },
+            openai: { confidence: clearClassifier.providerConfidence },
           },
-        }) as Awaited<ReturnType<MockEvaluationModel["doEvaluate"]>>,
+        }) as Awaited<ReturnType<MockDecisionModel["doDecide"]>>,
     });
 
-    expect(mock).toBeInstanceOf(MockEvaluationModel);
+    expect(mock).toBeInstanceOf(MockDecisionModel);
   });
 });

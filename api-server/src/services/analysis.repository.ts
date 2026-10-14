@@ -89,7 +89,7 @@ export async function saveCompletedAnalysis(params: {
         id: crypto.randomUUID(),
         analysisId: params.id,
         role: "analyst",
-        model: params.classifierModel ?? "typesafe-ai/jev",
+        model: params.classifierModel ?? "gpt-6-luna",
         resultJson: params.classifier,
         createdAt: completedAt,
       });

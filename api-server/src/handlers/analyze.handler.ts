@@ -9,8 +9,8 @@ import {
   saveCompletedAnalysis,
 } from "../services/analysis.repository.js";
 
-const REVIEWER_MODEL = "openai/gpt-5.6-luna";
-const CLASSIFIER_MODEL = "typesafe-ai/jev";
+const REVIEWER_MODEL = "gpt-6-luna";
+const CLASSIFIER_MODEL = "gpt-6-luna";
 
 export async function createAnalysisHandler(c: Context) {
   const body = analyzeRequestSchema.parse(await c.req.json());

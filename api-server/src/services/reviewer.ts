@@ -1,9 +1,8 @@
+import { openai } from "@ai-sdk/openai";
 import {
   Output,
-  gateway,
   generateText,
   isStepCount,
-  type GatewayModelId,
 } from "ai";
 import type { AnalyzeRequest } from "../schemas/analysis-input.js";
 import type { ClassifierResult } from "../schemas/classifier.js";
@@ -14,6 +13,8 @@ import {
 } from "../schemas/reviewer.js";
 import { createReviewerTools } from "../tools/index.js";
 import { buildReviewerPrompt } from "./analysis-format.js";
+
+type OpenAILanguageModelId = Parameters<typeof openai>[0];
 
 const REVIEWER_INSTRUCTIONS = `You are an independent reviewer. A deterministic collector gathered evidence and a fast classifier produced a prior assessment. Your job is to verify and produce the final assessment. Do not inherit a hidden verdict from how alarming the evidence list looks; test the important claims.
 
@@ -26,7 +27,7 @@ Tool use:
 - verify_evidence first when you need to re-run a specific prior finding.
 - inspect_url, lookup_domain, inspect_email, check_threat_intel, and verify_brand_identity when the collector skipped them or the result looks thin or stale.
 - decode_qr and scan_file for images, QR codes, and file attachments.
-- parallel_search to confirm or refute impersonation and "official" contact details.
+- web_search to confirm or refute impersonation and "official" contact details.
 Do not call tools to pad the record. Call them when a claim would change the assessment if it were wrong.
 
 Judgment:
@@ -42,10 +43,10 @@ export async function runLlmReview(
   request: AnalyzeRequest,
   evidences: Evidence[],
   classifier: ClassifierResult,
-  model: GatewayModelId,
+  model: OpenAILanguageModelId,
 ): Promise<ReviewerAssessment> {
   const reviewerResult = await generateText({
-    model: gateway(model),
+    model: openai(model),
     instructions: REVIEWER_INSTRUCTIONS,
     tools: createReviewerTools(),
     output: Output.object({

@@ -1,4 +1,4 @@
-import { gateway, type GatewayModelId } from "ai";
+import { openai, type OpenAIDecisionModelId } from "@ai-sdk/openai";
 import type { AnalyzeRequest } from "../schemas/analysis-input.js";
 import type { ClassifierResult } from "../schemas/classifier.js";
 import type { Evidence } from "../schemas/evidence.js";
@@ -14,9 +14,11 @@ import {
 } from "./classifier-gate.js";
 import { runLlmReview } from "./reviewer.js";
 
+type OpenAILanguageModelId = Parameters<typeof openai>[0];
+
 export type RunAnalysisOptions = {
-  reviewerModel: GatewayModelId;
-  classifierModel?: string;
+  reviewerModel: OpenAILanguageModelId;
+  classifierModel?: OpenAIDecisionModelId;
 };
 
 export type RunAnalysisResult = {
@@ -24,7 +26,7 @@ export type RunAnalysisResult = {
   assessment: ReviewerAssessment;
   classifier: ClassifierResult;
   classifierModel: string;
-  reviewerModel: GatewayModelId;
+  reviewerModel: OpenAILanguageModelId;
   usedLlmReviewer: boolean;
 };
 
@@ -33,12 +35,11 @@ export async function runAnalysis(
   options: RunAnalysisOptions,
 ): Promise<RunAnalysisResult> {
   const evidences = await collect(request);
+  const classifierModel = options.classifierModel ?? DEFAULT_CLASSIFIER_MODEL;
   const classifier = await classifySubmission(
     request,
     evidences,
-    gateway.evaluationModel(
-      (options.classifierModel ?? DEFAULT_CLASSIFIER_MODEL) as GatewayModelId,
-    ),
+    openai.decisionModel(classifierModel),
   );
 
   const needsReview = shouldReview(request, classifier, evidences);
@@ -55,7 +56,7 @@ export async function runAnalysis(
     evidences,
     assessment,
     classifier,
-    classifierModel: options.classifierModel ?? DEFAULT_CLASSIFIER_MODEL,
+    classifierModel,
     reviewerModel: options.reviewerModel,
     usedLlmReviewer: needsReview,
   };

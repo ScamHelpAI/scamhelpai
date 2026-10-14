@@ -3,7 +3,7 @@ import { z } from "zod";
 const envSchema = z.object({
   PORT: z.coerce.number().int().positive().default(3000),
   DATABASE_URL: z.string().min(1, "DATABASE_URL is required"),
-  AI_GATEWAY_API_KEY: z.string().optional(),
+  OPENAI_API_KEY: z.string().min(1, "OPENAI_API_KEY is required"),
 
   REDIS_URL: z.string().optional(),
   S3_ENDPOINT: z.string().optional(),
@@ -27,7 +27,7 @@ const envSchema = z.object({
 export const env = envSchema.parse({
   PORT: process.env.PORT,
   DATABASE_URL: process.env.DATABASE_URL,
-  AI_GATEWAY_API_KEY: process.env.AI_GATEWAY_API_KEY,
+  OPENAI_API_KEY: process.env.OPENAI_API_KEY,
   REDIS_URL: process.env.REDIS_URL,
   S3_ENDPOINT: process.env.S3_ENDPOINT,
   S3_ACCESS_KEY: process.env.S3_ACCESS_KEY,
