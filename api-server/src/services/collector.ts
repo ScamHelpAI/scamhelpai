@@ -1,3 +1,7 @@
+/**
+ * Deterministic first-pass evidence gathering: extract indicators from inputs
+ * (URLs, domains, phones, brands, etc.) and run lookup/inspect tools on them.
+ */
 import type {
   AnalyzeRequest,
   AnalysisInput,
@@ -48,8 +52,12 @@ function unique<T>(values: T[]): T[] {
   return [...new Set(values)];
 }
 
-function truncate(text: string, max = 4000): string {
-  return text.length <= max ? text : `${text.slice(0, max)}…`;
+/** Keep head + tail so titles/CTAs survive when content is long. */
+function truncateForModel(text: string, max = 20_000): string {
+  if (text.length <= max) return text;
+  const head = Math.floor(max * 0.7);
+  const tail = max - head - 32;
+  return `${text.slice(0, head)}\n\n…[truncated]…\n\n${text.slice(-tail)}`;
 }
 
 function extractTextFromInput(input: AnalysisInput): string {
@@ -160,10 +168,19 @@ function summarizeUrlInspection(
 ): string {
   const features = result.suspiciousFeatures.join(", ");
   const https = result.usesHttps ? "uses HTTPS" : "does not use HTTPS";
-  const form = result.credentialFormDetected
-    ? "credential form detected"
-    : "no credential form detected";
-  return `URL ${result.normalizedUrl} ${https}; ${form}${features ? `; suspicious features: ${features}` : ""}`;
+  const form =
+    result.credentialFormDetected === undefined
+      ? null
+      : result.credentialFormDetected
+        ? "credential form detected"
+        : "no credential form detected";
+  return [
+    `URL ${result.normalizedUrl} ${https}`,
+    form,
+    features ? `suspicious features: ${features}` : null,
+  ]
+    .filter(Boolean)
+    .join("; ");
 }
 
 function summarizeDomainLookup(
@@ -194,8 +211,15 @@ async function investigateIndicators(
   indicators: CollectorState["indicators"],
   createdAt: string,
   nextId: () => string,
+  pageUrl?: string,
 ): Promise<Evidence[]> {
   const evidences: Evidence[] = [];
+  const pageHost = pageUrl ? hostnameFromUrl(pageUrl) : null;
+  const brandCheckDomains = unique(
+    [pageHost, ...indicators.domains].filter(
+      (value): value is string => value !== null && value.length > 0,
+    ),
+  ).slice(0, MAX_DOMAINS);
 
   const tasks: Array<Promise<void>> = [];
 
@@ -308,24 +332,24 @@ async function investigateIndicators(
   }
 
   for (const brand of indicators.brands) {
-    const domain = indicators.domains[0];
-    if (!domain) continue;
-    tasks.push(
-      verifyBrandIdentity(brand, domain).then((result) => {
-        evidences.push(
-          createEvidence({
-            id: nextId(),
-            type: "identity",
-            source: "tool",
-            summary: `Brand check for ${brand} on ${domain}: ${result.likelyLegitimate ? "likely legitimate" : "likely impersonation"}`,
-            confidence: result.likelyLegitimate ? 0.8 : 0.85,
-            toolName: "verify_brand_identity",
-            data: { brand, domain },
-            createdAt,
-          }),
-        );
-      }),
-    );
+    for (const domain of brandCheckDomains) {
+      tasks.push(
+        verifyBrandIdentity(brand, domain).then((result) => {
+          evidences.push(
+            createEvidence({
+              id: nextId(),
+              type: "identity",
+              source: "tool",
+              summary: `Brand check for ${brand} on ${domain}: ${result.likelyLegitimate ? "likely legitimate" : "likely impersonation"}`,
+              confidence: result.likelyLegitimate ? 0.8 : 0.85,
+              toolName: "verify_brand_identity",
+              data: { brand, domain, pageHost },
+              createdAt,
+            }),
+          );
+        }),
+      );
+    }
   }
 
   await Promise.allSettled(tasks);
@@ -348,7 +372,7 @@ export function buildCollectorState(
   const inputs = request.inputs.map((input, index) => ({
     id: inputId(index),
     type: input.type,
-    text: truncate(extractTextFromInput(input)),
+    text: truncateForModel(extractTextFromInput(input)),
   }));
 
   return {
@@ -395,20 +419,6 @@ export async function collect(request: AnalyzeRequest): Promise<Evidence[]> {
       extractIndicators(text, input.type === "url" ? input.url : undefined),
     );
 
-    if (text.trim()) {
-      evidences.push(
-        createEvidence({
-          id: nextId(),
-          type: "text",
-          source: "user_input",
-          summary: `Submission includes ${input.type} content (${text.length} characters)`,
-          confidence: 1,
-          sourceInputId,
-          createdAt,
-        }),
-      );
-    }
-
     if (input.type === "email" && (input.raw || input.body)) {
       try {
         const emailResult = await inspectEmail(
@@ -441,7 +451,7 @@ export async function collect(request: AnalyzeRequest): Promise<Evidence[]> {
           extractIndicators(emailResult.urls.join(" ")),
         );
       } catch {
-        // Email parsing can fail on partial input; user_input evidence still remains.
+        // Email parsing can fail on partial input; continue with other indicators.
       }
     }
   }
@@ -450,6 +460,7 @@ export async function collect(request: AnalyzeRequest): Promise<Evidence[]> {
     indicators,
     createdAt,
     nextId,
+    request.context?.pageUrl,
   );
   evidences.push(...toolEvidences);
 

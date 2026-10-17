@@ -1,3 +1,7 @@
+/**
+ * Tests for classifier-gate: review gating rules and mapping decision-model
+ * answers into assessments.
+ */
 import { Experimental_DecisionMockModelV4 as MockDecisionModel } from "ai/test";
 import { describe, expect, it } from "vitest";
 import type { AnalyzeRequest } from "../schemas/analysis-input.js";

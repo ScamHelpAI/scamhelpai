@@ -1,3 +1,7 @@
+/**
+ * Readiness checks for dependent infra (Postgres, Redis, S3/MinIO) used by
+ * the health endpoint.
+ */
 import { sql } from "drizzle-orm";
 import { env } from "../config/env.js";
 import { db } from "../db/index.js";

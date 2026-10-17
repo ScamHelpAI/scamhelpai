@@ -1,3 +1,7 @@
+/**
+ * Runs the OpenAI decision model over collector state to answer scam-signal
+ * questions (impersonation, credential harvest, scam type, risk, etc.).
+ */
 import { openai, type OpenAIDecisionModelId } from "@ai-sdk/openai";
 import {
   experimental_decide as decide,

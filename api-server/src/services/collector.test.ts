@@ -1,3 +1,7 @@
+/**
+ * Tests for the collector, especially unique evidence id allocation across
+ * tool findings.
+ */
 import { describe, expect, it, vi } from "vitest";
 
 vi.mock("../tools/inspect-url.js", () => ({
@@ -51,13 +55,15 @@ vi.mock("../tools/inspect-email.js", () => ({
 import { collect } from "./collector.js";
 
 describe("collect", () => {
-  it("assigns unique evidence ids when user input and tool findings are both present", async () => {
+  it("assigns unique evidence ids across tool findings", async () => {
     const evidences = await collect({
       inputs: [{ type: "url", url: "https://example.com/login" }],
+      context: { pageUrl: "https://example.com/login" },
     });
 
     const ids = evidences.map((item) => item.id);
     expect(ids.length).toBeGreaterThan(1);
     expect(new Set(ids).size).toBe(ids.length);
+    expect(evidences.every((item) => item.source === "tool")).toBe(true);
   });
 });

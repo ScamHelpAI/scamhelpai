@@ -1,3 +1,6 @@
+/**
+ * Tests for sequential id helpers used when labeling evidence rows.
+ */
 import { describe, expect, it } from "vitest";
 import { createSequentialId } from "./ids.js";
 

@@ -1,3 +1,7 @@
+/**
+ * Formats analysis inputs and collector/classifier context into prompts for
+ * the verifier LLM.
+ */
 import type {
   AnalyzeRequest,
   AnalysisInput,

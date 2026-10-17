@@ -1,3 +1,7 @@
+/**
+ * Persistence layer for analyses: create pending rows, save initial
+ * decision-model results, persist verifier completions, and load by id.
+ */
 import { and, eq } from "drizzle-orm";
 import type { AnalyzeRequest } from "../schemas/analysis-input.js";
 import type {

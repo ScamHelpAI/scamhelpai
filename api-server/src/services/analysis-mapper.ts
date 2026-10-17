@@ -1,3 +1,7 @@
+/**
+ * Converts internal assessments and evidence into the public AnalysisResult
+ * shape (risk levels, severities, review metadata).
+ */
 import type {
   AnalysisResult,
   AnalysisReview,

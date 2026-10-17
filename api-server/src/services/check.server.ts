@@ -1,3 +1,7 @@
+/**
+ * Lightweight URL check endpoint logic: inspect a URL, look up its domain and
+ * threat intel, then score a simple safe/suspicious/malicious status.
+ */
 import { checkThreatIntel } from "../tools/check-threat-intel.js";
 import { inspectUrl } from "../tools/inspect-url.js";
 import { lookupDomain } from "../tools/lookup-domain.js";

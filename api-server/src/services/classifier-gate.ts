@@ -1,3 +1,7 @@
+/**
+ * Maps decision-model answers into an assessment, combines risk signals into a
+ * scam probability, and decides whether a deeper LLM review is warranted.
+ */
 import type { AnalyzeRequest } from "../schemas/analysis-input.js";
 import type { ScamType } from "../schemas/analyst.js";
 import type { ClassifierResult } from "../schemas/classifier.js";

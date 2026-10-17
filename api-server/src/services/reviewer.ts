@@ -1,3 +1,7 @@
+/**
+ * Async verifier step: tool-using LLM that challenges the collector evidence
+ * and decision-model prior, then produces the final ReviewerAssessment.
+ */
 import { openai } from "@ai-sdk/openai";
 import {
   Output,
