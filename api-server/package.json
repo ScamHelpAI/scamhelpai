@@ -12,6 +12,7 @@
     "libphonenumber-js": "^1.13.11",
     "mailparser": "^3.9.15",
     "postgres": "^3.4.9",
+    "redis": "^6.3.0",
     "sharp": "^0.35.3",
     "whoiser": "^2.0.0-beta.10",
     "zod": "^4.4.3"

@@ -3,6 +3,7 @@
  * the health endpoint.
  */
 import { sql } from "drizzle-orm";
+import { pingRedis } from "../cache/redis.js";
 import { env } from "../config/env.js";
 import { db } from "../db/index.js";
 
@@ -28,8 +29,9 @@ async function checkPostgres(): Promise<CheckStatus> {
   }
 }
 
-function checkRedis(): CheckStatus {
-  return env.REDIS_URL ? "ok" : "skipped";
+async function checkRedis(): Promise<CheckStatus> {
+  if (!env.REDIS_URL) return "skipped";
+  return (await pingRedis()) ? "ok" : "error";
 }
 
 function checkS3(): CheckStatus {
@@ -42,7 +44,7 @@ function checkS3(): CheckStatus {
 export async function getReadiness(): Promise<ReadinessResult> {
   const checks: ReadinessChecks = {
     postgres: await checkPostgres(),
-    redis: checkRedis(),
+    redis: await checkRedis(),
     s3: checkS3(),
   };
 

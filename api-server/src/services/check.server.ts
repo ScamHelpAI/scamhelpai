@@ -9,10 +9,12 @@ import type { CheckUrlResult, CheckStatus } from "../schemas/check.js";
 import type { DomainLookupResult } from "../schemas/tool-result.js";
 import type { ThreatIntelResult } from "../schemas/tool-result.js";
 import type { UrlInspectionResult } from "../schemas/tool-result.js";
-
-function hostnameFromUrl(url: string): string {
-  return new URL(url).hostname.toLowerCase().replace(/^www\./, "");
-}
+import {
+  getCachedCheckUrl,
+  storeCheckUrlResult,
+} from "./check-cache.js";
+import { normalizeCheckUrl, hostnameFromCheckUrl } from "./check-cache-key.js";
+import type { DomainCacheEntry } from "./check-cache-policy.js";
 
 function scoreCheck(params: {
   threatIntel: ThreatIntelResult;
@@ -83,15 +85,52 @@ function defaultReasons(status: CheckStatus): string[] {
   }
 }
 
-export async function checkUrl(url: string): Promise<CheckUrlResult> {
-  const normalizedUrl = new URL(url).toString();
-  const domain = hostnameFromUrl(normalizedUrl);
+function buildDomainCacheEntry(params: {
+  hostname: string;
+  threatIntel: ThreatIntelResult;
+  domain: DomainLookupResult;
+  checkedAt: string;
+}): DomainCacheEntry {
+  let score = 0;
+  const reasons: string[] = [];
+
+  if (params.threatIntel.verdict === "malicious") {
+    score += 70;
+    reasons.push("Flagged as malicious by threat intelligence.");
+  } else if (params.threatIntel.verdict === "suspicious") {
+    score += 40;
+    reasons.push("Marked suspicious by threat intelligence.");
+  }
+
+  if (params.domain.suspicious) {
+    score += 25;
+    reasons.push("Domain appears newly registered.");
+  } else if (params.domain.reputation === "suspicious") {
+    score += 20;
+    reasons.push("Domain reputation is suspicious.");
+  }
+
+  const normalizedScore = Math.min(100, score);
+  const status = statusFromScore(normalizedScore);
+
+  return {
+    hostname: params.hostname,
+    status,
+    score: normalizedScore,
+    reasons:
+      reasons.length > 0 ? [...new Set(reasons)] : defaultReasons(status),
+    checkedAt: params.checkedAt,
+  };
+}
+
+async function runLiveUrlCheck(normalizedUrl: string): Promise<CheckUrlResult> {
+  const hostname = hostnameFromCheckUrl(normalizedUrl);
   const checkedAt = new Date().toISOString();
 
   const [threatIntel, inspection, domainLookup] = await Promise.all([
     checkThreatIntel(normalizedUrl),
     inspectUrl(normalizedUrl),
-    lookupDomain(domain),
+    lookupDomain(hostname),
   ]);
 
   const { score, reasons } = scoreCheck({
@@ -101,17 +140,42 @@ export async function checkUrl(url: string): Promise<CheckUrlResult> {
   });
   const status = statusFromScore(score);
 
-  return {
+  const result: Omit<CheckUrlResult, "cached"> = {
     url: normalizedUrl,
     status,
     score,
     reasons: reasons.length > 0 ? reasons : defaultReasons(status),
     checkedAt,
-    cached: false,
   };
+
+  const domainEntry = buildDomainCacheEntry({
+    hostname,
+    threatIntel,
+    domain: domainLookup,
+    checkedAt,
+  });
+
+  return storeCheckUrlResult({
+    normalizedUrl,
+    result,
+    domainEntry,
+  });
+}
+
+export async function checkUrl(url: string): Promise<CheckUrlResult> {
+  const normalizedUrl = normalizeCheckUrl(url);
+
+  const cached = await getCachedCheckUrl(normalizedUrl);
+  if (cached) {
+    return cached;
+  }
+
+  return runLiveUrlCheck(normalizedUrl);
 }
 
 export async function checkUrls(urls: string[]): Promise<CheckUrlResult[]> {
-  const uniqueUrls = [...new Set(urls.map((url) => new URL(url).toString()))];
+  const uniqueUrls = [
+    ...new Set(urls.map((url) => normalizeCheckUrl(url))),
+  ];
   return Promise.all(uniqueUrls.map((url) => checkUrl(url)));
 }
