@@ -8,6 +8,10 @@ export function analysisUrl(apiBase: string, id: string): string {
   return `${analysesUrl(apiBase)}/${id}`;
 }
 
+export function checkUrlsUrl(apiBase: string): string {
+  return `${apiBase.replace(/\/+$/, "")}/v1/check/urls`;
+}
+
 export function analyzerErrorMessage(status: number, bodyText: string): string {
   if (status === 0) {
     return "Could not reach the ScamHelp server. Is it running?";

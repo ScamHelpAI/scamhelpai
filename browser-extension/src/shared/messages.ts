@@ -1,3 +1,4 @@
+import type { CheckUrlResult } from "./check.ts";
 import type { AnalysisResult, AnalyzeRequest } from "./types.ts";
 
 export type ReadPageMessage = {
@@ -30,9 +31,19 @@ export type ScanActivePageMessage = {
   type: "scanActivePage";
 };
 
+export type CheckUrlsMessage = {
+  type: "checkUrls";
+  urls: string[];
+};
+
+export type CheckUrlsResponseMessage =
+  | { ok: true; results: CheckUrlResult[] }
+  | { ok: false; error: string };
+
 export type ExtensionRequest =
   | ReadPageMessage
   | AnalyzeMessage
   | GetAnalysisMessage
   | ReadActivePageMessage
-  | ScanActivePageMessage;
+  | ScanActivePageMessage
+  | CheckUrlsMessage;

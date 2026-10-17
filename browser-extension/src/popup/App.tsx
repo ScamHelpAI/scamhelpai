@@ -1,19 +1,55 @@
 import { useEffect, useState } from "react";
-import type { AnalyzeResponse } from "../shared/messages.ts";
-import type { AnalysisResult } from "../shared/types.ts";
-import { toVerdict, type VerdictTone } from "../shared/verdict.ts";
+import { Loader2Icon, ScanSearchIcon, SettingsIcon } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
+import type { AnalyzeResponse } from "@/shared/messages.ts";
+import {
+  getLinkScanEnabled,
+  setLinkScanEnabled,
+} from "@/shared/settings.ts";
+import type { AnalysisResult } from "@/shared/types.ts";
+import { toVerdict, type VerdictTone } from "@/shared/verdict.ts";
 
 const REVIEW_POLL_MS = 1500;
 const REVIEW_POLL_MAX_ATTEMPTS = 20;
 
-function toneClass(tone: VerdictTone): string {
+function toneBadgeVariant(
+  tone: VerdictTone,
+): "destructive" | "secondary" | "outline" {
   switch (tone) {
     case "danger":
-      return "border-red-700 bg-red-50";
+      return "destructive";
     case "warn":
-      return "border-amber-700 bg-amber-50";
+      return "secondary";
     case "safe":
-      return "border-green-700 bg-green-50";
+      return "outline";
+    default: {
+      const _exhaustive: never = tone;
+      return _exhaustive;
+    }
+  }
+}
+
+function toneCardClass(tone: VerdictTone): string {
+  switch (tone) {
+    case "danger":
+      return "ring-destructive/40 bg-destructive/5";
+    case "warn":
+      return "ring-amber-500/40 bg-amber-50 dark:bg-amber-950/30";
+    case "safe":
+      return "ring-emerald-500/40 bg-emerald-50 dark:bg-emerald-950/30";
     default: {
       const _exhaustive: never = tone;
       return _exhaustive;
@@ -31,41 +67,47 @@ function VerdictCard({
   const verdict = toVerdict(result);
 
   return (
-    <section
-      className={`mt-5 rounded-xl border-[3px] p-4 ${toneClass(verdict.tone)}`}
+    <Card
+      className={toneCardClass(verdict.tone)}
+      size="sm"
       role="status"
       aria-live="polite"
     >
-      <h2 className="mb-2 pr-2 text-xl font-bold leading-tight">
-        {verdict.icon} {verdict.title}
-      </h2>
-      <p className="mb-3 text-base font-semibold leading-snug">
-        {verdict.recommendation}
-      </p>
-      {reviewing ? (
-        <p className="mb-3 text-sm font-medium text-slate-700">
-          Initial result — checking for review updates…
-        </p>
-      ) : null}
-      {verdict.reviewNote ? (
-        <p className="mb-3 text-sm font-medium text-slate-700">
-          {verdict.reviewNote}
-        </p>
-      ) : null}
-      {verdict.reasons.length > 0 ? (
-        <>
-          <h3 className="mb-1 text-base font-bold">Why we think so</h3>
-          <ul className="mb-3 list-disc space-y-1.5 pl-5 text-[15px] leading-snug">
-            {verdict.reasons.slice(0, 6).map((reason) => (
-              <li key={reason}>{reason}</li>
-            ))}
-          </ul>
-        </>
-      ) : null}
-      <p className="text-sm text-slate-600">
-        Risk score: {verdict.riskScore} out of 100
-      </p>
-    </section>
+      <CardHeader>
+        <div className="flex items-start justify-between gap-2">
+          <CardTitle className="text-base leading-snug">
+            {verdict.icon} {verdict.title}
+          </CardTitle>
+          <Badge variant={toneBadgeVariant(verdict.tone)}>
+            {verdict.riskScore}/100
+          </Badge>
+        </div>
+        <CardDescription className="text-foreground/80">
+          {verdict.recommendation}
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        {reviewing ? (
+          <p className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Loader2Icon className="size-3.5 animate-spin" />
+            Initial result — checking for review updates…
+          </p>
+        ) : null}
+        {verdict.reviewNote ? (
+          <p className="text-sm text-muted-foreground">{verdict.reviewNote}</p>
+        ) : null}
+        {verdict.reasons.length > 0 ? (
+          <div>
+            <p className="mb-1.5 text-sm font-medium">Why we think so</p>
+            <ul className="list-disc space-y-1 pl-4 text-sm text-muted-foreground">
+              {verdict.reasons.slice(0, 6).map((reason) => (
+                <li key={reason}>{reason}</li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+      </CardContent>
+    </Card>
   );
 }
 
@@ -92,6 +134,15 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [reviewing, setReviewing] = useState(false);
+  const [linkScanEnabled, setLinkScanEnabledState] = useState(false);
+  const [linkScanReady, setLinkScanReady] = useState(false);
+
+  useEffect(() => {
+    void getLinkScanEnabled().then((enabled) => {
+      setLinkScanEnabledState(enabled);
+      setLinkScanReady(true);
+    });
+  }, []);
 
   useEffect(() => {
     if (!result || result.status !== "reviewing") {
@@ -125,7 +176,6 @@ export default function App() {
             setReviewing(false);
           }
         } catch {
-          // Keep showing the initial decision-model result.
           window.clearInterval(timer);
           if (!cancelled) setReviewing(false);
         }
@@ -156,37 +206,75 @@ export default function App() {
     }
   }
 
+  async function toggleLinkScan(next: boolean) {
+    setLinkScanEnabledState(next);
+    await setLinkScanEnabled(next);
+  }
+
   return (
-    <main className="p-5">
-      <h1 className="mb-1 text-2xl font-semibold leading-tight">ScamHelp AI</h1>
-      <p className="mb-4 text-[15px] leading-relaxed text-slate-600">
-        Check the page you have open for scam signals.
-      </p>
+    <main className="w-80 p-4">
+      <Card size="sm" className="border-0 bg-transparent shadow-none ring-0">
+        <CardHeader className="px-0 pt-0">
+          <CardTitle className="text-lg">ScamHelp AI</CardTitle>
+          <CardDescription>
+            Check the page you have open for scam signals.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3 px-0">
+          <div className="flex items-start justify-between gap-3 rounded-xl border bg-muted/40 px-3 py-3">
+            <div className="space-y-1 pr-2">
+              <Label htmlFor="link-scan" className="text-sm font-medium">
+                Scan links on pages
+              </Label>
+              <p className="text-xs leading-snug text-muted-foreground">
+                Amber caution on risky links; block unsafe ones.
+              </p>
+            </div>
+            <Switch
+              id="link-scan"
+              checked={linkScanEnabled}
+              disabled={!linkScanReady}
+              onCheckedChange={(checked) => void toggleLinkScan(checked)}
+            />
+          </div>
 
-      <button
-        type="button"
-        onClick={() => void scanPage()}
-        disabled={loading}
-        className="w-full rounded-xl bg-teal-800 px-4 py-3.5 text-[17px] font-semibold text-white hover:bg-teal-900 focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-amber-500 disabled:cursor-wait disabled:opacity-60"
-      >
-        {loading ? "Scanning…" : "Scan this page"}
-      </button>
+          <Button
+            type="button"
+            className="w-full"
+            size="lg"
+            onClick={() => void scanPage()}
+            disabled={loading}
+          >
+            {loading ? (
+              <Loader2Icon data-icon="inline-start" className="animate-spin" />
+            ) : (
+              <ScanSearchIcon data-icon="inline-start" />
+            )}
+            {loading ? "Scanning…" : "Scan this page"}
+          </Button>
 
-      {error ? (
-        <p className="mt-3 text-[15px] font-medium text-red-600" role="alert">
-          {error}
-        </p>
-      ) : null}
+          {error ? (
+            <Alert variant="destructive">
+              <AlertTitle>Scan failed</AlertTitle>
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          ) : null}
 
-      {result ? <VerdictCard result={result} reviewing={reviewing} /> : null}
-
-      <button
-        type="button"
-        className="mt-4 text-[15px] font-medium text-teal-800 hover:underline focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-amber-500"
-        onClick={() => chrome.runtime.openOptionsPage()}
-      >
-        Settings
-      </button>
+          {result ? <VerdictCard result={result} reviewing={reviewing} /> : null}
+        </CardContent>
+        <Separator className="my-1" />
+        <CardFooter className="justify-start border-0 bg-transparent px-0">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => chrome.runtime.openOptionsPage()}
+          >
+            <SettingsIcon data-icon="inline-start" />
+            Settings
+          </Button>
+        </CardFooter>
+      </Card>
     </main>
   );
 }

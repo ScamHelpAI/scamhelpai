@@ -2,18 +2,44 @@ import {
   analysesUrl,
   analysisUrl,
   analyzerErrorMessage,
+  checkUrlsUrl,
   DEFAULT_API_BASE,
 } from "../shared/api-url.ts";
+import {
+  CHECK_URLS_BATCH_SIZE,
+  chunkUrls,
+  type CheckUrlResult,
+} from "../shared/check.ts";
 import type {
   AnalyzeMessage,
   AnalyzeResponse,
+  CheckUrlsMessage,
+  CheckUrlsResponseMessage,
   GetAnalysisMessage,
   ReadActivePageMessage,
   ReadPageResponse,
   ScanActivePageMessage,
 } from "../shared/messages.ts";
 import { pageHtmlToAnalyzeRequest } from "../shared/page-request.ts";
+import { LINK_SCAN_ENABLED_KEY } from "../shared/settings.ts";
 import type { AnalysisResult, AnalyzeRequest } from "../shared/types.ts";
+
+async function injectLinkScannerIntoOpenTabs(): Promise<void> {
+  const tabs = await chrome.tabs.query({ url: ["http://*/*", "https://*/*"] });
+  await Promise.all(
+    tabs.map(async (tab) => {
+      if (tab.id === undefined) return;
+      try {
+        await chrome.scripting.executeScript({
+          target: { tabId: tab.id },
+          files: ["content/links.js"],
+        });
+      } catch {
+        // Restricted pages (chrome://, Web Store, etc.) cannot be scripted.
+      }
+    }),
+  );
+}
 
 async function getApiBase(): Promise<string> {
   const { apiBase } = await chrome.storage.sync.get("apiBase");
@@ -112,13 +138,48 @@ async function scanActivePage(): Promise<AnalysisResult> {
   return createAnalysis(pageHtmlToAnalyzeRequest(page.html, page.url));
 }
 
+async function checkUrls(urls: string[]): Promise<CheckUrlResult[]> {
+  const unique = [...new Set(urls)];
+  const apiBase = await getApiBase();
+  const results: CheckUrlResult[] = [];
+
+  for (const batch of chunkUrls(unique, CHECK_URLS_BATCH_SIZE)) {
+    const res = await fetch(checkUrlsUrl(apiBase), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        urls: batch,
+        context: { source: "browser_extension" },
+      }),
+    });
+
+    if (!res.ok) {
+      const bodyText = await res.text().catch(() => "");
+      throw new Error(analyzerErrorMessage(res.status, bodyText));
+    }
+
+    const body = (await res.json()) as { results: CheckUrlResult[] };
+    results.push(...body.results);
+  }
+
+  return results;
+}
+
+chrome.storage.onChanged.addListener((changes, area) => {
+  if (area !== "sync" || !(LINK_SCAN_ENABLED_KEY in changes)) return;
+  if (changes[LINK_SCAN_ENABLED_KEY]?.newValue === true) {
+    void injectLinkScannerIntoOpenTabs();
+  }
+});
+
 chrome.runtime.onMessage.addListener(
   (
     message:
       | ReadActivePageMessage
       | ScanActivePageMessage
       | AnalyzeMessage
-      | GetAnalysisMessage,
+      | GetAnalysisMessage
+      | CheckUrlsMessage,
     _sender,
     sendResponse,
   ) => {
@@ -184,6 +245,26 @@ chrome.runtime.onMessage.addListener(
                 ? error.message
                 : "Is the ScamHelp server running?",
           } satisfies AnalyzeResponse),
+        );
+      return true;
+    }
+
+    if (message?.type === "checkUrls") {
+      checkUrls(message.urls)
+        .then((results) =>
+          sendResponse({
+            ok: true,
+            results,
+          } satisfies CheckUrlsResponseMessage),
+        )
+        .catch((error: unknown) =>
+          sendResponse({
+            ok: false,
+            error:
+              error instanceof Error
+                ? error.message
+                : "Is the ScamHelp server running?",
+          } satisfies CheckUrlsResponseMessage),
         );
       return true;
     }

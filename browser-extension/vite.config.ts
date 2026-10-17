@@ -1,5 +1,5 @@
 import { mkdir } from "node:fs/promises";
-import { resolve } from "node:path";
+import path, { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import * as esbuild from "esbuild";
 import { defineConfig, type Plugin } from "vite";
@@ -37,6 +37,17 @@ function bundleExtensionScripts(): Plugin {
         target: "es2022",
         logLevel: "info",
       });
+
+      await esbuild.build({
+        absWorkingDir: root,
+        entryPoints: [resolve(root, "src/content/links/index.ts")],
+        bundle: true,
+        format: "iife",
+        outfile: resolve(outDir, "content/links.js"),
+        platform: "browser",
+        target: "es2022",
+        logLevel: "info",
+      });
     },
   };
 }
@@ -44,10 +55,16 @@ function bundleExtensionScripts(): Plugin {
 export default defineConfig({
   plugins: [react(), tailwindcss(), bundleExtensionScripts()],
   base: "./",
+  resolve: {
+    alias: {
+      "@": path.resolve(root, "./src"),
+    },
+  },
   build: {
     rollupOptions: {
       input: {
         popup: "index.html",
+        options: "options.html",
       },
     },
   },
