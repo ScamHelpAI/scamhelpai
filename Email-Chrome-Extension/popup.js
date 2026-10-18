@@ -1,9 +1,3 @@
-const LEVEL_COPY = {
-  high: { title: "⛔ This looks like a scam", tone: "danger" },
-  medium: { title: "⚠️ Be careful with this email", tone: "warn" },
-  low: { title: "✅ No clear scam signs found", tone: "safe" },
-};
-
 const resultEl = document.getElementById("result");
 
 function showText(text) {
@@ -15,42 +9,12 @@ function showText(text) {
 }
 
 function showResult(result) {
-  const copy = LEVEL_COPY[result.level] || LEVEL_COPY.medium;
   resultEl.textContent = "";
 
+  const { copy, heading, advice, list, score, readBtn } = scamhelpRenderVerdict(result, "read");
   const card = document.createElement("div");
   card.className = `card ${copy.tone}`;
-
-  const h2 = document.createElement("h2");
-  h2.textContent = copy.title;
-
-  const advice = document.createElement("p");
-  advice.textContent = result.recommendation;
-
-  const list = document.createElement("ul");
-  for (const reason of result.reasons) {
-    const li = document.createElement("li");
-    li.textContent = reason;
-    list.appendChild(li);
-  }
-
-  const score = document.createElement("p");
-  score.textContent = `Risk score: ${result.riskScore} out of 100`;
-
-  const read = document.createElement("button");
-  read.className = "read";
-  read.type = "button";
-  read.textContent = "🔊 Read this to me";
-  read.addEventListener("click", () => {
-    speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(
-      `${copy.title}. ${result.recommendation} Warning signs: ${result.reasons.join(". ")}`,
-    );
-    utterance.rate = 0.85;
-    speechSynthesis.speak(utterance);
-  });
-
-  card.append(h2, advice, list, score, read);
+  card.append(heading, advice, list, score, readBtn);
   resultEl.appendChild(card);
 }
 

@@ -1,6 +1,6 @@
 # ScamHelp.AI — Email Chrome Extension
 
-A Manifest V3 extension that checks the Gmail message you're reading for phishing
+Manifest V3 extension that checks the Gmail message you're reading for phishing
 and scam signals, using the `api-server` in this repo.
 
 ## Run it
@@ -30,6 +30,7 @@ in the extension's Settings page and add that origin to `host_permissions` in
 
 | File | Role |
 | --- | --- |
+| `shared/verdict.js` | Builds the verdict card + read-aloud button; shared by the popup and the Gmail panel |
 | `content/gmail.js` | Reads the open Gmail message (sender, subject, body, links) and renders the verdict panel |
 | `background.js` | The only caller of `POST /analyze`, so page CSP and CORS never block a check |
 | `popup.html/js` | Toolbar entry point: check the open email, or paste text |

@@ -46,12 +46,6 @@ function toRequest(email) {
   return { type: "text", text: text.slice(0, 20000), url: email.links[0] };
 }
 
-const LEVEL_COPY = {
-  high: { title: "This looks like a scam", tone: "danger", icon: "⛔" },
-  medium: { title: "Be careful with this email", tone: "warn", icon: "⚠️" },
-  low: { title: "No clear scam signs found", tone: "safe", icon: "✅" },
-};
-
 function ensurePanel() {
   let panel = document.getElementById(PANEL_ID);
   if (panel) return panel;
@@ -90,56 +84,25 @@ function renderMessage(text, tone = "neutral") {
   panel.append(closeButton(), p);
 }
 
-function spokenSummary(result, copy) {
-  return [
-    copy.title + ".",
-    result.recommendation,
-    "Warning signs: " + result.reasons.join(". "),
-  ].join(" ");
-}
-
 function renderResult(result) {
-  const copy = LEVEL_COPY[result.level] || LEVEL_COPY.medium;
   const panel = ensurePanel();
+  const { copy, heading, advice, list, score, readBtn } = scamhelpRenderVerdict(
+    result,
+    "scamhelp-read",
+  );
   panel.className = `scamhelp-panel scamhelp-${copy.tone}`;
   panel.innerHTML = "";
 
-  const heading = document.createElement("h2");
   heading.className = "scamhelp-title";
-  heading.textContent = `${copy.icon} ${copy.title}`;
-
-  const advice = document.createElement("p");
   advice.className = "scamhelp-advice";
-  advice.textContent = result.recommendation;
+  list.className = "scamhelp-reasons";
+  score.className = "scamhelp-score";
 
   const reasonsTitle = document.createElement("h3");
   reasonsTitle.className = "scamhelp-subtitle";
   reasonsTitle.textContent = "Why we think so";
 
-  const list = document.createElement("ul");
-  list.className = "scamhelp-reasons";
-  for (const reason of result.reasons) {
-    const li = document.createElement("li");
-    li.textContent = reason;
-    list.appendChild(li);
-  }
-
-  const score = document.createElement("p");
-  score.className = "scamhelp-score";
-  score.textContent = `Risk score: ${result.riskScore} out of 100`;
-
-  const readAloud = document.createElement("button");
-  readAloud.className = "scamhelp-read";
-  readAloud.type = "button";
-  readAloud.textContent = "🔊 Read this to me";
-  readAloud.addEventListener("click", () => {
-    speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(spokenSummary(result, copy));
-    utterance.rate = 0.85;
-    speechSynthesis.speak(utterance);
-  });
-
-  panel.append(closeButton(), heading, advice, reasonsTitle, list, score, readAloud);
+  panel.append(closeButton(), heading, advice, reasonsTitle, list, score, readBtn);
 }
 
 async function checkOpenEmail() {

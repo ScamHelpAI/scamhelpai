@@ -17,7 +17,7 @@
   "content_scripts": [
     {
       "matches": ["https://mail.google.com/*"],
-      "js": ["content/gmail.js"],
+      "js": ["shared/verdict.js", "content/gmail.js"],
       "css": ["content/panel.css"],
       "run_at": "document_idle"
     }
