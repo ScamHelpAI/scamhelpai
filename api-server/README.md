@@ -20,7 +20,14 @@ From the repo root, start local Postgres, Redis, and MinIO:
 docker compose up -d postgres redis minio minio-init
 ```
 
-Host ports: Postgres `5432`, Redis `6380`, MinIO `9000` / console `9001`.
+Host ports: Postgres `5433`, Redis `6380`, MinIO `9100` / console `9101`.
+
+## Asset uploads
+
+1. `POST /v1/assets/presign` with `{ "contentType": "image/png", "filename": "shot.png" }`
+2. `PUT` the file bytes to the returned `uploadUrl` (include `requiredHeaders`)
+3. `POST /v1/assets/{assetId}/complete`
+4. Use `assetId` in analysis inputs (`image` / `pdf` / `audio` / email `assetIds`)
 
 Push the Drizzle schema to Postgres:
 

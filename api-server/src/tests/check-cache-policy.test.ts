@@ -4,7 +4,7 @@ import {
   redisDomainTtlSeconds,
   redisUrlTtlSeconds,
   shouldPersistUrlToPostgres,
-} from "./check-cache-policy.js";
+} from "../services/check-cache-policy.js";
 
 describe("hitCountMultiplier", () => {
   it("scales ttl tiers by popularity", () => {

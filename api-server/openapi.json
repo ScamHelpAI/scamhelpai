@@ -14,6 +14,7 @@
   "tags": [
     { "name": "Health", "description": "Liveness and readiness probes" },
     { "name": "Check", "description": "Fast deterministic URL safety checks" },
+    { "name": "Assets", "description": "Presigned uploads for images, PDFs, audio, and email files" },
     { "name": "Analyses", "description": "Full agent-based scam analysis" }
   ],
   "paths": {
@@ -144,6 +145,133 @@
             }
           },
           "400": { "$ref": "#/components/responses/ValidationError" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    },
+    "/v1/assets/presign": {
+      "post": {
+        "tags": ["Assets"],
+        "summary": "Create a pending asset and presigned upload URL",
+        "description": "Creates an assets row with status pending and returns a short-lived PUT URL for direct upload to object storage. After uploading, call POST /v1/assets/{assetId}/complete.",
+        "operationId": "presignAsset",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/PresignAssetRequest" },
+              "example": {
+                "contentType": "image/png",
+                "filename": "screenshot.png",
+                "sizeBytes": 20480
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Presigned upload created",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PresignAssetResponse" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/ValidationError" },
+          "503": {
+            "description": "Object storage is not configured",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    },
+    "/v1/assets/{assetId}/complete": {
+      "post": {
+        "tags": ["Assets"],
+        "summary": "Mark an uploaded asset ready",
+        "description": "Verifies the object exists in storage and sets status to ready. Idempotent if already ready.",
+        "operationId": "completeAsset",
+        "parameters": [
+          {
+            "name": "assetId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "minLength": 1 }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Asset is ready",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Asset" }
+              }
+            }
+          },
+          "400": {
+            "description": "Upload missing from object storage",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "404": {
+            "description": "Asset not found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "503": {
+            "description": "Object storage is not configured",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    },
+    "/v1/assets/{assetId}": {
+      "get": {
+        "tags": ["Assets"],
+        "summary": "Get asset metadata",
+        "description": "Returns metadata for an uploaded asset (not the file bytes).",
+        "operationId": "getAsset",
+        "parameters": [
+          {
+            "name": "assetId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "minLength": 1 }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Asset metadata",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Asset" }
+              }
+            }
+          },
+          "404": {
+            "description": "Asset not found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
           "500": { "$ref": "#/components/responses/InternalError" }
         }
       }
@@ -356,6 +484,58 @@
           "results": {
             "type": "array",
             "items": { "$ref": "#/components/schemas/CheckUrlResult" }
+          }
+        }
+      },
+      "PresignAssetRequest": {
+        "type": "object",
+        "required": ["contentType"],
+        "properties": {
+          "contentType": {
+            "type": "string",
+            "minLength": 1,
+            "description": "MIME type. Allowed: image/*, audio/*, application/pdf, message/rfc822, text/plain"
+          },
+          "filename": { "type": "string" },
+          "sizeBytes": { "type": "integer", "minimum": 0 }
+        }
+      },
+      "PresignAssetResponse": {
+        "type": "object",
+        "required": ["assetId", "uploadUrl", "expiresIn"],
+        "properties": {
+          "assetId": { "type": "string", "minLength": 1 },
+          "uploadUrl": { "type": "string", "format": "uri" },
+          "expiresIn": { "type": "integer", "minimum": 1 },
+          "requiredHeaders": {
+            "type": "object",
+            "additionalProperties": { "type": "string" }
+          }
+        }
+      },
+      "AssetStatus": {
+        "type": "string",
+        "enum": ["pending", "uploaded", "processing", "ready", "failed"]
+      },
+      "Asset": {
+        "type": "object",
+        "required": ["id", "objectKey", "contentType", "status", "createdAt"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "objectKey": { "type": "string", "minLength": 1 },
+          "contentType": { "type": "string", "minLength": 1 },
+          "sizeBytes": { "type": "integer", "minimum": 0 },
+          "status": { "$ref": "#/components/schemas/AssetStatus" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "uploadedAt": { "type": "string", "format": "date-time" },
+          "metadata": {
+            "type": "object",
+            "properties": {
+              "filename": { "type": "string" },
+              "width": { "type": "integer", "minimum": 1 },
+              "height": { "type": "integer", "minimum": 1 },
+              "durationSeconds": { "type": "number", "exclusiveMinimum": 0 }
+            }
           }
         }
       },

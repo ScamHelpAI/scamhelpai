@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   canUseDomainFallback,
   type DomainCacheEntry,
-} from "./check-cache-policy.js";
+} from "../services/check-cache-policy.js";
 
 describe("canUseDomainFallback", () => {
   const base: DomainCacheEntry = {

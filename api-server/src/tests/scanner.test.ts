@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { normalizeScannerEvidences } from "./scanner.js";
-import type { Evidence } from "./evidence.js";
+import { normalizeScannerEvidences } from "../schemas/scanner.js";
+import type { Evidence } from "../schemas/evidence.js";
 
 const generatedAt = "2026-01-01T00:00:00.000Z";
 

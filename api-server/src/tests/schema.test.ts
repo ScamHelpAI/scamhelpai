@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { getTableConfig } from "drizzle-orm/pg-core";
-import { analysisInputs, evidence } from "./schema.js";
+import { analysisInputs, evidence } from "../db/schema.js";
 
 function primaryKeyColumns(table: Parameters<typeof getTableConfig>[0]) {
   const config = getTableConfig(table);

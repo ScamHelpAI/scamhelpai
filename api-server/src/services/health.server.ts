@@ -6,6 +6,7 @@ import { sql } from "drizzle-orm";
 import { pingRedis } from "../cache/redis.js";
 import { env } from "../config/env.js";
 import { db } from "../db/index.js";
+import { isS3Configured } from "../storage/s3.js";
 
 type CheckStatus = "ok" | "error" | "skipped";
 
@@ -35,10 +36,7 @@ async function checkRedis(): Promise<CheckStatus> {
 }
 
 function checkS3(): CheckStatus {
-  const configured =
-    env.S3_ENDPOINT && env.S3_ACCESS_KEY && env.S3_SECRET_KEY && env.S3_BUCKET;
-
-  return configured ? "ok" : "skipped";
+  return isS3Configured() ? "ok" : "skipped";
 }
 
 export async function getReadiness(): Promise<ReadinessResult> {
