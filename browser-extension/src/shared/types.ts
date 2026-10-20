@@ -32,8 +32,9 @@ export type AnalysisResult = {
   };
   claimedIdentity?: string;
   summary: string;
-  decision: AnalysisDecision;
-  riskyParts: RiskyPart[];
+  /** Absent when the API server predates risky-part annotations. */
+  decision?: AnalysisDecision;
+  riskyParts?: RiskyPart[];
   evidence: {
     id: string;
     summary: string;

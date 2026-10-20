@@ -18,7 +18,7 @@ import type { AnalysisResult } from "@/shared/types.ts";
 import { toVerdict, type VerdictTone } from "@/shared/verdict.ts";
 
 const REVIEW_POLL_MS = 1500;
-const REVIEW_POLL_MAX_ATTEMPTS = 20;
+const REVIEW_POLL_MAX_ATTEMPTS = 40;
 
 function toneBadgeVariant(
   tone: VerdictTone,
@@ -182,7 +182,12 @@ export default function App() {
   }, [result?.id, result?.status]);
 
   useEffect(() => {
-    if (!result || result.status !== "completed" || result.riskyParts.length === 0) {
+    if (
+      !result ||
+      result.status !== "completed" ||
+      !result.decision ||
+      !result.riskyParts?.length
+    ) {
       return;
     }
 

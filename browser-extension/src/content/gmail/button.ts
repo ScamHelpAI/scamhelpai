@@ -52,7 +52,7 @@ export function setButtonState(
   button: HTMLButtonElement,
   state: GmailButtonState,
   statusEl: HTMLElement | null,
-  errorMessage?: string,
+  message?: string,
 ): void {
   button.dataset.state = state;
   switch (state) {
@@ -69,13 +69,13 @@ export function setButtonState(
     case "done":
       button.disabled = false;
       button.textContent = "Check again";
-      if (statusEl) statusEl.textContent = "Highlights added to this email.";
+      if (statusEl) statusEl.textContent = message ?? "Check complete.";
       break;
     case "error":
       button.disabled = false;
       button.textContent = "Try again";
       if (statusEl) {
-        statusEl.textContent = errorMessage ?? "Could not check this email.";
+        statusEl.textContent = message ?? "Could not check this email.";
       }
       break;
     default: {

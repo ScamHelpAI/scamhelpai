@@ -5,7 +5,7 @@ import { findOpenMessage, markAnnotateRoot } from "./dom.ts";
 import { getButtonStatusEl, setButtonState } from "./button.ts";
 
 const REVIEW_POLL_MS = 1500;
-const REVIEW_POLL_MAX_ATTEMPTS = 20;
+const REVIEW_POLL_MAX_ATTEMPTS = 40;
 
 function emailAnalyzeRequest(text: string, pageUrl: string): AnalyzeRequest {
   return {
@@ -93,15 +93,27 @@ export async function scanOpenGmailEmail(
     if (result.status === "failed") {
       throw new Error("Analysis failed. Try again in a moment.");
     }
-
-    if (result.riskyParts.length > 0) {
-      applyAnnotations(result.decision, result.riskyParts, {
-        doc,
-        root: open.body,
-      });
+    if (result.status !== "completed") {
+      throw new Error("The check is taking too long. Try again in a moment.");
     }
 
-    setButtonState(button, "done", statusEl);
+    const riskyParts = result.riskyParts ?? [];
+    const highlighted =
+      result.decision && riskyParts.length > 0
+        ? applyAnnotations(result.decision, riskyParts, {
+            doc,
+            root: open.body,
+          })
+        : 0;
+
+    setButtonState(
+      button,
+      "done",
+      statusEl,
+      highlighted > 0
+        ? `Highlighted ${highlighted} risky ${highlighted === 1 ? "part" : "parts"}. Click one to see why.`
+        : "No risky parts found in this email.",
+    );
   } catch (error) {
     setButtonState(
       button,

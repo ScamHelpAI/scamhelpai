@@ -35,6 +35,24 @@ describe("gmail dom", () => {
     expect(open!.text).not.toContain("Old body");
   });
 
+  it("picks the a3s block with the most text, not the first one", () => {
+    document.body.innerHTML = `
+      <div data-legacy-message-id="m1">
+        <div class="a3s">-</div>
+        <div class="a3s" id="main">Your account will be closed within 24 hours.</div>
+      </div>
+    `;
+    for (const el of document.querySelectorAll("[data-legacy-message-id], .a3s")) {
+      Object.defineProperty(el, "getClientRects", {
+        value: () => [{ width: 10, height: 10 }],
+      });
+    }
+
+    const open = findOpenMessage(document);
+    expect(open?.body.id).toBe("main");
+    expect(open?.text).toContain("closed within 24 hours");
+  });
+
   it("marks a single annotate root", () => {
     document.body.innerHTML = `
       <div id="a"></div>

@@ -28,6 +28,26 @@ export function findOpenMessageContainers(
   );
 }
 
+function readableText(el: HTMLElement): string {
+  const raw = el.innerText || el.textContent || "";
+  return raw.replace(/\s+\n/g, "\n").trim();
+}
+
+/** Gmail renders several `div.a3s` per message (body, quoted text, stray separators); the main body has the most text. */
+export function findMessageBody(
+  container: HTMLElement,
+): { body: HTMLElement; text: string } | null {
+  let best: { body: HTMLElement; text: string } | null = null;
+  for (const node of container.querySelectorAll(MESSAGE_BODY_SELECTOR)) {
+    if (!(node instanceof HTMLElement) || !isVisible(node)) continue;
+    const text = readableText(node);
+    if (!best || text.length > best.text.length) {
+      best = { body: node, text };
+    }
+  }
+  return best && best.text ? best : null;
+}
+
 /** Prefer the last visible message in the open thread (usually the newest). */
 export function findOpenMessage(
   doc: Document = document,
@@ -37,8 +57,9 @@ export function findOpenMessage(
 
   for (let i = containers.length - 1; i >= 0; i -= 1) {
     const container = containers[i];
-    const body = container.querySelector(MESSAGE_BODY_SELECTOR);
-    if (!(body instanceof HTMLElement) || !isVisible(body)) continue;
+    const found = findMessageBody(container);
+    if (!found) continue;
+    const { body, text: bodyText } = found;
 
     const subject =
       doc.querySelector(SUBJECT_SELECTOR)?.textContent?.trim() ?? "";
@@ -49,10 +70,6 @@ export function findOpenMessage(
       fromName && fromEmail
         ? `${fromName} <${fromEmail}>`
         : fromEmail || fromName;
-
-    const rawBody = body.innerText || body.textContent || "";
-    const bodyText = rawBody.replace(/\s+\n/g, "\n").trim();
-    if (!bodyText) continue;
 
     const parts = [
       subject ? `Subject: ${subject}` : null,
