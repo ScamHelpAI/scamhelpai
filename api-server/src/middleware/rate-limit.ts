@@ -1,6 +1,6 @@
 /**
- * In-memory per-route fixed-window rate limiting by client IP.
- * Fine for a single-server deployment.
+ * Per-route short-window rate limiting by client IP (in-memory fixed window).
+ * Fine for a single-server burst protection.
  */
 import type { Context, MiddlewareHandler } from "hono";
 
@@ -36,7 +36,11 @@ export class MemoryRateLimitStore {
 
 const store = new MemoryRateLimitStore();
 
-function clientKey(c: Context): string {
+export function dailyRateLimitKey(name: string, client: string): string {
+  return `ratelimit:daily:${name}:${client}`;
+}
+
+export function clientKey(c: Context): string {
   const forwarded = c.req.header("x-forwarded-for");
   if (forwarded) {
     const first = forwarded.split(",")[0]?.trim();
@@ -47,6 +51,22 @@ function clientKey(c: Context): string {
     c.req.header("cf-connecting-ip") ??
     c.req.header("x-real-ip") ??
     "unknown"
+  );
+}
+
+export function rateLimitExceededResponse(
+  c: Context,
+  params: { limit: number; retryAfterSec: number; scope: "minute" | "day" },
+) {
+  c.header("Retry-After", String(params.retryAfterSec));
+  return c.json(
+    {
+      error: "rate_limit_exceeded",
+      scope: params.scope,
+      limit: params.limit,
+      retryAfter: params.retryAfterSec,
+    },
+    429,
   );
 }
 
@@ -64,15 +84,11 @@ export function rateLimit(options: RateLimitOptions): MiddlewareHandler {
     c.header("X-RateLimit-Reset", String(Math.ceil(resetAt / 1000)));
 
     if (count > options.limit) {
-      c.header("Retry-After", String(retryAfterSec));
-      return c.json(
-        {
-          error: "rate_limit_exceeded",
-          limit: options.limit,
-          retryAfter: retryAfterSec,
-        },
-        429,
-      );
+      return rateLimitExceededResponse(c, {
+        limit: options.limit,
+        retryAfterSec,
+        scope: "minute",
+      });
     }
 
     await next();

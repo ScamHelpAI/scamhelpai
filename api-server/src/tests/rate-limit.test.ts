@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { MemoryRateLimitStore } from "../middleware/rate-limit.js";
+import {
+  MemoryRateLimitStore,
+  dailyRateLimitKey,
+} from "../middleware/rate-limit.js";
 
 describe("MemoryRateLimitStore", () => {
   it("counts hits within the window", () => {
@@ -21,3 +24,12 @@ describe("MemoryRateLimitStore", () => {
     expect(other.count).toBe(1);
   });
 });
+
+describe("dailyRateLimitKey", () => {
+  it("namespaces by route and client", () => {
+    expect(dailyRateLimitKey("analyze-create", "1.2.3.4")).toBe(
+      "ratelimit:daily:analyze-create:1.2.3.4",
+    );
+  });
+});
+

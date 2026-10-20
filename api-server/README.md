@@ -31,19 +31,27 @@ Host ports: Postgres `5433`, Redis `6380`, MinIO `9100` / console `9101`.
 
 ## Rate limits
 
-Per client IP, fixed 60s in-memory window:
+Per client IP:
+
+**Short window** — fixed 60s in-memory counter:
 
 | Route | Limit / min |
 |-------|-------------|
-| `POST /v1/check/url` | 120 |
-| `POST /v1/check/urls` | 30 |
-| `POST /v1/analyses` | 10 |
-| `GET /v1/analyses/:id` | 60 |
+| `POST /v1/check/url` | 60 |
+| `POST /v1/check/urls` | 15 |
+| `POST /v1/analyses` | 5 |
+| `GET /v1/analyses/:id` | 30 |
 | `POST /v1/assets/presign` | 20 |
 | `POST /v1/assets/:id/complete` | 20 |
 | `GET /v1/assets/:id` | 60 |
 
-Health probes are not rate limited. Exceeded requests return `429` with `Retry-After`.
+**Daily window** — rolling 24h Redis counter (`REDIS_URL` required; skipped if Redis is down):
+
+| Route | Limit / day |
+|-------|-------------|
+| `POST /v1/analyses` | 300 |
+
+Health probes are not rate limited. Exceeded requests return `429` with `Retry-After` and `scope` of `minute` or `day`.
 
 Push the Drizzle schema to Postgres:
 
