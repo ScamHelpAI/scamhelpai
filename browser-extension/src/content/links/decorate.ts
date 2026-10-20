@@ -1,13 +1,15 @@
 import type { CheckStatus, CheckUrlResult } from "../../shared/check.ts";
+import {
+  OCTAGON_ALERT_SVG,
+  RISK_COLORS,
+  TRIANGLE_ALERT_SVG,
+} from "../../shared/risk-icon-svgs.ts";
 
 export const SCAMHELP_MARK = "data-scamhelp";
 export const SCAMHELP_STATUS = "data-scamhelp-status";
 export const SCAMHELP_HREF = "data-scamhelp-href";
 export const SCAMHELP_BLOCKED = "data-scamhelp-blocked";
 export const STYLE_ID = "scamhelp-link-scan-styles";
-
-const ICON_WARNING = "⚠";
-const ICON_DANGER = "⛔";
 
 export function ensureStyles(doc: Document = document): void {
   if (doc.getElementById(STYLE_ID)) return;
@@ -17,7 +19,7 @@ export function ensureStyles(doc: Document = document): void {
   style.textContent = `
     a[${SCAMHELP_STATUS}="warning"] {
       text-decoration-line: underline !important;
-      text-decoration-color: #d97706 !important;
+      text-decoration-color: ${RISK_COLORS.medium} !important;
       text-decoration-thickness: 2px !important;
       text-underline-offset: 2px;
     }
@@ -25,20 +27,31 @@ export function ensureStyles(doc: Document = document): void {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      margin-left: 0.25em;
-      font-size: 0.85em;
+      margin-left: 0.35em;
+      width: 1.35em;
+      height: 1.35em;
       line-height: 1;
       vertical-align: middle;
       cursor: default;
       user-select: none;
       border: none;
+      border-radius: 0.35em;
       background: transparent;
       padding: 0;
       font-family: inherit;
     }
-    [${SCAMHELP_MARK}="icon"][${SCAMHELP_STATUS}="warning"] { color: #d97706; }
+    [${SCAMHELP_MARK}="icon"] svg {
+      display: block;
+      width: 1em;
+      height: 1em;
+    }
+    [${SCAMHELP_MARK}="icon"][${SCAMHELP_STATUS}="warning"] {
+      color: ${RISK_COLORS.medium};
+      background: #fff3e0;
+    }
     [${SCAMHELP_MARK}="icon"][${SCAMHELP_STATUS}="danger"] {
-      color: #b91c1c;
+      color: ${RISK_COLORS.high};
+      background: #fbe9e7;
       cursor: pointer;
     }
     [${SCAMHELP_BLOCKED}="1"] {
@@ -51,8 +64,8 @@ export function ensureStyles(doc: Document = document): void {
       max-width: 280px;
       margin-top: 4px;
       padding: 10px 12px;
-      border: 2px solid #b91c1c;
-      border-radius: 8px;
+      border: 2px solid ${RISK_COLORS.high};
+      border-radius: 12px;
       background: #fff;
       color: #111;
       font: 13px/1.4 system-ui, sans-serif;
@@ -72,7 +85,7 @@ export function ensureStyles(doc: Document = document): void {
       padding: 6px 10px;
       border: none;
       border-radius: 6px;
-      background: #b91c1c;
+      background: ${RISK_COLORS.high};
       color: #fff;
       font: 600 13px/1.2 system-ui, sans-serif;
       cursor: pointer;
@@ -122,7 +135,8 @@ function createIcon(
   if (isButton) {
     (el as HTMLButtonElement).type = "button";
   }
-  el.textContent = status === "warning" ? ICON_WARNING : ICON_DANGER;
+  el.innerHTML =
+    status === "warning" ? TRIANGLE_ALERT_SVG : OCTAGON_ALERT_SVG;
   return el;
 }
 

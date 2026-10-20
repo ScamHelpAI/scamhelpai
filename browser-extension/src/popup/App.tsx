@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Loader2Icon, ScanSearchIcon, SettingsIcon } from "lucide-react";
+import { VerdictIcon, iconForTone } from "@/components/verdict-icon.tsx";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -11,14 +12,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { Switch } from "@/components/ui/switch";
 import type { AnalyzeResponse } from "@/shared/messages.ts";
-import {
-  getLinkScanEnabled,
-  setLinkScanEnabled,
-} from "@/shared/settings.ts";
 import type { AnalysisResult } from "@/shared/types.ts";
 import { toVerdict, type VerdictTone } from "@/shared/verdict.ts";
 
@@ -27,14 +22,14 @@ const REVIEW_POLL_MAX_ATTEMPTS = 20;
 
 function toneBadgeVariant(
   tone: VerdictTone,
-): "destructive" | "secondary" | "outline" {
+): "danger" | "warn" | "safe" {
   switch (tone) {
     case "danger":
-      return "destructive";
+      return "danger";
     case "warn":
-      return "secondary";
+      return "warn";
     case "safe":
-      return "outline";
+      return "safe";
     default: {
       const _exhaustive: never = tone;
       return _exhaustive;
@@ -45,11 +40,11 @@ function toneBadgeVariant(
 function toneCardClass(tone: VerdictTone): string {
   switch (tone) {
     case "danger":
-      return "ring-destructive/40 bg-destructive/5";
+      return "bg-risk-high-bg ring-risk-high/35";
     case "warn":
-      return "ring-amber-500/40 bg-amber-50 dark:bg-amber-950/30";
+      return "bg-risk-medium-bg ring-risk-medium/35";
     case "safe":
-      return "ring-emerald-500/40 bg-emerald-50 dark:bg-emerald-950/30";
+      return "bg-risk-low-bg ring-risk-low/35";
     default: {
       const _exhaustive: never = tone;
       return _exhaustive;
@@ -65,41 +60,46 @@ function VerdictCard({
   reviewing: boolean;
 }) {
   const verdict = toVerdict(result);
+  const ToneIcon = iconForTone(verdict.tone);
 
   return (
     <Card
-      className={toneCardClass(verdict.tone)}
+      className={`animate-panel-in ${toneCardClass(verdict.tone)}`}
       size="sm"
       role="status"
       aria-live="polite"
     >
       <CardHeader>
-        <div className="flex items-start justify-between gap-2">
-          <CardTitle className="text-base leading-snug">
-            {verdict.icon} {verdict.title}
-          </CardTitle>
-          <Badge variant={toneBadgeVariant(verdict.tone)}>
-            {verdict.riskScore}/100
-          </Badge>
+        <div className="flex items-start gap-3">
+          <VerdictIcon tone={verdict.tone} />
+          <div className="flex min-w-0 flex-1 items-start justify-between gap-2">
+            <CardTitle className="text-lg leading-snug font-semibold">
+              {verdict.title}
+            </CardTitle>
+            <Badge
+              variant={toneBadgeVariant(verdict.tone)}
+              className="shrink-0 gap-1.5 px-3 py-1 text-sm"
+            >
+              <ToneIcon className="size-4 stroke-[2.25]" aria-hidden />
+              {verdict.riskScore}/100
+            </Badge>
+          </div>
         </div>
-        <CardDescription className="text-foreground/80">
-          {verdict.recommendation}
-        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">
         {reviewing ? (
-          <p className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Loader2Icon className="size-3.5 animate-spin" />
+          <p className="flex items-center gap-2 text-base text-muted-foreground">
+            <Loader2Icon className="size-4 animate-spin" />
             Initial result — checking for review updates…
           </p>
         ) : null}
         {verdict.reviewNote ? (
-          <p className="text-sm text-muted-foreground">{verdict.reviewNote}</p>
+          <p className="text-base text-muted-foreground">{verdict.reviewNote}</p>
         ) : null}
         {verdict.reasons.length > 0 ? (
           <div>
-            <p className="mb-1.5 text-sm font-medium">Why we think so</p>
-            <ul className="list-disc space-y-1 pl-4 text-sm text-muted-foreground">
+            <p className="mb-2 text-base font-semibold">Why we think so</p>
+            <ul className="list-disc space-y-2 pl-5 text-base leading-relaxed text-muted-foreground">
               {verdict.reasons.slice(0, 6).map((reason) => (
                 <li key={reason}>{reason}</li>
               ))}
@@ -134,15 +134,6 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [reviewing, setReviewing] = useState(false);
-  const [linkScanEnabled, setLinkScanEnabledState] = useState(false);
-  const [linkScanReady, setLinkScanReady] = useState(false);
-
-  useEffect(() => {
-    void getLinkScanEnabled().then((enabled) => {
-      setLinkScanEnabledState(enabled);
-      setLinkScanReady(true);
-    });
-  }, []);
 
   useEffect(() => {
     if (!result || result.status !== "reviewing") {
@@ -206,41 +197,22 @@ export default function App() {
     }
   }
 
-  async function toggleLinkScan(next: boolean) {
-    setLinkScanEnabledState(next);
-    await setLinkScanEnabled(next);
-  }
-
   return (
-    <main className="w-80 p-4">
+    <main className="w-96 p-5">
       <Card size="sm" className="border-0 bg-transparent shadow-none ring-0">
-        <CardHeader className="px-0 pt-0">
-          <CardTitle className="text-lg">ScamHelp AI</CardTitle>
-          <CardDescription>
+        <CardHeader className="animate-stagger-in gap-2 px-0 pt-0">
+          <CardTitle className="text-3xl leading-tight font-bold tracking-tight">
+            ScamHelp AI
+          </CardTitle>
+          <CardDescription className="text-base leading-relaxed">
             Check the page you have open for scam signals.
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-3 px-0">
-          <div className="flex items-start justify-between gap-3 rounded-xl border bg-muted/40 px-3 py-3">
-            <div className="space-y-1 pr-2">
-              <Label htmlFor="link-scan" className="text-sm font-medium">
-                Scan links on pages
-              </Label>
-              <p className="text-xs leading-snug text-muted-foreground">
-                Amber caution on risky links; block unsafe ones.
-              </p>
-            </div>
-            <Switch
-              id="link-scan"
-              checked={linkScanEnabled}
-              disabled={!linkScanReady}
-              onCheckedChange={(checked) => void toggleLinkScan(checked)}
-            />
-          </div>
-
+        <CardContent className="space-y-4 px-0">
           <Button
             type="button"
-            className="w-full"
+            className="animate-stagger-in w-full text-lg shadow-md"
+            style={{ animationDelay: "var(--duration-stagger)" }}
             size="lg"
             onClick={() => void scanPage()}
             disabled={loading}
@@ -254,20 +226,21 @@ export default function App() {
           </Button>
 
           {error ? (
-            <Alert variant="destructive">
-              <AlertTitle>Scan failed</AlertTitle>
-              <AlertDescription>{error}</AlertDescription>
+            <Alert variant="destructive" className="animate-panel-in text-base">
+              <AlertTitle className="text-base">Scan failed</AlertTitle>
+              <AlertDescription className="text-base">{error}</AlertDescription>
             </Alert>
           ) : null}
 
           {result ? <VerdictCard result={result} reviewing={reviewing} /> : null}
         </CardContent>
-        <Separator className="my-1" />
+        <Separator className="my-2" />
         <CardFooter className="justify-start border-0 bg-transparent px-0">
           <Button
             type="button"
             variant="ghost"
-            size="sm"
+            size="default"
+            className="text-base"
             onClick={() => chrome.runtime.openOptionsPage()}
           >
             <SettingsIcon data-icon="inline-start" />

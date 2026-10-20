@@ -58,7 +58,7 @@ describe("decorateAnchor", () => {
 
     expect(document.body.querySelector("a")).toBe(anchor);
     expect(anchor.getAttribute(SCAMHELP_STATUS)).toBe("warning");
-    expect(anchor.nextElementSibling?.textContent).toBe("⚠");
+    expect(anchor.nextElementSibling?.querySelector("svg")).not.toBeNull();
   });
 
   it("blocks danger links and restores them on clear", () => {
@@ -80,7 +80,7 @@ describe("decorateAnchor", () => {
     const blocked = document.body.querySelector(`[${SCAMHELP_BLOCKED}="1"]`);
     expect(blocked).not.toBeNull();
     expect(blocked?.textContent).toContain("Click");
-    expect(blocked?.textContent).toContain("⛔");
+    expect(blocked?.querySelector("svg")).not.toBeNull();
 
     clearDecorations(document);
     const restored = document.body.querySelector("a");
