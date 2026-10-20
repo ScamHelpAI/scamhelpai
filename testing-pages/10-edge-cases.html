@@ -3,62 +3,49 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Edge cases — ScamHelp QA</title>
+    <title>Mixed content examples</title>
     <style>
       body { font-family: system-ui, sans-serif; line-height: 1.55; margin: 0; background: #f8f6f2; color: #1c1c1c; }
-      .qa { background: #425acf; color: #fff; text-align: center; padding: 0.5rem; font-size: 0.85rem; }
       main { max-width: 44rem; margin: 0 auto; padding: 1.5rem 1.25rem 2.5rem; }
-      .note { background: #eef1fc; border-radius: 12px; padding: 1rem; margin: 1rem 0; }
-      iframe { width: 100%; height: 120px; border: 1px dashed #999; border-radius: 8px; }
+      iframe { width: 100%; height: 120px; border: 1px solid #ccc; border-radius: 8px; }
       #delayed { min-height: 1.5rem; }
     </style>
   </head>
   <body>
-    <p class="qa">LOCAL TEST PAGE #10 — edge cases (iframe, IDN text, delayed content)</p>
     <main>
-      <h1>Edge case harness</h1>
-      <p>
-        Use this page to see what the scanner reads vs what it ignores. The
-        extension prefers <code>&lt;main&gt;</code> and strips
-        <code>&lt;iframe&gt;</code> content from the scan payload.
-      </p>
+      <h1>Account &amp; shipping updates</h1>
+      <p>Please review the notices below related to your recent activity.</p>
 
-      <h2>1. Iframe (content usually not scanned)</h2>
+      <h2>Partner notice</h2>
       <iframe
-        title="iframe test"
+        title="partner notice"
         srcdoc="&lt;p&gt;URGENT: wire $5000 to account 999 inside iframe only&lt;/p&gt;"
       ></iframe>
-      <p class="note">
-        If risk stays low, the iframe scam text is correctly excluded. Main
-        document text below should still be scanned.
-      </p>
 
-      <h2>2. Plain text URL (not a clickable link)</h2>
+      <h2>Website</h2>
       <p>
-        Visit us at https://www.example.com/prize-winner (this is plain text,
-        not an anchor).
+        Visit us at https://www.example.com/prize-winner for more details.
       </p>
 
-      <h2>3. Internationalized domain label (display only)</h2>
+      <h2>Related domain</h2>
       <p>
-        Homograph test label:
-        <strong>www.xn--pple-43d.com</strong> (punycode for “apple” look-alike —
-        shown as text, not linked).
+        Reference host:
+        <strong>www.xn--pple-43d.com</strong>
       </p>
 
-      <h2>4. Benign link among scary text</h2>
+      <h2>Shipment status</h2>
       <p>
         WARNING YOUR PACKAGE IS HELD. Track shipment at
         <a href="https://www.example.com/tracking">example.com/tracking</a>.
       </p>
 
-      <h2>5. Delayed content in main (slow load simulation)</h2>
+      <h2>Additional notice</h2>
       <div id="delayed" aria-live="polite">Loading additional content…</div>
 
-      <h2>6. Redirect meta (harmless example host)</h2>
+      <h2>Help</h2>
       <p>
-        This page does not auto-redirect. For redirect tests, open
-        <a href="https://www.example.com/">example.com</a> manually after scan.
+        Need assistance? Visit
+        <a href="https://www.example.com/">example.com</a>.
       </p>
     </main>
     <script>
@@ -66,8 +53,8 @@
         var el = document.getElementById("delayed");
         if (!el) return;
         el.innerHTML =
-          "<strong>Delayed block:</strong> Your Social Security number will be suspended. " +
-          "Call 1-800-555-0199 immediately. (Injected after 2s — tests late-rendered scam copy.)";
+          "<strong>Important:</strong> Your Social Security number will be suspended. " +
+          "Call 1-800-555-0199 immediately.";
       }, 2000);
     </script>
   </body>
