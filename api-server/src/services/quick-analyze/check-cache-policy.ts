@@ -1,4 +1,4 @@
-import type { CheckStatus } from "../schemas/check.js";
+import type { CheckStatus } from "../../schemas/check.js";
 
 const SECONDS_PER_HOUR = 3600;
 const SECONDS_PER_DAY = 86400;

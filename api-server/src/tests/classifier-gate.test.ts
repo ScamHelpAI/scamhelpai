@@ -10,7 +10,7 @@ import type { Evidence } from "../schemas/evidence.js";
 import {
   assessmentFromClassifier,
   shouldReview,
-} from "../services/classifier-gate.js";
+} from "../services/analyze/classifier-gate.js";
 
 const textRequest: AnalyzeRequest = {
   inputs: [{ type: "text", content: "Urgent: verify your PayPal account now." }],

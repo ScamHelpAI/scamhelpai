@@ -11,7 +11,7 @@
 /*
   Senior-first email extension design system → shadcn tokens.
   Colors from design: brand orange, warm surface, trust blue, risk levels.
-  Typography: Fredoka (senior-friendly, rounded).
+  Typography: Fredoka for headings & emphasis; system UI for body.
 */
 :root {
   /* Surfaces */
@@ -93,8 +93,10 @@
 }
 
 @theme inline {
-  --font-heading: var(--font-sans);
   --font-sans:
+    system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial,
+    sans-serif;
+  --font-heading:
     "Fredoka", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue",
     Arial, sans-serif;
 
@@ -197,10 +199,23 @@
   }
   body {
     /* Senior-first: 17px body, roomier line height */
-    @apply m-0 min-w-80 bg-background text-[17px] leading-relaxed text-foreground;
+    @apply m-0 min-w-80 bg-background font-sans text-[17px] leading-relaxed text-foreground;
   }
-  html {
-    @apply font-sans;
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-heading;
+  }
+  button,
+  [data-slot="button"] {
+    @apply font-heading;
+  }
+  [data-slot="alert-title"],
+  [data-slot="card-title"] {
+    @apply font-heading;
   }
 }
 

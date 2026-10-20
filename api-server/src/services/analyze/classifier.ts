@@ -7,13 +7,13 @@ import {
   experimental_decide as decide,
   type Experimental_DecisionModel,
 } from "ai";
-import type { AnalyzeRequest } from "../schemas/analysis-input.js";
+import type { AnalyzeRequest } from "../../schemas/analysis-input.js";
 import {
   RISK_RUBRIC,
   SCAM_TYPE_CRITERIA,
   type ClassifierResult,
-} from "../schemas/classifier.js";
-import type { Evidence } from "../schemas/evidence.js";
+} from "../../schemas/classifier.js";
+import type { Evidence } from "../../schemas/evidence.js";
 import { buildCollectorState } from "./collector.js";
 
 export const DEFAULT_CLASSIFIER_MODEL: OpenAIDecisionModelId = "gpt-6-luna";

@@ -8,7 +8,7 @@ import {
   runInitialAnalysis,
   runVerifierReview,
   type OpenAILanguageModelId,
-} from "../services/analysis.server.js";
+} from "../services/analyze/analysis.server.js";
 import {
   createPendingAnalysis,
   getAnalysisById,
@@ -16,7 +16,7 @@ import {
   markAnalysisFailed,
   saveInitialAnalysis,
   saveReviewCompletion,
-} from "../services/analysis.repository.js";
+} from "../services/analyze/analysis.repository.js";
 
 const REVIEWER_MODEL: OpenAILanguageModelId = "gpt-6-luna";
 const CLASSIFIER_MODEL = "gpt-6-luna";

@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ScamHelp — local test catalog</title>
+    <style>
+      :root {
+        font-family: system-ui, sans-serif;
+        line-height: 1.5;
+        color: #1c1c1c;
+        background: #f1eee8;
+      }
+      body {
+        max-width: 52rem;
+        margin: 0 auto;
+        padding: 2rem 1.25rem 3rem;
+      }
+      h1 {
+        font-size: 1.75rem;
+      }
+      .banner {
+        background: #eef1fc;
+        border: 2px solid #425acf;
+        border-radius: 12px;
+        padding: 1rem 1.25rem;
+        margin-bottom: 1.5rem;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        background: #fff;
+        border-radius: 12px;
+        overflow: hidden;
+      }
+      th,
+      td {
+        text-align: left;
+        padding: 0.65rem 0.85rem;
+        border-bottom: 1px solid #ddd8ce;
+        vertical-align: top;
+      }
+      th {
+        background: #fff4e0;
+      }
+      a {
+        color: #425acf;
+        font-weight: 600;
+      }
+      code {
+        font-size: 0.9em;
+      }
+      .risk-low {
+        color: #1e6b34;
+        font-weight: 600;
+      }
+      .risk-med {
+        color: #6b4200;
+        font-weight: 600;
+      }
+      .risk-high {
+        color: #b3261e;
+        font-weight: 600;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>ScamHelp extension — local test pages</h1>
+    <div class="banner">
+      <p>
+        <strong>Local QA only.</strong> These pages use harmless copy and
+        <code>example.com</code> / <code>example.org</code> URLs. Do not enter
+        real passwords or payment details. Serve this folder over HTTP (for
+        example <code>npx serve testing-pages</code>) so the extension can scan
+        pages; <code>file://</code> may not work depending on browser policy.
+      </p>
+      <p>
+        For each page: open in a test profile, run <strong>Scan this page</strong>,
+        record risk level, score, and “Why we think so”. Track false positives and
+        missed cases separately after code changes.
+      </p>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Page</th>
+          <th>Intent</th>
+          <th>Expected (manual)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td><a href="01-plain-safe.html">01-plain-safe.html</a></td>
+          <td>Baseline benign article</td>
+          <td class="risk-low">Low / no clear scam signs</td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td><a href="02-matched-links.html">02-matched-links.html</a></td>
+          <td>Honest links (text matches destination)</td>
+          <td class="risk-low">Low</td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td><a href="03-neutral-login.html">03-neutral-login.html</a></td>
+          <td>Ordinary login form, neutral wording</td>
+          <td class="risk-low">Low to medium (credential form only)</td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td><a href="04-soft-urgency.html">04-soft-urgency.html</a></td>
+          <td>Mild marketing urgency, still legitimate</td>
+          <td class="risk-low">Low</td>
+        </tr>
+        <tr>
+          <td>5</td>
+          <td><a href="05-link-mismatch.html">05-link-mismatch.html</a></td>
+          <td>Link label does not match href host</td>
+          <td class="risk-med">Medium — phishing pattern</td>
+        </tr>
+        <tr>
+          <td>6</td>
+          <td><a href="06-account-locked.html">06-account-locked.html</a></td>
+          <td>Fake “account locked” + verify now</td>
+          <td class="risk-med">Medium to high</td>
+        </tr>
+        <tr>
+          <td>7</td>
+          <td><a href="07-countdown-pressure.html">07-countdown-pressure.html</a></td>
+          <td>Countdown + fear / authority pressure</td>
+          <td class="risk-high">High</td>
+        </tr>
+        <tr>
+          <td>8</td>
+          <td><a href="08-credential-payment.html">08-credential-payment.html</a></td>
+          <td>Password + card fields with scammy copy</td>
+          <td class="risk-high">High</td>
+        </tr>
+        <tr>
+          <td>9</td>
+          <td><a href="09-full-scam.html">09-full-scam.html</a></td>
+          <td>Full kit: impersonation, urgency, harvest, bad links</td>
+          <td class="risk-high">High / critical</td>
+        </tr>
+        <tr>
+          <td>10</td>
+          <td><a href="10-edge-cases.html">10-edge-cases.html</a></td>
+          <td>Iframe, IDN label text, non-link URL text, delayed main content</td>
+          <td class="risk-med">Varies — document behavior</td>
+        </tr>
+      </tbody>
+    </table>
+  </body>
+</html>

@@ -3,7 +3,7 @@ import {
   checkUrlRequestSchema,
   checkUrlsRequestSchema,
 } from "../schemas/check.js";
-import { checkUrl, checkUrls } from "../services/check.server.js";
+import { checkUrl, checkUrls } from "../services/quick-analyze/check.server.js";
 
 export async function checkUrlHandler(c: Context) {
   const body = checkUrlRequestSchema.parse(await c.req.json());

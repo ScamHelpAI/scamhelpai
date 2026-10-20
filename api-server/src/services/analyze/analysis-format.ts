@@ -5,9 +5,9 @@
 import type {
   AnalyzeRequest,
   AnalysisInput,
-} from "../schemas/analysis-input.js";
-import type { ClassifierResult } from "../schemas/classifier.js";
-import type { Evidence } from "../schemas/evidence.js";
+} from "../../schemas/analysis-input.js";
+import type { ClassifierResult } from "../../schemas/classifier.js";
+import type { Evidence } from "../../schemas/evidence.js";
 
 export function formatInput(input: AnalysisInput, index: number): string {
   const label = `Input ${index + 1} (${input.type})`;

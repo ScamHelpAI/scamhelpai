@@ -3,7 +3,7 @@ import {
   hostnameFromCheckUrl,
   normalizeCheckUrl,
   urlCheckHash,
-} from "../services/check-cache-key.js";
+} from "../services/quick-analyze/check-cache-key.js";
 
 describe("normalizeCheckUrl", () => {
   it("lowercases host and strips hash", () => {

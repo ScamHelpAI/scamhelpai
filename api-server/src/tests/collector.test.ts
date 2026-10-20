@@ -52,7 +52,7 @@ vi.mock("../tools/inspect-email.js", () => ({
   inspectEmail: vi.fn(),
 }));
 
-import { collect } from "../services/collector.js";
+import { collect } from "../services/analyze/collector.js";
 
 describe("collect", () => {
   it("assigns unique evidence ids across tool findings", async () => {

@@ -8,14 +8,14 @@ import {
   generateText,
   isStepCount,
 } from "ai";
-import type { AnalyzeRequest } from "../schemas/analysis-input.js";
-import type { ClassifierResult } from "../schemas/classifier.js";
-import type { Evidence } from "../schemas/evidence.js";
+import type { AnalyzeRequest } from "../../schemas/analysis-input.js";
+import type { ClassifierResult } from "../../schemas/classifier.js";
+import type { Evidence } from "../../schemas/evidence.js";
 import {
   reviewerAssessmentSchema,
   type ReviewerAssessment,
-} from "../schemas/reviewer.js";
-import { createReviewerTools } from "../tools/index.js";
+} from "../../schemas/reviewer.js";
+import { createReviewerTools } from "../../tools/index.js";
 import { buildReviewerPrompt } from "./analysis-format.js";
 
 type OpenAILanguageModelId = Parameters<typeof openai>[0];

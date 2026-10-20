@@ -3,10 +3,10 @@
  * for an initial assessment, and run the async verifier review.
  */
 import { openai, type OpenAIDecisionModelId } from "@ai-sdk/openai";
-import type { AnalyzeRequest } from "../schemas/analysis-input.js";
-import type { ClassifierResult } from "../schemas/classifier.js";
-import type { Evidence } from "../schemas/evidence.js";
-import type { ReviewerAssessment } from "../schemas/reviewer.js";
+import type { AnalyzeRequest } from "../../schemas/analysis-input.js";
+import type { ClassifierResult } from "../../schemas/classifier.js";
+import type { Evidence } from "../../schemas/evidence.js";
+import type { ReviewerAssessment } from "../../schemas/reviewer.js";
 import { collect } from "./collector.js";
 import {
   DEFAULT_CLASSIFIER_MODEL,

@@ -1,5 +1,5 @@
-import { getRedisClient } from "../cache/redis.js";
-import type { CheckUrlResult } from "../schemas/check.js";
+import { getRedisClient } from "../../cache/redis.js";
+import type { CheckUrlResult } from "../../schemas/check.js";
 import {
   hostnameFromCheckUrl,
   redisDomainHitsKey,

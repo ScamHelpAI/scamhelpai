@@ -2,7 +2,7 @@
  * Tests for sequential id helpers used when labeling evidence rows.
  */
 import { describe, expect, it } from "vitest";
-import { createSequentialId } from "../services/ids.js";
+import { createSequentialId } from "../services/analyze/ids.js";
 
 describe("createSequentialId", () => {
   it("allocates unique ids from a shared counter", () => {

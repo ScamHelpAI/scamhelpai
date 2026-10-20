@@ -1,7 +1,7 @@
 import { and, eq, lt, sql } from "drizzle-orm";
-import { db } from "../db/index.js";
-import { domainCheckCache, urlCheckCache } from "../db/schema.js";
-import type { CheckStatus } from "../schemas/check.js";
+import { db } from "../../db/index.js";
+import { domainCheckCache, urlCheckCache } from "../../db/schema.js";
+import type { CheckStatus } from "../../schemas/check.js";
 import {
   postgresDomainExpiresAt,
   postgresUrlExpiresAt,

@@ -5,16 +5,16 @@
 import type {
   AnalyzeRequest,
   AnalysisInput,
-} from "../schemas/analysis-input.js";
-import type { Evidence, EvidenceType } from "../schemas/evidence.js";
-import { checkThreatIntel } from "../tools/check-threat-intel.js";
-import { inspectEmail } from "../tools/inspect-email.js";
-import { inspectUrl } from "../tools/inspect-url.js";
-import { lookupCryptoAddress } from "../tools/lookup-crypto-address.js";
-import { lookupDomain } from "../tools/lookup-domain.js";
-import { lookupPhone } from "../tools/lookup-phone.js";
-import { BRAND_DOMAINS } from "../tools/shared/brands.js";
-import { verifyBrandIdentity } from "../tools/verify-brand-identity.js";
+} from "../../schemas/analysis-input.js";
+import type { Evidence, EvidenceType } from "../../schemas/evidence.js";
+import { checkThreatIntel } from "../../tools/check-threat-intel.js";
+import { inspectEmail } from "../../tools/inspect-email.js";
+import { inspectUrl } from "../../tools/inspect-url.js";
+import { lookupCryptoAddress } from "../../tools/lookup-crypto-address.js";
+import { lookupDomain } from "../../tools/lookup-domain.js";
+import { lookupPhone } from "../../tools/lookup-phone.js";
+import { BRAND_DOMAINS } from "../../tools/shared/brands.js";
+import { verifyBrandIdentity } from "../../tools/verify-brand-identity.js";
 import { createSequentialId } from "./ids.js";
 
 const URL_RE = /https?:\/\/[^\s"'<>]+/gi;

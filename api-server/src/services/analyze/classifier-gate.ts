@@ -2,11 +2,11 @@
  * Maps decision-model answers into an assessment, combines risk signals into a
  * scam probability, and decides whether a deeper LLM review is warranted.
  */
-import type { AnalyzeRequest } from "../schemas/analysis-input.js";
-import type { ScamType } from "../schemas/analyst.js";
-import type { ClassifierResult } from "../schemas/classifier.js";
-import type { Evidence } from "../schemas/evidence.js";
-import type { ReviewerAssessment } from "../schemas/reviewer.js";
+import type { AnalyzeRequest } from "../../schemas/analysis-input.js";
+import type { ScamType } from "../../schemas/analyst.js";
+import type { ClassifierResult } from "../../schemas/classifier.js";
+import type { Evidence } from "../../schemas/evidence.js";
+import type { ReviewerAssessment } from "../../schemas/reviewer.js";
 import { hasToolBackedEvidence } from "./evidence-utils.js";
 
 export const CHOICE_CONFIDENCE_FLOOR = 0.6;

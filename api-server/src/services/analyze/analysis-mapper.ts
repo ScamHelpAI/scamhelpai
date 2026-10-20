@@ -7,9 +7,9 @@ import type {
   AnalysisReview,
   AnalysisStatus,
   RiskLevel,
-} from "../schemas/analysis-result.js";
-import type { Evidence, PublicEvidence } from "../schemas/evidence.js";
-import type { ReviewerAssessment } from "../schemas/reviewer.js";
+} from "../../schemas/analysis-result.js";
+import type { Evidence, PublicEvidence } from "../../schemas/evidence.js";
+import type { ReviewerAssessment } from "../../schemas/reviewer.js";
 
 export function toRiskLevel(score: number): RiskLevel {
   if (score >= 0.85) return "critical";

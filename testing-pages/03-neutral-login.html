@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sign in — Example Library</title>
+    <style>
+      body { font-family: system-ui, sans-serif; line-height: 1.55; margin: 0; background: #f8f6f2; color: #1c1c1c; }
+      .qa { background: #425acf; color: #fff; text-align: center; padding: 0.5rem; font-size: 0.85rem; }
+      main { max-width: 40rem; margin: 0 auto; padding: 1.5rem 1.25rem 2.5rem; }
+      form { display: grid; gap: 0.75rem; max-width: 20rem; }
+      label { font-weight: 600; }
+      input, button { font: inherit; padding: 0.5rem; border-radius: 8px; border: 1px solid #ccc; }
+      button { background: #eef1fc; cursor: pointer; }
+    </style>
+  </head>
+  <body>
+    <p class="qa">LOCAL TEST PAGE #3 — neutral login (false-positive check)</p>
+    <main>
+      <h1>Sign in to your library account</h1>
+      <p>
+        Use your library card number and PIN. This is a test page; the form does
+        not submit anywhere.
+      </p>
+      <form action="#" method="get" onsubmit="return false;">
+        <label for="card">Library card number</label>
+        <input id="card" name="card" type="text" autocomplete="off" />
+
+        <label for="pin">PIN</label>
+        <input id="pin" name="pin" type="password" autocomplete="off" />
+
+        <button type="submit">Continue</button>
+      </form>
+      <p>
+        <a href="https://www.example.com/password-reset">Forgot your PIN?</a>
+      </p>
+    </main>
+  </body>
+</html>

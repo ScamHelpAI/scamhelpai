@@ -7,12 +7,9 @@ import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import type { AnalyzeResponse } from "@/shared/messages.ts";
 import type { AnalysisResult } from "@/shared/types.ts";
 import { toVerdict, type VerdictTone } from "@/shared/verdict.ts";
@@ -98,7 +95,9 @@ function VerdictCard({
         ) : null}
         {verdict.reasons.length > 0 ? (
           <div>
-            <p className="mb-2 text-base font-semibold">Why we think so</p>
+            <p className="mb-2 font-heading text-base font-semibold">
+              Why we think so
+            </p>
             <ul className="list-disc space-y-2 pl-5 text-base leading-relaxed text-muted-foreground">
               {verdict.reasons.slice(0, 6).map((reason) => (
                 <li key={reason}>{reason}</li>
@@ -198,56 +197,53 @@ export default function App() {
   }
 
   return (
-    <main className="w-96 p-5">
-      <Card size="sm" className="border-0 bg-transparent shadow-none ring-0">
-        <CardHeader className="animate-stagger-in gap-2 px-0 pt-0">
-          <CardTitle className="text-3xl leading-tight font-bold tracking-tight">
-            ScamHelp AI
-          </CardTitle>
-          <CardDescription className="text-base leading-relaxed">
-            Check the page you have open for scam signals.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4 px-0">
-          <Button
-            type="button"
-            className="animate-stagger-in w-full text-lg shadow-md"
-            style={{ animationDelay: "var(--duration-stagger)" }}
-            size="lg"
-            onClick={() => void scanPage()}
-            disabled={loading}
-          >
-            {loading ? (
-              <Loader2Icon data-icon="inline-start" className="animate-spin" />
-            ) : (
-              <ScanSearchIcon data-icon="inline-start" />
-            )}
-            {loading ? "Scanning…" : "Scan this page"}
-          </Button>
+    <main className="flex w-[22rem] flex-col gap-6 p-6">
+      <header className="animate-stagger-in space-y-1.5">
+        <h1 className="font-heading text-[1.75rem] leading-none font-bold tracking-tight text-foreground">
+          ScamHelp AI
+        </h1>
+        <p className="text-[15px] leading-snug text-muted-foreground">
+          Check the page you have open for scam signals.
+        </p>
+      </header>
 
-          {error ? (
-            <Alert variant="destructive" className="animate-panel-in text-base">
-              <AlertTitle className="text-base">Scan failed</AlertTitle>
-              <AlertDescription className="text-base">{error}</AlertDescription>
-            </Alert>
-          ) : null}
+      <div className="flex flex-col gap-4">
+        <Button
+          type="button"
+          className="animate-stagger-in w-full gap-2.5 text-[1.05rem] font-semibold shadow-[0_4px_14px_rgba(184,101,10,0.22)]"
+          style={{ animationDelay: "var(--duration-stagger)" }}
+          size="lg"
+          onClick={() => void scanPage()}
+          disabled={loading}
+        >
+          {loading ? (
+            <Loader2Icon data-icon="inline-start" className="size-5 animate-spin" />
+          ) : (
+            <ScanSearchIcon data-icon="inline-start" className="size-5" />
+          )}
+          {loading ? "Scanning…" : "Scan this page"}
+        </Button>
 
-          {result ? <VerdictCard result={result} reviewing={reviewing} /> : null}
-        </CardContent>
-        <Separator className="my-2" />
-        <CardFooter className="justify-start border-0 bg-transparent px-0">
-          <Button
-            type="button"
-            variant="ghost"
-            size="default"
-            className="text-base"
-            onClick={() => chrome.runtime.openOptionsPage()}
-          >
-            <SettingsIcon data-icon="inline-start" />
-            Settings
-          </Button>
-        </CardFooter>
-      </Card>
+        {error ? (
+          <Alert variant="destructive" className="animate-panel-in text-base">
+            <AlertTitle className="text-base">Scan failed</AlertTitle>
+            <AlertDescription className="text-base">{error}</AlertDescription>
+          </Alert>
+        ) : null}
+
+        {result ? <VerdictCard result={result} reviewing={reviewing} /> : null}
+      </div>
+
+      <footer className="border-t border-border/80 pt-4">
+        <button
+          type="button"
+          className="inline-flex items-center gap-2 rounded-full px-1 py-1 text-[15px] font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+          onClick={() => chrome.runtime.openOptionsPage()}
+        >
+          <SettingsIcon className="size-4" aria-hidden />
+          Settings
+        </button>
+      </footer>
     </main>
   );
 }
