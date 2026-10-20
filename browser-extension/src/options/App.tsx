@@ -1,12 +1,23 @@
 import { useEffect, useState } from "react";
+import { FileTextIcon, ScaleIcon } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import {
   getLinkScanEnabled,
   setLinkScanEnabled,
 } from "@/shared/settings.ts";
+import {
+  hashForLegalView,
+  legalViewFromHash,
+  type LegalView,
+} from "./legal/constants.ts";
+import { PrivacyPolicy } from "./legal/PrivacyPolicy.tsx";
+import { TermsOfService } from "./legal/TermsOfService.tsx";
 
 export default function App() {
+  const [view, setView] = useState<LegalView>(() =>
+    legalViewFromHash(window.location.hash),
+  );
   const [linkScanEnabled, setLinkScanEnabledState] = useState(false);
   const [linkScanReady, setLinkScanReady] = useState(false);
 
@@ -17,9 +28,39 @@ export default function App() {
     });
   }, []);
 
+  useEffect(() => {
+    function onHashChange() {
+      setView(legalViewFromHash(window.location.hash));
+    }
+    window.addEventListener("hashchange", onHashChange);
+    return () => window.removeEventListener("hashchange", onHashChange);
+  }, []);
+
+  function navigate(next: LegalView) {
+    const hash = hashForLegalView(next);
+    if (hash) {
+      window.location.hash = hash;
+    } else if (window.location.hash) {
+      history.pushState(
+        null,
+        "",
+        `${window.location.pathname}${window.location.search}`,
+      );
+    }
+    setView(next);
+  }
+
   async function toggleLinkScan(next: boolean) {
     setLinkScanEnabledState(next);
     await setLinkScanEnabled(next);
+  }
+
+  if (view === "privacy") {
+    return <PrivacyPolicy onBack={() => navigate("settings")} />;
+  }
+
+  if (view === "terms") {
+    return <TermsOfService onBack={() => navigate("settings")} />;
   }
 
   return (
@@ -33,7 +74,7 @@ export default function App() {
         </p>
       </header>
 
-      <section>
+      <section className="space-y-4">
         <div className="flex items-start justify-between gap-4 rounded-2xl border border-border bg-card px-4 py-4">
           <div className="space-y-1.5 pr-2">
             <Label
@@ -53,6 +94,51 @@ export default function App() {
             disabled={!linkScanReady}
             onCheckedChange={(checked) => void toggleLinkScan(checked)}
           />
+        </div>
+      </section>
+
+      <section className="mt-10 space-y-3">
+        <h2 className="font-heading text-lg font-semibold tracking-tight">
+          Legal
+        </h2>
+        <p className="text-base leading-relaxed text-muted-foreground">
+          How we handle data and the rules for using ScamHelp AI.
+        </p>
+        <div className="overflow-hidden rounded-2xl border border-border bg-card">
+          <button
+            type="button"
+            className="flex w-full items-center gap-3 px-4 py-4 text-left transition-colors hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+            onClick={() => navigate("privacy")}
+          >
+            <FileTextIcon
+              className="size-5 shrink-0 text-trust"
+              aria-hidden
+            />
+            <span className="flex-1">
+              <span className="block font-heading text-base font-semibold">
+                Privacy Policy
+              </span>
+              <span className="block text-sm text-muted-foreground">
+                What we collect and how we use it
+              </span>
+            </span>
+          </button>
+          <div className="border-t border-border" />
+          <button
+            type="button"
+            className="flex w-full items-center gap-3 px-4 py-4 text-left transition-colors hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+            onClick={() => navigate("terms")}
+          >
+            <ScaleIcon className="size-5 shrink-0 text-trust" aria-hidden />
+            <span className="flex-1">
+              <span className="block font-heading text-base font-semibold">
+                Terms of Service
+              </span>
+              <span className="block text-sm text-muted-foreground">
+                Rules for using the extension and API
+              </span>
+            </span>
+          </button>
         </div>
       </section>
     </main>
