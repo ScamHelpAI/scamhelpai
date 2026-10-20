@@ -14,11 +14,12 @@ import type {
   AnalyzeResponse,
   ApplyPageAnnotationsMessage,
 } from "@/shared/messages.ts";
+import {
+  REVIEW_POLL_MAX_ATTEMPTS,
+  REVIEW_POLL_MS,
+} from "@/shared/analysis-poll.ts";
 import type { AnalysisResult } from "@/shared/types.ts";
 import { toVerdict, type VerdictTone } from "@/shared/verdict.ts";
-
-const REVIEW_POLL_MS = 1500;
-const REVIEW_POLL_MAX_ATTEMPTS = 40;
 
 function toneBadgeVariant(
   tone: VerdictTone,

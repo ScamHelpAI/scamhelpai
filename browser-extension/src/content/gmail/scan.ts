@@ -1,11 +1,13 @@
 import type { AnalyzeResponse } from "../../shared/messages.ts";
 import type { AnalysisResult, AnalyzeRequest } from "../../shared/types.ts";
+import {
+  REVIEW_POLL_MAX_ATTEMPTS,
+  REVIEW_POLL_MS,
+} from "../../shared/analysis-poll.ts";
+import { toVerdict } from "../../shared/verdict.ts";
 import { applyAnnotations } from "../annotations/decorate.ts";
 import { findOpenMessage, markAnnotateRoot } from "./dom.ts";
 import { getButtonStatusEl, setButtonState } from "./button.ts";
-
-const REVIEW_POLL_MS = 1500;
-const REVIEW_POLL_MAX_ATTEMPTS = 40;
 
 function emailAnalyzeRequest(text: string, pageUrl: string): AnalyzeRequest {
   return {
@@ -15,6 +17,23 @@ function emailAnalyzeRequest(text: string, pageUrl: string): AnalyzeRequest {
       pageUrl,
     },
   };
+}
+
+function quickStatusMessage(result: AnalysisResult): string {
+  const verdict = toVerdict(result);
+  const headline = `${verdict.title} (${verdict.riskScore}/100)`;
+  const topReason = verdict.reasons[0];
+  if (topReason) {
+    return `${headline} — ${topReason}. Finding risky phrases…`;
+  }
+  return `${headline}. Finding risky phrases…`;
+}
+
+function doneStatusMessage(highlighted: number): string {
+  if (highlighted > 0) {
+    return `Highlighted ${highlighted} risky ${highlighted === 1 ? "part" : "parts"}. Click one to see why.`;
+  }
+  return "No risky parts found in this email.";
 }
 
 async function requestAnalyze(request: AnalyzeRequest): Promise<AnalysisResult> {
@@ -66,6 +85,21 @@ async function waitForCompletion(id: string): Promise<AnalysisResult> {
   return latest;
 }
 
+function applyHighlights(
+  result: AnalysisResult,
+  body: HTMLElement,
+  doc: Document,
+): number {
+  const riskyParts = result.riskyParts ?? [];
+  if (!result.decision || riskyParts.length === 0) {
+    return 0;
+  }
+  return applyAnnotations(result.decision, riskyParts, {
+    doc,
+    root: body,
+  });
+}
+
 export async function scanOpenGmailEmail(
   button: HTMLButtonElement,
   doc: Document = document,
@@ -85,10 +119,15 @@ export async function scanOpenGmailEmail(
       emailAnalyzeRequest(open.text, doc.location.href),
     );
 
-    const result =
-      initial.status === "completed" || initial.status === "failed"
-        ? initial
-        : await waitForCompletion(initial.id);
+    if (initial.status === "failed") {
+      throw new Error("Analysis failed. Try again in a moment.");
+    }
+
+    let result = initial;
+    if (initial.status === "reviewing") {
+      setButtonState(button, "reviewing", statusEl, quickStatusMessage(initial));
+      result = await waitForCompletion(initial.id);
+    }
 
     if (result.status === "failed") {
       throw new Error("Analysis failed. Try again in a moment.");
@@ -97,23 +136,9 @@ export async function scanOpenGmailEmail(
       throw new Error("The check is taking too long. Try again in a moment.");
     }
 
-    const riskyParts = result.riskyParts ?? [];
-    const highlighted =
-      result.decision && riskyParts.length > 0
-        ? applyAnnotations(result.decision, riskyParts, {
-            doc,
-            root: open.body,
-          })
-        : 0;
+    const highlighted = applyHighlights(result, open.body, doc);
 
-    setButtonState(
-      button,
-      "done",
-      statusEl,
-      highlighted > 0
-        ? `Highlighted ${highlighted} risky ${highlighted === 1 ? "part" : "parts"}. Click one to see why.`
-        : "No risky parts found in this email.",
-    );
+    setButtonState(button, "done", statusEl, doneStatusMessage(highlighted));
   } catch (error) {
     setButtonState(
       button,

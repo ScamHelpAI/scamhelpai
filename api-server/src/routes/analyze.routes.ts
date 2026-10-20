@@ -19,6 +19,6 @@ analyzeRoutes.post(
 // Clients poll while review finishes.
 analyzeRoutes.get(
   "/:id",
-  rateLimit({ name: "analyze-get", limit: 30 }),
+  rateLimit({ name: "analyze-get", limit: 60 }),
   getAnalysisHandler,
 );

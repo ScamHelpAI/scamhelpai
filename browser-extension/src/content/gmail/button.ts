@@ -1,7 +1,12 @@
 export const BUTTON_ATTR = "data-scamhelp-gmail-btn";
 export const BUTTON_HOST_ATTR = "data-scamhelp-gmail-btn-host";
 
-export type GmailButtonState = "idle" | "loading" | "done" | "error";
+export type GmailButtonState =
+  | "idle"
+  | "loading"
+  | "reviewing"
+  | "done"
+  | "error";
 
 const STYLE_ID = "scamhelp-gmail-button-styles";
 
@@ -35,6 +40,13 @@ export function ensureButtonStyles(doc: Document = document): void {
       background: #fce4e1;
       color: #7f1d1d;
     }
+    [${BUTTON_ATTR}][data-state="reviewing"] {
+      border-color: #b8650a;
+      background: #fff7ed;
+      color: #7c3a0a;
+      opacity: 1;
+      cursor: wait;
+    }
     [${BUTTON_ATTR}][data-state="done"] {
       border-color: #2e7d32;
       background: #e8f5e9;
@@ -64,7 +76,15 @@ export function setButtonState(
     case "loading":
       button.disabled = true;
       button.textContent = "Checking…";
-      if (statusEl) statusEl.textContent = "Analyzing this email…";
+      if (statusEl) statusEl.textContent = "Sending this email to ScamHelp…";
+      break;
+    case "reviewing":
+      button.disabled = true;
+      button.textContent = "Quick result";
+      if (statusEl) {
+        statusEl.textContent =
+          message ?? "Quick check done — finding risky phrases…";
+      }
       break;
     case "done":
       button.disabled = false;
