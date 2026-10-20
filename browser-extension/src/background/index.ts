@@ -13,6 +13,8 @@ import {
 import type {
   AnalyzeMessage,
   AnalyzeResponse,
+  ApplyPageAnnotationsMessage,
+  ApplyPageAnnotationsResponse,
   CheckUrlsMessage,
   CheckUrlsResponseMessage,
   GetAnalysisMessage,
@@ -129,6 +131,50 @@ async function fetchAnalysis(id: string): Promise<AnalysisResult> {
   return res.json() as Promise<AnalysisResult>;
 }
 
+async function applyPageAnnotations(
+  message: ApplyPageAnnotationsMessage,
+): Promise<ApplyPageAnnotationsResponse> {
+  const tab = await getActiveTab();
+  const tabId = tab.id;
+  if (tabId === undefined) {
+    return { ok: false, error: "No active tab found." };
+  }
+
+  try {
+    const response = (await chrome.tabs.sendMessage(
+      tabId,
+      message,
+    )) as ApplyPageAnnotationsResponse | undefined;
+    if (response?.ok) return response;
+  } catch {
+    // Content script not injected yet.
+  }
+
+  try {
+    await chrome.scripting.executeScript({
+      target: { tabId },
+      files: ["content/annotations.js"],
+    });
+    const response = (await chrome.tabs.sendMessage(
+      tabId,
+      message,
+    )) as ApplyPageAnnotationsResponse | undefined;
+
+    if (!response?.ok) {
+      return {
+        ok: false,
+        error: response?.error ?? "Annotation script did not respond.",
+      };
+    }
+    return response;
+  } catch {
+    return {
+      ok: false,
+      error: "Could not annotate this page. Try reloading the tab.",
+    };
+  }
+}
+
 async function scanActivePage(): Promise<AnalysisResult> {
   const page = await readActivePageContents();
   if (!page.ok) {
@@ -179,7 +225,8 @@ chrome.runtime.onMessage.addListener(
       | ScanActivePageMessage
       | AnalyzeMessage
       | GetAnalysisMessage
-      | CheckUrlsMessage,
+      | CheckUrlsMessage
+      | ApplyPageAnnotationsMessage,
     _sender,
     sendResponse,
   ) => {
@@ -245,6 +292,21 @@ chrome.runtime.onMessage.addListener(
                 ? error.message
                 : "Is the ScamHelp server running?",
           } satisfies AnalyzeResponse),
+        );
+      return true;
+    }
+
+    if (message?.type === "applyPageAnnotations") {
+      applyPageAnnotations(message)
+        .then((response) => sendResponse(response))
+        .catch((error: unknown) =>
+          sendResponse({
+            ok: false,
+            error:
+              error instanceof Error
+                ? error.message
+                : "Could not annotate this page.",
+          } satisfies ApplyPageAnnotationsResponse),
         );
       return true;
     }

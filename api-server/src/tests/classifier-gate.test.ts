@@ -154,6 +154,8 @@ describe("assessmentFromClassifier", () => {
     expect(assessment.finalScamProbability).toBeGreaterThan(0.8);
     expect(assessment.supportedClaims[0]?.evidenceIds).toContain("ev-001");
     expect(assessment.reasoningSummary).toContain("credential_phishing");
+    expect(assessment.decision.title).toBe("Rushing you on purpose");
+    expect(assessment.riskyParts).toEqual([]);
   });
 
   it("marks insufficient_evidence when the classifier says so", () => {

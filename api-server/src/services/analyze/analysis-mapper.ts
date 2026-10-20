@@ -61,6 +61,8 @@ export function toAnalysisResult(params: {
       primary: params.assessment.finalScamType,
     },
     summary: params.assessment.reasoningSummary,
+    decision: params.assessment.decision,
+    riskyParts: params.assessment.riskyParts,
     evidence: params.evidences.map(toPublicEvidence),
     ...(params.review ? { review: params.review } : {}),
     createdAt: params.createdAt,

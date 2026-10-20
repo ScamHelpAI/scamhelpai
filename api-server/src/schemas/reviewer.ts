@@ -22,6 +22,40 @@ export const supportedClaimSchema = z.object({
     .describe("Evidence ids that support this claim"),
 });
 
+export const analysisDecisionSchema = z.object({
+  title: z
+    .string()
+    .min(1)
+    .describe(
+      "Plain-language verdict title for the main manipulation tactic, e.g. Rushing you on purpose",
+    ),
+  dont: z
+    .string()
+    .min(1)
+    .describe("One short Don't line: what the user should not do"),
+  do: z
+    .string()
+    .min(1)
+    .describe("One short Do line: a safer alternative action"),
+});
+
+export type AnalysisDecision = z.infer<typeof analysisDecisionSchema>;
+
+export const riskyPartSchema = z.object({
+  quote: z
+    .string()
+    .min(1)
+    .describe(
+      "Exact contiguous substring from the submission that makes the message risky",
+    ),
+  message: z
+    .string()
+    .min(1)
+    .describe("One short sentence explaining why this quoted part is risky"),
+});
+
+export type RiskyPart = z.infer<typeof riskyPartSchema>;
+
 export const reviewerAssessmentSchema = z.object({
   verdict: reviewVerdictSchema,
   finalScamProbability: confidenceSchema.describe(
@@ -49,6 +83,15 @@ export const reviewerAssessmentSchema = z.object({
     .string()
     .min(1)
     .describe("Concise explanation of the final judgment"),
+  decision: analysisDecisionSchema.describe(
+    "User-facing verdict card: title plus Don't/Do guidance for the whole message",
+  ),
+  riskyParts: z
+    .array(riskyPartSchema)
+    .max(12)
+    .describe(
+      "Risky phrases from the submission with short annotations; empty when none apply",
+    ),
 });
 
 export type ReviewerAssessment = z.infer<typeof reviewerAssessmentSchema>;

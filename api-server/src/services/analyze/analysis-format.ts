@@ -59,6 +59,8 @@ export function buildReviewerPrompt(params: {
   const submission = buildSubmissionPrompt(params.request);
   return `Review this submission. A fast classifier produced a prior assessment; challenge it rather than copying it blindly.
 
+For decision and riskyParts, quote only contiguous substrings that appear in the submission inputs below. Each riskyParts.message should explain that quote in one short sentence.
+
 Classifier prior:
 ${JSON.stringify(params.classifier.answers, null, 2)}
 

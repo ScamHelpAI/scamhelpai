@@ -7,6 +7,17 @@ export type AnalysisStatus =
   | "completed"
   | "failed";
 
+export type AnalysisDecision = {
+  title: string;
+  dont: string;
+  do: string;
+};
+
+export type RiskyPart = {
+  quote: string;
+  message: string;
+};
+
 export type AnalysisResult = {
   id: string;
   status: AnalysisStatus;
@@ -21,6 +32,8 @@ export type AnalysisResult = {
   };
   claimedIdentity?: string;
   summary: string;
+  decision: AnalysisDecision;
+  riskyParts: RiskyPart[];
   evidence: {
     id: string;
     summary: string;

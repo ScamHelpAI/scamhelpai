@@ -41,7 +41,11 @@ Judgment:
 - Disagree when the evidence does not support a scam reading, or a benign explanation is better.
 - Score probability from corroborated evidence, not from scare language alone.
 - If type is unclear, use unknown rather than forcing a label.
-- Record contradictions and unsupported claims explicitly. Be conservative: when unsure, lower probability and say what is missing.`;
+- Record contradictions and unsupported claims explicitly. Be conservative: when unsure, lower probability and say what is missing.
+
+User-facing annotations:
+- decision is one plain-language verdict for the whole message (title plus one Don't line and one Do line). Write for a non-expert reader.
+- riskyParts lists only phrases that appear verbatim in the submission text and that make the message risky. Prefer exact substrings a reader would see (not HTML tags). Use at most eight entries; one short sentence per message. If nothing in the text is specifically risky, return an empty riskyParts array.`;
 
 export async function runLlmReview(
   request: AnalyzeRequest,

@@ -9,13 +9,17 @@ import type {
   AnalysisReview,
 } from "../../schemas/analysis-result.js";
 import type { Evidence } from "../../schemas/evidence.js";
-import type { ClassifierResult } from "../../schemas/classifier.js";
+import {
+  classifierResultSchema,
+  type ClassifierResult,
+} from "../../schemas/classifier.js";
 import {
   reviewerAssessmentSchema,
   type ReviewerAssessment,
 } from "../../schemas/reviewer.js";
 import { db } from "../../db/index.js";
 import { agentRuns, analyses, analysisInputs, evidence } from "../../db/schema.js";
+import { assessmentFromClassifier } from "./classifier-gate.js";
 import { toAnalysisResult } from "./analysis-mapper.js";
 
 export async function createPendingAnalysis(
@@ -183,7 +187,9 @@ function toPublicReview(assessment: ReviewerAssessment): AnalysisReview {
   };
 }
 
-async function loadReview(analysisId: string): Promise<AnalysisReview | undefined> {
+async function loadReviewerAssessment(
+  analysisId: string,
+): Promise<ReviewerAssessment | undefined> {
   const [row] = await db
     .select()
     .from(agentRuns)
@@ -196,7 +202,43 @@ async function loadReview(analysisId: string): Promise<AnalysisReview | undefine
 
   const parsed = reviewerAssessmentSchema.safeParse(row.resultJson);
   if (!parsed.success) return undefined;
-  return toPublicReview(parsed.data);
+  return parsed.data;
+}
+
+async function loadClassifierAssessment(
+  analysisId: string,
+  evidences: Evidence[],
+): Promise<ReviewerAssessment | undefined> {
+  const [row] = await db
+    .select()
+    .from(agentRuns)
+    .where(
+      and(eq(agentRuns.analysisId, analysisId), eq(agentRuns.role, "analyst")),
+    )
+    .limit(1);
+
+  if (!row) return undefined;
+
+  const parsed = classifierResultSchema.safeParse(row.resultJson);
+  if (!parsed.success) return undefined;
+  return assessmentFromClassifier(parsed.data, evidences);
+}
+
+async function loadAssessmentForAnalysis(
+  analysisId: string,
+  status: "reviewing" | "completed",
+  evidences: Evidence[],
+): Promise<ReviewerAssessment | null> {
+  if (status === "completed") {
+    const reviewer = await loadReviewerAssessment(analysisId);
+    if (reviewer) return reviewer;
+  }
+
+  const classifierAssessment = await loadClassifierAssessment(
+    analysisId,
+    evidences,
+  );
+  return classifierAssessment ?? null;
 }
 
 export async function getAnalysisById(
@@ -230,33 +272,42 @@ export async function getAnalysisById(
     return null;
   }
 
-  const review =
-    analysis.status === "completed" ? await loadReview(id) : undefined;
+  const evidences: Evidence[] = evidenceRows.map((item) => ({
+    id: item.id,
+    type: item.type,
+    source: item.source,
+    summary: item.summary,
+    confidence: item.confidence,
+    data:
+      item.data && typeof item.data === "object"
+        ? (item.data as Record<string, unknown>)
+        : undefined,
+    sourceInputId: item.sourceInputId ?? undefined,
+    toolName: item.toolName ?? undefined,
+    createdAt: item.createdAt,
+  }));
 
-  return {
+  const assessment = await loadAssessmentForAnalysis(
+    id,
+    analysis.status,
+    evidences,
+  );
+  if (!assessment) {
+    return null;
+  }
+
+  const review =
+    analysis.status === "completed"
+      ? toPublicReview(assessment)
+      : undefined;
+
+  return toAnalysisResult({
     id: analysis.id,
     status: analysis.status,
-    risk: {
-      score: analysis.riskScore,
-      level: analysis.riskLevel,
-      confidence: analysis.confidence,
-    },
-    classification: {
-      primary: analysis.scamType,
-    },
-    summary: analysis.summary,
-    evidence: evidenceRows.map((item) => ({
-      id: item.id,
-      summary: item.summary,
-      severity:
-        item.confidence >= 0.7
-          ? "high"
-          : item.confidence >= 0.4
-            ? "medium"
-            : "low",
-    })),
-    ...(review ? { review } : {}),
+    assessment,
+    evidences,
     createdAt: analysis.createdAt,
     completedAt: analysis.completedAt ?? undefined,
-  };
+    ...(review ? { review } : {}),
+  });
 }

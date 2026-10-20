@@ -10,7 +10,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import type { AnalyzeResponse } from "@/shared/messages.ts";
+import type {
+  AnalyzeResponse,
+  ApplyPageAnnotationsMessage,
+} from "@/shared/messages.ts";
 import type { AnalysisResult } from "@/shared/types.ts";
 import { toVerdict, type VerdictTone } from "@/shared/verdict.ts";
 
@@ -177,6 +180,20 @@ export default function App() {
       window.clearInterval(timer);
     };
   }, [result?.id, result?.status]);
+
+  useEffect(() => {
+    if (!result || result.status !== "completed" || result.riskyParts.length === 0) {
+      return;
+    }
+
+    const message: ApplyPageAnnotationsMessage = {
+      type: "applyPageAnnotations",
+      decision: result.decision,
+      riskyParts: result.riskyParts,
+    };
+
+    void chrome.runtime.sendMessage(message);
+  }, [result?.id, result?.status, result?.riskyParts, result?.decision]);
 
   async function scanPage() {
     setLoading(true);

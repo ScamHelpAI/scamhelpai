@@ -2,7 +2,11 @@ import { z } from "zod";
 import { confidenceSchema, idSchema, timestampSchema } from "./shared.js";
 import { scamTypeSchema } from "./analyst.js";
 import { publicEvidenceSchema } from "./evidence.js";
-import { reviewVerdictSchema } from "./reviewer.js";
+import {
+  analysisDecisionSchema,
+  reviewVerdictSchema,
+  riskyPartSchema,
+} from "./reviewer.js";
 
 export const analysisStatusSchema = z.enum([
   "queued",
@@ -49,6 +53,8 @@ export const analysisResultSchema = z.object({
   classification: classificationSchema,
   claimedIdentity: z.string().optional(),
   summary: z.string().min(1),
+  decision: analysisDecisionSchema,
+  riskyParts: z.array(riskyPartSchema),
   evidence: z.array(publicEvidenceSchema),
   review: analysisReviewSchema.optional(),
   createdAt: timestampSchema,

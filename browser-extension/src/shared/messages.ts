@@ -1,5 +1,10 @@
 import type { CheckUrlResult } from "./check.ts";
-import type { AnalysisResult, AnalyzeRequest } from "./types.ts";
+import type {
+  AnalysisDecision,
+  AnalysisResult,
+  AnalyzeRequest,
+  RiskyPart,
+} from "./types.ts";
 
 export type ReadPageMessage = {
   type: "readPageContents";
@@ -40,10 +45,21 @@ export type CheckUrlsResponseMessage =
   | { ok: true; results: CheckUrlResult[] }
   | { ok: false; error: string };
 
+export type ApplyPageAnnotationsMessage = {
+  type: "applyPageAnnotations";
+  decision: AnalysisDecision;
+  riskyParts: RiskyPart[];
+};
+
+export type ApplyPageAnnotationsResponse =
+  | { ok: true }
+  | { ok: false; error: string };
+
 export type ExtensionRequest =
   | ReadPageMessage
   | AnalyzeMessage
   | GetAnalysisMessage
   | ReadActivePageMessage
   | ScanActivePageMessage
-  | CheckUrlsMessage;
+  | CheckUrlsMessage
+  | ApplyPageAnnotationsMessage;

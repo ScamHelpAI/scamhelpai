@@ -95,11 +95,15 @@ export {
 } from "./evidence.js";
 
 export {
+  analysisDecisionSchema,
   reviewVerdictSchema,
   reviewerAssessmentSchema,
+  riskyPartSchema,
   supportedClaimSchema,
+  type AnalysisDecision,
   type ReviewVerdict,
   type ReviewerAssessment,
+  type RiskyPart,
 } from "./reviewer.js";
 
 export {

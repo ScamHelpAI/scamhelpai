@@ -6,7 +6,10 @@ import type { AnalyzeRequest } from "../../schemas/analysis-input.js";
 import type { ScamType } from "../../schemas/analyst.js";
 import type { ClassifierResult } from "../../schemas/classifier.js";
 import type { Evidence } from "../../schemas/evidence.js";
-import type { ReviewerAssessment } from "../../schemas/reviewer.js";
+import type {
+  AnalysisDecision,
+  ReviewerAssessment,
+} from "../../schemas/reviewer.js";
 import { hasToolBackedEvidence } from "./evidence-utils.js";
 
 export const CHOICE_CONFIDENCE_FLOOR = 0.6;
@@ -151,6 +154,60 @@ export function combineScamProbability(classifier: ClassifierResult): number {
   return Math.min(1, Math.max(maxBoolean, riskNormalized));
 }
 
+const PROVISIONAL_DECISIONS: Record<string, AnalysisDecision> = {
+  urgency_manipulation: {
+    title: "Rushing you on purpose",
+    dont: "Don't hurry. There is no real deadline.",
+    do: "Do take a break and talk to someone you trust.",
+  },
+  impersonation: {
+    title: "Pretending to be someone you trust",
+    dont: "Don't assume the sender is who they claim to be.",
+    do: "Do contact the organization using a number or site you already trust.",
+  },
+  credential_harvest: {
+    title: "Trying to steal your login",
+    dont: "Don't enter passwords or codes from this message.",
+    do: "Do sign in only by opening the app or site yourself.",
+  },
+  payment_redirection: {
+    title: "Pushing you to pay the wrong way",
+    dont: "Don't send money or gift cards because this message asks.",
+    do: "Do verify payment requests through a channel you already use.",
+  },
+  malware_delivery: {
+    title: "Trying to get you to open something harmful",
+    dont: "Don't download attachments or install software from this message.",
+    do: "Do delete the file and check with the sender another way.",
+  },
+};
+
+const PROVISIONAL_DECISION_PRIORITY = [
+  "urgency_manipulation",
+  "impersonation",
+  "credential_harvest",
+  "payment_redirection",
+  "malware_delivery",
+] as const;
+
+const DEFAULT_PROVISIONAL_DECISION: AnalysisDecision = {
+  title: "Checking this message",
+  dont: "Don't act on this message yet.",
+  do: "Do wait for a fuller check before you respond.",
+};
+
+export function provisionalDecisionFromClassifier(
+  classifier: ClassifierResult,
+): AnalysisDecision {
+  for (const key of PROVISIONAL_DECISION_PRIORITY) {
+    const probability = booleanProbability(classifier, key);
+    if (probability !== null && probability >= 0.6) {
+      return PROVISIONAL_DECISIONS[key];
+    }
+  }
+  return DEFAULT_PROVISIONAL_DECISION;
+}
+
 function firedSignals(classifier: ClassifierResult): string[] {
   const labels: Record<string, string> = {
     impersonation: "impersonation",
@@ -207,5 +264,7 @@ export function assessmentFromClassifier(
     confidenceAdjustment: 0,
     additionalEvidenceIds: [],
     reasoningSummary: reasoningParts.join(" "),
+    decision: provisionalDecisionFromClassifier(classifier),
+    riskyParts: [],
   };
 }
