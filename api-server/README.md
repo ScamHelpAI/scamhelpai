@@ -29,6 +29,22 @@ Host ports: Postgres `5433`, Redis `6380`, MinIO `9100` / console `9101`.
 3. `POST /v1/assets/{assetId}/complete`
 4. Use `assetId` in analysis inputs (`image` / `pdf` / `audio` / email `assetIds`)
 
+## Rate limits
+
+Per client IP, fixed 60s in-memory window:
+
+| Route | Limit / min |
+|-------|-------------|
+| `POST /v1/check/url` | 120 |
+| `POST /v1/check/urls` | 30 |
+| `POST /v1/analyses` | 10 |
+| `GET /v1/analyses/:id` | 60 |
+| `POST /v1/assets/presign` | 20 |
+| `POST /v1/assets/:id/complete` | 20 |
+| `GET /v1/assets/:id` | 60 |
+
+Health probes are not rate limited. Exceeded requests return `429` with `Retry-After`.
+
 Push the Drizzle schema to Postgres:
 
 ```sh
