@@ -36,6 +36,11 @@
       "matches": ["http://*/*", "https://*/*"],
       "js": ["content/links.js"],
       "run_at": "document_idle"
+    },
+    {
+      "matches": ["https://mail.google.com/*"],
+      "js": ["content/gmail.js"],
+      "run_at": "document_idle"
     }
   ]
 }

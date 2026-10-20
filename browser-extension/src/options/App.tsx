@@ -1,9 +1,14 @@
 import { useEffect, useState } from "react";
-import { FileTextIcon, ScaleIcon } from "lucide-react";
+import { ChevronRightIcon, FileTextIcon, ScaleIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { DEFAULT_API_BASE } from "@/shared/api-url.ts";
 import {
+  getApiBaseSetting,
   getLinkScanEnabled,
+  setApiBaseSetting,
   setLinkScanEnabled,
 } from "@/shared/settings.ts";
 import {
@@ -20,11 +25,18 @@ export default function App() {
   );
   const [linkScanEnabled, setLinkScanEnabledState] = useState(false);
   const [linkScanReady, setLinkScanReady] = useState(false);
+  const [apiBase, setApiBase] = useState(DEFAULT_API_BASE);
+  const [apiBaseReady, setApiBaseReady] = useState(false);
+  const [apiBaseSaved, setApiBaseSaved] = useState(false);
 
   useEffect(() => {
     void getLinkScanEnabled().then((enabled) => {
       setLinkScanEnabledState(enabled);
       setLinkScanReady(true);
+    });
+    void getApiBaseSetting().then((base) => {
+      setApiBase(base);
+      setApiBaseReady(true);
     });
   }, []);
 
@@ -53,6 +65,22 @@ export default function App() {
   async function toggleLinkScan(next: boolean) {
     setLinkScanEnabledState(next);
     await setLinkScanEnabled(next);
+  }
+
+  async function saveApiBase() {
+    await setApiBaseSetting(apiBase);
+    const saved = await getApiBaseSetting();
+    setApiBase(saved);
+    setApiBaseSaved(true);
+    window.setTimeout(() => setApiBaseSaved(false), 2000);
+  }
+
+  function resetApiBase() {
+    setApiBase(DEFAULT_API_BASE);
+    void setApiBaseSetting(DEFAULT_API_BASE).then(() => {
+      setApiBaseSaved(true);
+      window.setTimeout(() => setApiBaseSaved(false), 2000);
+    });
   }
 
   if (view === "privacy") {
@@ -95,6 +123,64 @@ export default function App() {
             onCheckedChange={(checked) => void toggleLinkScan(checked)}
           />
         </div>
+      </section>
+
+      <section className="mt-8">
+        <details className="group overflow-hidden rounded-2xl border border-border bg-card">
+          <summary
+            className="flex cursor-pointer list-none items-center gap-2 px-4 py-4 font-heading text-lg font-semibold tracking-tight marker:content-none [&::-webkit-details-marker]:hidden"
+          >
+            <ChevronRightIcon
+              className="size-5 shrink-0 text-muted-foreground transition-transform group-open:rotate-90"
+              aria-hidden
+            />
+            Debug
+          </summary>
+          <div className="space-y-4 border-t border-border px-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="api-base" className="text-base font-semibold">
+                API URL
+              </Label>
+              <p className="text-sm leading-relaxed text-muted-foreground">
+                Base URL for the ScamHelp server (no trailing slash). Default is{" "}
+                {DEFAULT_API_BASE}.
+              </p>
+              <Input
+                id="api-base"
+                type="url"
+                inputMode="url"
+                autoComplete="off"
+                spellCheck={false}
+                placeholder={DEFAULT_API_BASE}
+                value={apiBase}
+                disabled={!apiBaseReady}
+                onChange={(event) => setApiBase(event.target.value)}
+              />
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <Button
+                type="button"
+                size="sm"
+                disabled={!apiBaseReady}
+                onClick={() => void saveApiBase()}
+              >
+                Save API URL
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                disabled={!apiBaseReady}
+                onClick={() => resetApiBase()}
+              >
+                Reset to default
+              </Button>
+              {apiBaseSaved ? (
+                <span className="text-sm text-muted-foreground">Saved.</span>
+              ) : null}
+            </div>
+          </div>
+        </details>
       </section>
 
       <section className="mt-10 space-y-3">

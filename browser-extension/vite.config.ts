@@ -59,6 +59,17 @@ function bundleExtensionScripts(): Plugin {
         target: "es2022",
         logLevel: "info",
       });
+
+      await esbuild.build({
+        absWorkingDir: root,
+        entryPoints: [resolve(root, "src/content/gmail/index.ts")],
+        bundle: true,
+        format: "iife",
+        outfile: resolve(outDir, "content/gmail.js"),
+        platform: "browser",
+        target: "es2022",
+        logLevel: "info",
+      });
     },
   };
 }

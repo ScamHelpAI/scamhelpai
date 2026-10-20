@@ -10,11 +10,20 @@ export const SCAMHELP_MARK = "data-scamhelp";
 export const SCAMHELP_ANNOTATION = "data-scamhelp-annotation";
 export const STYLE_ID = "scamhelp-annotation-styles";
 export const PAGE_GLOW_CLASS = "scamhelp-page-risk-outline";
+export const ANNOTATE_ROOT_ATTR = "data-scamhelp-annotate-root";
 
 const HIGHLIGHT_FILL = "#FCE4E1";
 const HIGHLIGHT_UNDERLINE = "#C62828";
 
 let activeDecision: AnalysisDecision | null = null;
+
+export type ApplyAnnotationsOptions = {
+  doc?: Document;
+  /** Limit search/clear/glow to this subtree. Defaults to document.body. */
+  root?: ParentNode;
+  /** CSS selector resolved against doc when root is not passed. */
+  rootSelector?: string;
+};
 
 export function ensureStyles(doc: Document = document): void {
   if (doc.getElementById(STYLE_ID)) return;
@@ -31,7 +40,7 @@ export function ensureStyles(doc: Document = document): void {
       cursor: pointer;
       border-radius: 2px;
     }
-    body.${PAGE_GLOW_CLASS} {
+    .${PAGE_GLOW_CLASS} {
       outline: 2px solid ${HIGHLIGHT_UNDERLINE};
       outline-offset: 4px;
       box-shadow: 0 0 0 6px rgba(198, 40, 40, 0.12);
@@ -179,11 +188,45 @@ function wrapQuoteInDom(
   return false;
 }
 
-export function clearAnnotations(doc: Document = document): void {
+function resolveRoot(
+  doc: Document,
+  options: ApplyAnnotationsOptions,
+): ParentNode {
+  if (options.root) return options.root;
+  if (options.rootSelector) {
+    const found = doc.querySelector(options.rootSelector);
+    if (found) return found;
+  }
+  return doc.body ?? doc.documentElement;
+}
+
+function glowTargetForRoot(root: ParentNode, doc: Document): Element | null {
+  if (root instanceof Element) return root;
+  if (root instanceof Document) return root.body ?? root.documentElement;
+  return doc.body;
+}
+
+export function clearAnnotations(
+  options: ApplyAnnotationsOptions | Document = {},
+): void {
+  const opts: ApplyAnnotationsOptions =
+    options instanceof Document ? { doc: options } : options;
+  const doc = opts.doc ?? document;
+  const root = resolveRoot(doc, opts);
+  const glow = glowTargetForRoot(root, doc);
+
   closePopover(doc);
+  glow?.classList.remove(PAGE_GLOW_CLASS);
   doc.body?.classList.remove(PAGE_GLOW_CLASS);
 
-  for (const mark of [...doc.querySelectorAll(`mark[${SCAMHELP_ANNOTATION}]`)]) {
+  const scope: ParentNode =
+    root instanceof Document ? root : (root as ParentNode);
+  const marks =
+    scope instanceof Element || scope instanceof Document
+      ? scope.querySelectorAll(`mark[${SCAMHELP_ANNOTATION}]`)
+      : doc.querySelectorAll(`mark[${SCAMHELP_ANNOTATION}]`);
+
+  for (const mark of [...marks]) {
     const text = mark.textContent ?? "";
     mark.replaceWith(doc.createTextNode(text));
   }
@@ -192,9 +235,14 @@ export function clearAnnotations(doc: Document = document): void {
 export function applyAnnotations(
   decision: AnalysisDecision,
   riskyParts: RiskyPart[],
-  doc: Document = document,
+  options: ApplyAnnotationsOptions | Document = {},
 ): number {
-  clearAnnotations(doc);
+  const opts: ApplyAnnotationsOptions =
+    options instanceof Document ? { doc: options } : options;
+  const doc = opts.doc ?? document;
+  const root = resolveRoot(doc, opts);
+
+  clearAnnotations(opts);
   activeDecision = decision;
   ensureStyles(doc);
 
@@ -202,7 +250,6 @@ export function applyAnnotations(
     return 0;
   }
 
-  const root = doc.body ?? doc.documentElement;
   const sorted = [...riskyParts].sort(
     (a, b) => b.quote.trim().length - a.quote.trim().length,
   );
@@ -215,7 +262,7 @@ export function applyAnnotations(
   }
 
   if (applied > 0) {
-    doc.body?.classList.add(PAGE_GLOW_CLASS);
+    glowTargetForRoot(root, doc)?.classList.add(PAGE_GLOW_CLASS);
   }
 
   return applied;

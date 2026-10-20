@@ -1,0 +1,113 @@
+import type { AnalyzeResponse } from "../../shared/messages.ts";
+import type { AnalysisResult, AnalyzeRequest } from "../../shared/types.ts";
+import { applyAnnotations } from "../annotations/decorate.ts";
+import { findOpenMessage, markAnnotateRoot } from "./dom.ts";
+import { getButtonStatusEl, setButtonState } from "./button.ts";
+
+const REVIEW_POLL_MS = 1500;
+const REVIEW_POLL_MAX_ATTEMPTS = 20;
+
+function emailAnalyzeRequest(text: string, pageUrl: string): AnalyzeRequest {
+  return {
+    inputs: [{ type: "text", content: text }],
+    context: {
+      source: "browser_extension",
+      pageUrl,
+    },
+  };
+}
+
+async function requestAnalyze(request: AnalyzeRequest): Promise<AnalysisResult> {
+  const response = (await chrome.runtime.sendMessage({
+    type: "analyze",
+    request,
+  })) as AnalyzeResponse | undefined;
+
+  if (!response?.ok) {
+    throw new Error(
+      response && "error" in response
+        ? response.error
+        : "Is the ScamHelp server running?",
+    );
+  }
+  return response.result;
+}
+
+async function requestGetAnalysis(id: string): Promise<AnalysisResult> {
+  const response = (await chrome.runtime.sendMessage({
+    type: "getAnalysis",
+    id,
+  })) as AnalyzeResponse | undefined;
+
+  if (!response?.ok) {
+    throw new Error(
+      response && "error" in response
+        ? response.error
+        : "Could not load analysis.",
+    );
+  }
+  return response.result;
+}
+
+async function waitForCompletion(id: string): Promise<AnalysisResult> {
+  let latest = await requestGetAnalysis(id);
+  if (latest.status === "completed" || latest.status === "failed") {
+    return latest;
+  }
+
+  for (let attempt = 0; attempt < REVIEW_POLL_MAX_ATTEMPTS; attempt += 1) {
+    await new Promise((resolve) => setTimeout(resolve, REVIEW_POLL_MS));
+    latest = await requestGetAnalysis(id);
+    if (latest.status === "completed" || latest.status === "failed") {
+      return latest;
+    }
+  }
+
+  return latest;
+}
+
+export async function scanOpenGmailEmail(
+  button: HTMLButtonElement,
+  doc: Document = document,
+): Promise<void> {
+  const statusEl = getButtonStatusEl(button);
+  setButtonState(button, "loading", statusEl);
+
+  try {
+    const open = findOpenMessage(doc);
+    if (!open) {
+      throw new Error("Open an email first, then try again.");
+    }
+
+    markAnnotateRoot(open.body, doc);
+
+    const initial = await requestAnalyze(
+      emailAnalyzeRequest(open.text, doc.location.href),
+    );
+
+    const result =
+      initial.status === "completed" || initial.status === "failed"
+        ? initial
+        : await waitForCompletion(initial.id);
+
+    if (result.status === "failed") {
+      throw new Error("Analysis failed. Try again in a moment.");
+    }
+
+    if (result.riskyParts.length > 0) {
+      applyAnnotations(result.decision, result.riskyParts, {
+        doc,
+        root: open.body,
+      });
+    }
+
+    setButtonState(button, "done", statusEl);
+  } catch (error) {
+    setButtonState(
+      button,
+      "error",
+      statusEl,
+      error instanceof Error ? error.message : "Could not check this email.",
+    );
+  }
+}

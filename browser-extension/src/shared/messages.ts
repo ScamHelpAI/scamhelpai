@@ -49,6 +49,8 @@ export type ApplyPageAnnotationsMessage = {
   type: "applyPageAnnotations";
   decision: AnalysisDecision;
   riskyParts: RiskyPart[];
+  /** When set, highlights are limited to this CSS selector subtree. */
+  rootSelector?: string;
 };
 
 export type ApplyPageAnnotationsResponse =

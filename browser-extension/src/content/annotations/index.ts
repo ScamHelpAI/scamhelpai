@@ -16,7 +16,12 @@ if (!annotationWindow[INSTALLED_FLAG]) {
       if (message?.type !== "applyPageAnnotations") return false;
 
       try {
-        applyAnnotations(message.decision, message.riskyParts, document);
+        applyAnnotations(message.decision, message.riskyParts, {
+          doc: document,
+          ...(message.rootSelector
+            ? { rootSelector: message.rootSelector }
+            : {}),
+        });
         sendResponse({ ok: true });
       } catch (error) {
         sendResponse({
