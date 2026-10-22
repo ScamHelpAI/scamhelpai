@@ -12,6 +12,7 @@ import { inspectEmail } from "../../tools/inspect-email.js";
 import { inspectUrl } from "../../tools/inspect-url.js";
 import { lookupCryptoAddress } from "../../tools/lookup-crypto-address.js";
 import { lookupDomain } from "../../tools/lookup-domain.js";
+import { parsePhoneNumberFromString } from "libphonenumber-js";
 import { lookupPhone } from "../../tools/lookup-phone.js";
 import { BRAND_DOMAINS } from "../../tools/shared/brands.js";
 import { verifyBrandIdentity } from "../../tools/verify-brand-identity.js";
@@ -89,6 +90,34 @@ function hostnameFromUrl(url: string): string | null {
   }
 }
 
+/** Drop regex false positives (order IDs, long digit runs) before phone lookup. */
+function extractPhones(text: string): string[] {
+  const candidates = unique(text.match(PHONE_RE) ?? []);
+  const phones: string[] = [];
+
+  for (const candidate of candidates) {
+    const digits = candidate.replace(/\D/g, "");
+    if (digits.length < 10 || digits.length > 15) continue;
+
+    const hasFormatting = /[+().\s-]/.test(candidate);
+    if (
+      digits.length > 10 &&
+      !hasFormatting &&
+      !candidate.trim().startsWith("+")
+    ) {
+      continue;
+    }
+
+    const parsed = parsePhoneNumberFromString(candidate, "US");
+    if (!parsed) continue;
+
+    phones.push(candidate);
+    if (phones.length >= MAX_PHONES) break;
+  }
+
+  return phones;
+}
+
 function extractBrands(text: string): string[] {
   const lower = text.toLowerCase();
   const found: string[] = [];
@@ -116,7 +145,7 @@ function extractIndicators(text: string, urlInput?: string): CollectorState["ind
     urls,
     domains,
     emails: unique(text.match(EMAIL_RE) ?? []).slice(0, MAX_URLS),
-    phones: unique(text.match(PHONE_RE) ?? []).slice(0, MAX_PHONES),
+    phones: extractPhones(text),
     crypto: unique([
       ...(text.match(BTC_RE) ?? []),
       ...(text.match(ETH_RE) ?? []),
@@ -296,6 +325,9 @@ async function investigateIndicators(
   for (const phone of indicators.phones) {
     tasks.push(
       Promise.resolve(lookupPhone(phone)).then((result) => {
+        if (result.flags.includes("invalid_format")) {
+          return;
+        }
         evidences.push(
           createEvidence({
             id: nextId(),

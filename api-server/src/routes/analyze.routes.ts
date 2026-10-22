@@ -11,7 +11,7 @@ export const analyzeRoutes = new Hono();
 // Full analysis runs collector + LLM; keep this strict.
 analyzeRoutes.post(
   "/",
-  rateLimit({ name: "analyze-create", limit: 5 }),
+  rateLimit({ name: "analyze-create", limit: 10 }),
   dailyRateLimit({ name: "analyze-create", limit: 300 }),
   createAnalysisHandler,
 );

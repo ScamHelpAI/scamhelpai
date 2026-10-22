@@ -19,14 +19,17 @@ function emailAnalyzeRequest(text: string, pageUrl: string): AnalyzeRequest {
   };
 }
 
-function quickStatusMessage(result: AnalysisResult): string {
+function verdictUi(result: AnalysisResult) {
   const verdict = toVerdict(result);
-  const headline = `${verdict.title} (${verdict.riskScore}/100)`;
   const topReason = verdict.reasons[0];
-  if (topReason) {
-    return `${headline} — ${topReason}. Finding risky phrases…`;
-  }
-  return `${headline}. Finding risky phrases…`;
+  const statusMessage = topReason
+    ? `${topReason} Finding risky phrases…`
+    : "Finding risky phrases…";
+  return {
+    tone: verdict.tone,
+    label: `${verdict.title} · ${verdict.riskScore}/100`,
+    statusMessage,
+  };
 }
 
 function doneStatusMessage(highlighted: number): string {
@@ -124,8 +127,14 @@ export async function scanOpenGmailEmail(
     }
 
     let result = initial;
+    const quickUi = verdictUi(initial);
+
     if (initial.status === "reviewing") {
-      setButtonState(button, "reviewing", statusEl, quickStatusMessage(initial));
+      setButtonState(button, "reviewing", statusEl, {
+        tone: quickUi.tone,
+        label: quickUi.label,
+        message: quickUi.statusMessage,
+      });
       result = await waitForCompletion(initial.id);
     }
 
@@ -137,14 +146,17 @@ export async function scanOpenGmailEmail(
     }
 
     const highlighted = applyHighlights(result, open.body, doc);
+    const finalUi = verdictUi(result);
 
-    setButtonState(button, "done", statusEl, doneStatusMessage(highlighted));
+    setButtonState(button, "done", statusEl, {
+      tone: finalUi.tone,
+      label: finalUi.label,
+      message: doneStatusMessage(highlighted),
+    });
   } catch (error) {
-    setButtonState(
-      button,
-      "error",
-      statusEl,
-      error instanceof Error ? error.message : "Could not check this email.",
-    );
+    setButtonState(button, "error", statusEl, {
+      message:
+        error instanceof Error ? error.message : "Could not check this email.",
+    });
   }
 }

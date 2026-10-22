@@ -1,5 +1,8 @@
+import type { VerdictTone } from "../../shared/verdict.ts";
+
 export const BUTTON_ATTR = "data-scamhelp-gmail-btn";
 export const BUTTON_HOST_ATTR = "data-scamhelp-gmail-btn-host";
+export const BUTTON_TONE_ATTR = "data-tone";
 
 export type GmailButtonState =
   | "idle"
@@ -8,94 +11,134 @@ export type GmailButtonState =
   | "done"
   | "error";
 
+export type SetButtonStateOptions = {
+  message?: string;
+  tone?: VerdictTone;
+  label?: string;
+};
+
 const STYLE_ID = "scamhelp-gmail-button-styles";
+
+/** Match popup risk tokens from popup/styles.css */
+const TONE_STYLES: Record<
+  VerdictTone | "brand",
+  { border: string; bg: string; color: string }
+> = {
+  brand: { border: "#b8650a", bg: "#fff7ed", color: "#7c3a0a" },
+  danger: { border: "#b3261e", bg: "#fbe9e7", color: "#b3261e" },
+  warn: { border: "#6b4200", bg: "#fff3e0", color: "#4a2e00" },
+  safe: { border: "#1e6b34", bg: "#e6f4ea", color: "#1e6b34" },
+};
 
 export function ensureButtonStyles(doc: Document = document): void {
   if (doc.getElementById(STYLE_ID)) return;
   const style = doc.createElement("style");
   style.id = STYLE_ID;
+  const toneRules = (
+    Object.entries(TONE_STYLES) as Array<
+      [keyof typeof TONE_STYLES, (typeof TONE_STYLES)[keyof typeof TONE_STYLES]]
+    >
+  )
+    .map(
+      ([tone, colors]) => `
+    [${BUTTON_ATTR}][${BUTTON_TONE_ATTR}="${tone}"] {
+      border-color: ${colors.border};
+      background: ${colors.bg};
+      color: ${colors.color};
+    }`,
+    )
+    .join("");
+
   style.textContent = `
     [${BUTTON_HOST_ATTR}] {
       display: flex;
       align-items: center;
       gap: 8px;
       margin: 8px 0 12px;
+      flex-wrap: wrap;
     }
     [${BUTTON_ATTR}] {
       appearance: none;
-      border: 2px solid #b8650a;
+      border: 2px solid;
       border-radius: 999px;
-      background: #fff7ed;
-      color: #7c3a0a;
       font: 600 13px/1.2 system-ui, sans-serif;
       padding: 8px 14px;
       cursor: pointer;
+      box-shadow: 0 0 0 3px transparent;
+      transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    ${toneRules}
+    [${BUTTON_ATTR}][${BUTTON_TONE_ATTR}="danger"] {
+      box-shadow: 0 0 0 3px rgba(179, 38, 30, 0.2);
+    }
+    [${BUTTON_ATTR}][${BUTTON_TONE_ATTR}="warn"] {
+      box-shadow: 0 0 0 3px rgba(107, 66, 0, 0.15);
+    }
+    [${BUTTON_ATTR}][${BUTTON_TONE_ATTR}="safe"] {
+      box-shadow: 0 0 0 3px rgba(30, 107, 52, 0.15);
     }
     [${BUTTON_ATTR}]:disabled {
-      opacity: 0.7;
+      opacity: 0.92;
       cursor: wait;
-    }
-    [${BUTTON_ATTR}][data-state="error"] {
-      border-color: #c62828;
-      background: #fce4e1;
-      color: #7f1d1d;
-    }
-    [${BUTTON_ATTR}][data-state="reviewing"] {
-      border-color: #b8650a;
-      background: #fff7ed;
-      color: #7c3a0a;
-      opacity: 1;
-      cursor: wait;
-    }
-    [${BUTTON_ATTR}][data-state="done"] {
-      border-color: #2e7d32;
-      background: #e8f5e9;
-      color: #1b5e20;
     }
     [${BUTTON_HOST_ATTR}] [data-scamhelp-gmail-status] {
       font: 13px/1.3 system-ui, sans-serif;
       color: #64748b;
+      flex: 1;
+      min-width: 12rem;
     }
   `;
   doc.documentElement.appendChild(style);
+}
+
+function applyButtonTone(
+  button: HTMLButtonElement,
+  tone: VerdictTone | "brand",
+): void {
+  button.setAttribute(BUTTON_TONE_ATTR, tone);
 }
 
 export function setButtonState(
   button: HTMLButtonElement,
   state: GmailButtonState,
   statusEl: HTMLElement | null,
-  message?: string,
+  options?: SetButtonStateOptions,
 ): void {
   button.dataset.state = state;
   switch (state) {
     case "idle":
+      applyButtonTone(button, "brand");
       button.disabled = false;
       button.textContent = "Check with ScamHelp";
       if (statusEl) statusEl.textContent = "";
       break;
     case "loading":
+      applyButtonTone(button, "brand");
       button.disabled = true;
       button.textContent = "Checking…";
       if (statusEl) statusEl.textContent = "Sending this email to ScamHelp…";
       break;
     case "reviewing":
+      applyButtonTone(button, options?.tone ?? "warn");
       button.disabled = true;
-      button.textContent = "Quick result";
+      button.textContent = options?.label ?? "Quick result";
       if (statusEl) {
         statusEl.textContent =
-          message ?? "Quick check done — finding risky phrases…";
+          options?.message ?? "Quick check done — finding risky phrases…";
       }
       break;
     case "done":
+      applyButtonTone(button, options?.tone ?? "safe");
       button.disabled = false;
-      button.textContent = "Check again";
-      if (statusEl) statusEl.textContent = message ?? "Check complete.";
+      button.textContent = options?.label ?? "Check again";
+      if (statusEl) statusEl.textContent = options?.message ?? "Check complete.";
       break;
     case "error":
+      applyButtonTone(button, "danger");
       button.disabled = false;
       button.textContent = "Try again";
       if (statusEl) {
-        statusEl.textContent = message ?? "Could not check this email.";
+        statusEl.textContent = options?.message ?? "Could not check this email.";
       }
       break;
     default: {
