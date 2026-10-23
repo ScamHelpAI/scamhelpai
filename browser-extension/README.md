@@ -23,7 +23,7 @@ Start the API server (`cd ../api-server && bun run dev`) before analyzing pages.
 
 - **Any page:** the popup can read the current tab’s cleaned HTML.
 - **Link scan toggle:** enable “Scan links on pages” in the popup to auto-check `http`/`https` links via `POST /v1/check/urls` (amber caution / blocked-unsafe; safe links left alone).
-- **Settings:** set the analyzer address (default `http://localhost:3000`). If you point it somewhere other than localhost, add that origin to `host_permissions` in `public/manifest.json` and rebuild.
+- **Settings:** set the analyzer address (default `https://api.scamhelp.ai`). For a custom API host, add that origin to `host_permissions` in `public/manifest.json` and rebuild if it is not already covered.
 
 ## Dev workflow
 

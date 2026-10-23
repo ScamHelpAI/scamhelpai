@@ -1,3 +1,4 @@
+import { FONT_FAMILY } from "../../shared/font-family.ts";
 import type { VerdictTone } from "../../shared/verdict.ts";
 
 export const BUTTON_ATTR = "data-scamhelp-gmail-btn";
@@ -61,7 +62,7 @@ export function ensureButtonStyles(doc: Document = document): void {
       appearance: none;
       border: 2px solid;
       border-radius: 999px;
-      font: 600 13px/1.2 system-ui, sans-serif;
+      font: 600 13px/1.2 ${FONT_FAMILY};
       padding: 8px 14px;
       cursor: pointer;
       box-shadow: 0 0 0 3px transparent;
@@ -82,7 +83,7 @@ export function ensureButtonStyles(doc: Document = document): void {
       cursor: wait;
     }
     [${BUTTON_HOST_ATTR}] [data-scamhelp-gmail-status] {
-      font: 13px/1.3 system-ui, sans-serif;
+      font: 13px/1.3 ${FONT_FAMILY};
       color: #64748b;
       flex: 1;
       min-width: 12rem;

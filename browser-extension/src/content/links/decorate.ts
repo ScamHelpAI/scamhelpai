@@ -1,4 +1,5 @@
 import type { CheckStatus, CheckUrlResult } from "../../shared/check.ts";
+import { FONT_FAMILY } from "../../shared/font-family.ts";
 import {
   OCTAGON_ALERT_SVG,
   RISK_COLORS,
@@ -68,7 +69,7 @@ export function ensureStyles(doc: Document = document): void {
       border-radius: 12px;
       background: #fff;
       color: #111;
-      font: 13px/1.4 system-ui, sans-serif;
+      font: 13px/1.4 ${FONT_FAMILY};
       box-shadow: 0 8px 24px rgba(0,0,0,0.18);
     }
     [${SCAMHELP_MARK}="popover"] strong {
@@ -87,7 +88,7 @@ export function ensureStyles(doc: Document = document): void {
       border-radius: 6px;
       background: ${RISK_COLORS.high};
       color: #fff;
-      font: 600 13px/1.2 system-ui, sans-serif;
+      font: 600 13px/1.2 ${FONT_FAMILY};
       cursor: pointer;
     }
     [${SCAMHELP_MARK}="popover"] button[data-action="close"] {
@@ -98,7 +99,7 @@ export function ensureStyles(doc: Document = document): void {
       border-radius: 6px;
       background: #fff;
       color: #334155;
-      font: 600 13px/1.2 system-ui, sans-serif;
+      font: 600 13px/1.2 ${FONT_FAMILY};
       cursor: pointer;
     }
   `;

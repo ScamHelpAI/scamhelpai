@@ -1,3 +1,4 @@
+import { FONT_FAMILY } from "../../shared/font-family.ts";
 import type { AnalysisDecision, RiskyPart } from "../../shared/types.ts";
 import {
   collectTextNodes,
@@ -54,13 +55,13 @@ export function ensureStyles(doc: Document = document): void {
       border-radius: 12px;
       background: #fff;
       color: #111;
-      font: 14px/1.45 system-ui, sans-serif;
+      font: 14px/1.45 ${FONT_FAMILY};
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
     }
     [${SCAMHELP_MARK}="analysis-popover"] h3 {
       margin: 0 0 8px;
       color: ${HIGHLIGHT_UNDERLINE};
-      font: 700 15px/1.3 system-ui, sans-serif;
+      font: 700 15px/1.3 ${FONT_FAMILY};
     }
     [${SCAMHELP_MARK}="analysis-popover"] p {
       margin: 0 0 10px;

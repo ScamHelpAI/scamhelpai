@@ -1,4 +1,4 @@
-export const DEFAULT_API_BASE = "http://localhost:3000";
+export const DEFAULT_API_BASE = "https://api.scamhelp.ai";
 
 export function analysesUrl(apiBase: string): string {
   return `${apiBase.replace(/\/+$/, "")}/v1/analyses`;
