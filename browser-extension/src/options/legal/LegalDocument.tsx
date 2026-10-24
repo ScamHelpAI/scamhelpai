@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { ArrowLeftIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 
 type LegalDocumentProps = {
   title: string;
@@ -30,13 +31,14 @@ export function LegalDocument({
         </Button>
       </div>
 
-      <header className="mb-8 space-y-2 border-b border-border pb-6">
+      <header className="mb-8 space-y-2">
         <h1 className="font-heading text-3xl font-bold tracking-tight">
           {title}
         </h1>
         <p className="text-base text-muted-foreground">
           Effective date: {effectiveDate}
         </p>
+        <Separator className="mt-6" />
       </header>
 
       <article className="legal-prose space-y-6 text-base leading-relaxed text-foreground">

@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { ChevronRightIcon, FileTextIcon, ScaleIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { DEFAULT_API_BASE } from "@/shared/api-url.ts";
 import {
@@ -103,8 +105,11 @@ export default function App() {
       </header>
 
       <section className="space-y-4">
-        <div className="flex items-start justify-between gap-4 rounded-2xl border border-border bg-card px-4 py-4">
-          <div className="space-y-1.5 pr-2">
+        <Card
+          size="sm"
+          className="flex-row items-start justify-between gap-4 py-4"
+        >
+          <CardContent className="flex-1 space-y-1.5 pr-2">
             <Label
               htmlFor="link-scan"
               className="font-heading text-lg font-semibold"
@@ -114,71 +119,74 @@ export default function App() {
             <p className="text-base leading-relaxed text-muted-foreground">
               Show a caution on risky links and block ones that look unsafe.
             </p>
-          </div>
+          </CardContent>
           <Switch
             id="link-scan"
-            className="mt-1"
+            className="mt-1 mr-(--card-spacing)"
             checked={linkScanEnabled}
             disabled={!linkScanReady}
             onCheckedChange={(checked) => void toggleLinkScan(checked)}
           />
-        </div>
+        </Card>
       </section>
 
       <section className="mt-8">
-        <details className="group overflow-hidden rounded-2xl border border-border bg-card">
-          <summary className="flex cursor-pointer list-none items-center gap-2 px-4 py-4 font-heading text-lg font-semibold tracking-tight marker:content-none [&::-webkit-details-marker]:hidden">
-            <ChevronRightIcon
-              className="size-5 shrink-0 text-muted-foreground transition-transform group-open:rotate-90"
-              aria-hidden
-            />
-            Debug
-          </summary>
-          <div className="space-y-4 border-t border-border px-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="api-base" className="text-base font-semibold">
-                API URL
-              </Label>
-              <p className="text-sm leading-relaxed text-muted-foreground">
-                Base URL for the ScamHelp server (no trailing slash). Default is{" "}
-                {DEFAULT_API_BASE}.
-              </p>
-              <Input
-                id="api-base"
-                type="url"
-                inputMode="url"
-                autoComplete="off"
-                spellCheck={false}
-                placeholder={DEFAULT_API_BASE}
-                value={apiBase}
-                disabled={!apiBaseReady}
-                onChange={(event) => setApiBase(event.target.value)}
+        <Card size="sm" className="gap-0 py-0">
+          <details className="group">
+            <summary className="flex cursor-pointer list-none items-center gap-2 px-(--card-spacing) py-4 font-heading text-lg font-semibold tracking-tight marker:content-none [&::-webkit-details-marker]:hidden">
+              <ChevronRightIcon
+                className="size-5 shrink-0 text-muted-foreground transition-transform group-open:rotate-90"
+                aria-hidden
               />
-            </div>
-            <div className="flex flex-wrap items-center gap-2">
-              <Button
-                type="button"
-                size="sm"
-                disabled={!apiBaseReady}
-                onClick={() => void saveApiBase()}
-              >
-                Save API URL
-              </Button>
-              <Button
-                type="button"
-                size="sm"
-                variant="outline"
-                disabled={!apiBaseReady}
-                onClick={() => resetApiBase()}
-              >
-                Reset to default
-              </Button>
-              {apiBaseSaved ? (
-                <span className="text-sm text-muted-foreground">Saved.</span>
-              ) : null}
-            </div>
-          </div>
-        </details>
+              Debug
+            </summary>
+            <Separator />
+            <CardContent className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="api-base" className="text-base font-semibold">
+                  API URL
+                </Label>
+                <p className="text-sm leading-relaxed text-muted-foreground">
+                  Base URL for the ScamHelp server (no trailing slash). Default
+                  is {DEFAULT_API_BASE}.
+                </p>
+                <Input
+                  id="api-base"
+                  type="url"
+                  inputMode="url"
+                  autoComplete="off"
+                  spellCheck={false}
+                  placeholder={DEFAULT_API_BASE}
+                  value={apiBase}
+                  disabled={!apiBaseReady}
+                  onChange={(event) => setApiBase(event.target.value)}
+                />
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <Button
+                  type="button"
+                  size="sm"
+                  disabled={!apiBaseReady}
+                  onClick={() => void saveApiBase()}
+                >
+                  Save API URL
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  disabled={!apiBaseReady}
+                  onClick={() => resetApiBase()}
+                >
+                  Reset to default
+                </Button>
+                {apiBaseSaved ? (
+                  <span className="text-sm text-muted-foreground">Saved.</span>
+                ) : null}
+              </div>
+            </CardContent>
+          </details>
+        </Card>
       </section>
 
       <section className="mt-10 space-y-3">
@@ -188,10 +196,11 @@ export default function App() {
         <p className="text-base leading-relaxed text-muted-foreground">
           How we handle data and the rules for using ScamHelp AI.
         </p>
-        <div className="overflow-hidden rounded-2xl border border-border bg-card">
-          <button
+        <Card size="sm" className="gap-0 overflow-hidden py-0">
+          <Button
             type="button"
-            className="flex w-full items-center gap-3 px-4 py-4 text-left transition-colors hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+            variant="ghost"
+            className="h-auto w-full items-center justify-start gap-3 rounded-none px-4 py-4 text-left whitespace-normal hover:bg-muted/60"
             onClick={() => navigate("privacy")}
           >
             <FileTextIcon className="size-5 shrink-0 text-trust" aria-hidden />
@@ -199,15 +208,16 @@ export default function App() {
               <span className="block font-heading text-base font-semibold">
                 Privacy Policy
               </span>
-              <span className="block text-sm text-muted-foreground">
+              <span className="block text-sm font-normal text-muted-foreground">
                 What we collect and how we use it
               </span>
             </span>
-          </button>
-          <div className="border-t border-border" />
-          <button
+          </Button>
+          <Separator />
+          <Button
             type="button"
-            className="flex w-full items-center gap-3 px-4 py-4 text-left transition-colors hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+            variant="ghost"
+            className="h-auto w-full items-center justify-start gap-3 rounded-none px-4 py-4 text-left whitespace-normal hover:bg-muted/60"
             onClick={() => navigate("terms")}
           >
             <ScaleIcon className="size-5 shrink-0 text-trust" aria-hidden />
@@ -215,12 +225,12 @@ export default function App() {
               <span className="block font-heading text-base font-semibold">
                 Terms of Service
               </span>
-              <span className="block text-sm text-muted-foreground">
+              <span className="block text-sm font-normal text-muted-foreground">
                 Rules for using the extension and API
               </span>
             </span>
-          </button>
-        </div>
+          </Button>
+        </Card>
       </section>
     </main>
   );
