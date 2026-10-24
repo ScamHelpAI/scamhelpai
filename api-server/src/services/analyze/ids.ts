@@ -1,5 +1,5 @@
 /**
- * Small helpers for allocating stable sequential ids (e.g. ev-001, ev-002)
+ * Small helper for allocating stable sequential ids (e.g. ev-001, ev-002)
  * within a single collect/analysis pass.
  */
 

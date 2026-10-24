@@ -9,9 +9,7 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
-  Senior-first email extension design system → shadcn tokens.
-  Colors from design: brand orange, warm surface, trust blue, risk levels.
-  Typography: Atkinson Hyperlegible Next (accessible, senior-first).
+  Prioritze higher readabiloy for like senior citizens.
 */
 :root {
   /* Surfaces */
