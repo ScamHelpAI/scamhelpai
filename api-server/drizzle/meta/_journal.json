@@ -8,6 +8,13 @@
       "when": 1792264674685,
       "tag": "0000_dapper_slyde",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1792870836182,
+      "tag": "0001_overjoyed_vanisher",
+      "breakpoints": true
     }
   ]
 }

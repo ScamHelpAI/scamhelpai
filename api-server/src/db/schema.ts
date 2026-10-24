@@ -1,7 +1,6 @@
 import { relations } from "drizzle-orm";
 import {
   boolean,
-  index,
   integer,
   jsonb,
   pgEnum,
@@ -79,75 +78,12 @@ export const feedbackVerdictEnum = pgEnum("feedback_verdict", [
   "partially_correct",
 ]);
 
-export const checkStatusEnum = pgEnum("check_status", [
-  "safe",
-  "warning",
-  "danger",
-]);
-
 const createdAt = timestamp("created_at", {
   withTimezone: true,
   mode: "string",
 })
   .notNull()
   .defaultNow();
-
-export const urlCheckCache = pgTable(
-  "url_check_cache",
-  {
-    urlHash: text("url_hash").primaryKey(),
-    url: text("url").notNull(),
-    hostname: text("hostname").notNull(),
-    status: checkStatusEnum("status").notNull(),
-    score: integer("score").notNull(),
-    reasons: jsonb("reasons").$type<string[]>().notNull(),
-    hitCount: integer("hit_count").notNull().default(0),
-    checkedAt: timestamp("checked_at", {
-      withTimezone: true,
-      mode: "string",
-    }).notNull(),
-    expiresAt: timestamp("expires_at", {
-      withTimezone: true,
-      mode: "string",
-    }).notNull(),
-    updatedAt: timestamp("updated_at", {
-      withTimezone: true,
-      mode: "string",
-    }).notNull(),
-  },
-  (table) => [
-    index("url_check_cache_expires_at_idx").on(table.expiresAt),
-    index("url_check_cache_hit_count_idx").on(table.hitCount),
-    index("url_check_cache_hostname_idx").on(table.hostname),
-  ],
-);
-
-export const domainCheckCache = pgTable(
-  "domain_check_cache",
-  {
-    hostname: text("hostname").primaryKey(),
-    status: checkStatusEnum("status").notNull(),
-    score: integer("score").notNull(),
-    reasons: jsonb("reasons").$type<string[]>().notNull(),
-    hitCount: integer("hit_count").notNull().default(0),
-    checkedAt: timestamp("checked_at", {
-      withTimezone: true,
-      mode: "string",
-    }).notNull(),
-    expiresAt: timestamp("expires_at", {
-      withTimezone: true,
-      mode: "string",
-    }).notNull(),
-    updatedAt: timestamp("updated_at", {
-      withTimezone: true,
-      mode: "string",
-    }).notNull(),
-  },
-  (table) => [
-    index("domain_check_cache_expires_at_idx").on(table.expiresAt),
-    index("domain_check_cache_hit_count_idx").on(table.hitCount),
-  ],
-);
 
 export const analyses = pgTable("analyses", {
   id: text("id").primaryKey(),
