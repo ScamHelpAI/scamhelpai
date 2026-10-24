@@ -17,29 +17,22 @@ export function LegalDocument({
   onBack,
 }: LegalDocumentProps) {
   return (
-    <main className="mx-auto max-w-2xl bg-background px-6 py-8 sm:px-8">
-      <div className="mb-6">
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          className="-ml-2 gap-1.5 text-muted-foreground"
-          onClick={onBack}
-        >
-          <ArrowLeftIcon data-icon="inline-start" className="size-4" />
-          Back to Settings
-        </Button>
-      </div>
+    <main className="mx-auto max-w-2xl space-y-8 bg-background px-6 py-8 sm:px-8">
+      <Button type="button" variant="ghost" size="sm" onClick={onBack}>
+        <ArrowLeftIcon data-icon="inline-start" />
+        Back to Settings
+      </Button>
 
-      <header className="mb-8 space-y-2">
+      <header className="space-y-2">
         <h1 className="font-heading text-3xl font-bold tracking-tight">
           {title}
         </h1>
-        <p className="text-base text-muted-foreground">
+        <p className="text-muted-foreground">
           Effective date: {effectiveDate}
         </p>
-        <Separator className="mt-6" />
       </header>
+
+      <Separator />
 
       <article className="legal-prose space-y-6 text-base leading-relaxed text-foreground">
         {children}

@@ -4,7 +4,13 @@ import { VerdictIcon, iconForTone } from "@/components/verdict-icon.tsx";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import type {
   AnalyzeResponse,
@@ -67,33 +73,26 @@ function VerdictCard({
       <CardHeader>
         <div className="flex items-start gap-3">
           <VerdictIcon tone={verdict.tone} />
-          <div className="flex min-w-0 flex-1 items-start justify-between gap-2">
-            <CardTitle className="text-lg leading-snug font-semibold">
-              {verdict.title}
-            </CardTitle>
-            <Badge
-              variant={toneBadgeVariant(verdict.tone)}
-              className="shrink-0 gap-1.5 px-3 py-1 text-sm"
-            >
-              <ToneIcon className="size-4 stroke-[2.25]" aria-hidden />
-              {verdict.badgeLabel}
-            </Badge>
-          </div>
+          <CardTitle>{verdict.title}</CardTitle>
         </div>
+        <CardAction>
+          <Badge variant={toneBadgeVariant(verdict.tone)}>
+            <ToneIcon data-icon="inline-start" aria-hidden />
+            {verdict.badgeLabel}
+          </Badge>
+        </CardAction>
       </CardHeader>
-      <CardContent className="space-y-3">
+      <CardContent className="flex flex-col gap-3">
         {reviewing ? (
-          <p className="flex items-center gap-2 text-base text-muted-foreground">
+          <p className="flex items-center gap-2 text-muted-foreground">
             <Loader2Icon className="size-4 animate-spin" />
             Double-checking…
           </p>
         ) : null}
         {verdict.reasons.length > 0 ? (
-          <div>
-            <p className="mb-2 font-heading text-base font-semibold">
-              Why we think so
-            </p>
-            <ul className="list-disc space-y-2 pl-5 text-base leading-relaxed text-muted-foreground">
+          <div className="space-y-2">
+            <p className="font-heading font-semibold">Why we think so</p>
+            <ul className="list-disc space-y-2 pl-5 text-muted-foreground">
               {verdict.reasons.slice(0, 6).map((reason) => (
                 <li key={reason}>{reason}</li>
               ))}
@@ -229,20 +228,17 @@ export default function App() {
           disabled={loading}
         >
           {loading ? (
-            <Loader2Icon
-              data-icon="inline-start"
-              className="size-5 animate-spin"
-            />
+            <Loader2Icon data-icon="inline-start" className="animate-spin" />
           ) : (
-            <ScanSearchIcon data-icon="inline-start" className="size-5" />
+            <ScanSearchIcon data-icon="inline-start" />
           )}
           {loading ? "Scanning…" : "Scan this page"}
         </Button>
 
         {error ? (
-          <Alert variant="destructive" className="animate-panel-in text-base">
-            <AlertTitle className="text-base">Scan failed</AlertTitle>
-            <AlertDescription className="text-base">{error}</AlertDescription>
+          <Alert variant="destructive" className="animate-panel-in">
+            <AlertTitle>Scan failed</AlertTitle>
+            <AlertDescription>{error}</AlertDescription>
           </Alert>
         ) : null}
 
@@ -250,15 +246,14 @@ export default function App() {
       </div>
 
       <footer className="space-y-4">
-        <Separator className="opacity-80" />
+        <Separator />
         <Button
           type="button"
           variant="ghost"
           size="sm"
-          className="gap-2 text-[15px] font-medium text-muted-foreground"
           onClick={() => chrome.runtime.openOptionsPage()}
         >
-          <SettingsIcon data-icon="inline-start" className="size-4" />
+          <SettingsIcon data-icon="inline-start" />
           Settings
         </Button>
       </footer>

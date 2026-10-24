@@ -1,10 +1,15 @@
 import { useEffect, useState } from "react";
 import { ChevronRightIcon, FileTextIcon, ScaleIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { DEFAULT_API_BASE } from "@/shared/api-url.ts";
 import {
@@ -105,63 +110,54 @@ export default function App() {
       </header>
 
       <section className="space-y-4">
-        <Card
-          size="sm"
-          className="flex-row items-start justify-between gap-4 py-4"
-        >
-          <CardContent className="flex-1 space-y-1.5 pr-2">
-            <Label
-              htmlFor="link-scan"
-              className="font-heading text-lg font-semibold"
-            >
-              Scan links on pages
-            </Label>
-            <p className="text-base leading-relaxed text-muted-foreground">
+        <Card size="sm">
+          <CardHeader>
+            <CardTitle>Scan links on pages</CardTitle>
+            <CardDescription>
               Show a caution on risky links and block ones that look unsafe.
-            </p>
-          </CardContent>
-          <Switch
-            id="link-scan"
-            className="mt-1 mr-(--card-spacing)"
-            checked={linkScanEnabled}
-            disabled={!linkScanReady}
-            onCheckedChange={(checked) => void toggleLinkScan(checked)}
-          />
+            </CardDescription>
+            <CardAction>
+              <Switch
+                checked={linkScanEnabled}
+                disabled={!linkScanReady}
+                onCheckedChange={(checked) => void toggleLinkScan(checked)}
+                aria-label="Scan links on pages"
+              />
+            </CardAction>
+          </CardHeader>
         </Card>
       </section>
 
       <section className="mt-8">
-        <Card size="sm" className="gap-0 py-0">
-          <details className="group">
-            <summary className="flex cursor-pointer list-none items-center gap-2 px-(--card-spacing) py-4 font-heading text-lg font-semibold tracking-tight marker:content-none [&::-webkit-details-marker]:hidden">
-              <ChevronRightIcon
-                className="size-5 shrink-0 text-muted-foreground transition-transform group-open:rotate-90"
-                aria-hidden
+        <details className="group space-y-3">
+          <summary className="flex cursor-pointer list-none items-center gap-2 font-heading text-lg font-semibold tracking-tight marker:content-none [&::-webkit-details-marker]:hidden">
+            <ChevronRightIcon
+              className="size-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-90"
+              aria-hidden
+            />
+            Debug
+          </summary>
+          <Card size="sm">
+            <CardHeader>
+              <CardTitle>API URL</CardTitle>
+              <CardDescription>
+                Base URL for the ScamHelp server (no trailing slash). Default is{" "}
+                {DEFAULT_API_BASE}.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="flex flex-col gap-4">
+              <Input
+                id="api-base"
+                type="url"
+                inputMode="url"
+                autoComplete="off"
+                spellCheck={false}
+                placeholder={DEFAULT_API_BASE}
+                value={apiBase}
+                disabled={!apiBaseReady}
+                onChange={(event) => setApiBase(event.target.value)}
+                aria-label="API URL"
               />
-              Debug
-            </summary>
-            <Separator />
-            <CardContent className="space-y-4 py-4">
-              <div className="space-y-2">
-                <Label htmlFor="api-base" className="text-base font-semibold">
-                  API URL
-                </Label>
-                <p className="text-sm leading-relaxed text-muted-foreground">
-                  Base URL for the ScamHelp server (no trailing slash). Default
-                  is {DEFAULT_API_BASE}.
-                </p>
-                <Input
-                  id="api-base"
-                  type="url"
-                  inputMode="url"
-                  autoComplete="off"
-                  spellCheck={false}
-                  placeholder={DEFAULT_API_BASE}
-                  value={apiBase}
-                  disabled={!apiBaseReady}
-                  onChange={(event) => setApiBase(event.target.value)}
-                />
-              </div>
               <div className="flex flex-wrap items-center gap-2">
                 <Button
                   type="button"
@@ -185,8 +181,8 @@ export default function App() {
                 ) : null}
               </div>
             </CardContent>
-          </details>
-        </Card>
+          </Card>
+        </details>
       </section>
 
       <section className="mt-10 space-y-3">
@@ -196,40 +192,27 @@ export default function App() {
         <p className="text-base leading-relaxed text-muted-foreground">
           How we handle data and the rules for using ScamHelp AI.
         </p>
-        <Card size="sm" className="gap-0 overflow-hidden py-0">
-          <Button
-            type="button"
-            variant="ghost"
-            className="h-auto w-full items-center justify-start gap-3 rounded-none px-4 py-4 text-left whitespace-normal hover:bg-muted/60"
-            onClick={() => navigate("privacy")}
-          >
-            <FileTextIcon className="size-5 shrink-0 text-trust" aria-hidden />
-            <span className="flex-1">
-              <span className="block font-heading text-base font-semibold">
-                Privacy Policy
-              </span>
-              <span className="block text-sm font-normal text-muted-foreground">
-                What we collect and how we use it
-              </span>
-            </span>
-          </Button>
-          <Separator />
-          <Button
-            type="button"
-            variant="ghost"
-            className="h-auto w-full items-center justify-start gap-3 rounded-none px-4 py-4 text-left whitespace-normal hover:bg-muted/60"
-            onClick={() => navigate("terms")}
-          >
-            <ScaleIcon className="size-5 shrink-0 text-trust" aria-hidden />
-            <span className="flex-1">
-              <span className="block font-heading text-base font-semibold">
-                Terms of Service
-              </span>
-              <span className="block text-sm font-normal text-muted-foreground">
-                Rules for using the extension and API
-              </span>
-            </span>
-          </Button>
+        <Card size="sm">
+          <CardContent className="flex flex-col gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full justify-start"
+              onClick={() => navigate("privacy")}
+            >
+              <FileTextIcon data-icon="inline-start" />
+              Privacy Policy
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full justify-start"
+              onClick={() => navigate("terms")}
+            >
+              <ScaleIcon data-icon="inline-start" />
+              Terms of Service
+            </Button>
+          </CardContent>
         </Card>
       </section>
     </main>
