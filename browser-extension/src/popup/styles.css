@@ -70,7 +70,7 @@
   --chart-5: #1e6b34;
 
   /* Soft, rounded system — cards use radius; buttons override to pill */
-  --radius: 1.25rem;
+  --radius: 0.75rem;
 
   /* Motion (design system) */
   --ease-senior: cubic-bezier(0.22, 1, 0.36, 1);

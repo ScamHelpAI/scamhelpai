@@ -4,6 +4,11 @@ const navItems = [
   { href: "#", label: "How it works" },
   { href: "#", label: "Extension" },
   { href: "#", label: "About" },
+  {
+    href: "https://studentsagainstscams.org",
+    label: "Students Against Scams",
+    external: true,
+  },
 ] as const;
 
 export function SiteHeader() {
@@ -15,6 +20,9 @@ export function SiteHeader() {
           <a
             key={item.label}
             href={item.href}
+            {...("external" in item && item.external
+              ? { target: "_blank", rel: "noopener noreferrer" }
+              : {})}
             className="text-[15px] font-medium text-muted-foreground transition-senior hover:text-foreground focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
           >
             {item.label}
