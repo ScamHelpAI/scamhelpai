@@ -1,3 +1,4 @@
+import { spawnSync } from "node:child_process";
 import { mkdir } from "node:fs/promises";
 import path, { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -7,6 +8,29 @@ import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 
 const root = fileURLToPath(new URL(".", import.meta.url));
+
+const pathAliasPlugin: esbuild.Plugin = {
+  name: "path-alias",
+  setup(build) {
+    build.onResolve({ filter: /^@\// }, (args) => ({
+      path: resolve(root, "src", args.path.slice(2)),
+    }));
+    build.onResolve({ filter: /^cn$/ }, () => ({
+      path: resolve(root, "node_modules/cn/dist/index.js"),
+    }));
+  },
+};
+
+const contentScriptBuild = {
+  bundle: true as const,
+  format: "iife" as const,
+  platform: "browser" as const,
+  target: "es2022",
+  logLevel: "info" as const,
+  jsx: "automatic" as const,
+  loader: { ".ts": "ts", ".tsx": "tsx" } as Record<string, esbuild.Loader>,
+  plugins: [pathAliasPlugin],
+};
 
 function bundleExtensionScripts(): Plugin {
   return {
@@ -30,45 +54,44 @@ function bundleExtensionScripts(): Plugin {
       await esbuild.build({
         absWorkingDir: root,
         entryPoints: [resolve(root, "src/content/page/index.ts")],
-        bundle: true,
-        format: "iife",
+        ...contentScriptBuild,
         outfile: resolve(outDir, "content/page.js"),
-        platform: "browser",
-        target: "es2022",
-        logLevel: "info",
       });
 
       await esbuild.build({
         absWorkingDir: root,
         entryPoints: [resolve(root, "src/content/links/index.ts")],
-        bundle: true,
-        format: "iife",
+        ...contentScriptBuild,
         outfile: resolve(outDir, "content/links.js"),
-        platform: "browser",
-        target: "es2022",
-        logLevel: "info",
       });
 
       await esbuild.build({
         absWorkingDir: root,
         entryPoints: [resolve(root, "src/content/annotations/index.ts")],
-        bundle: true,
-        format: "iife",
+        ...contentScriptBuild,
         outfile: resolve(outDir, "content/annotations.js"),
-        platform: "browser",
-        target: "es2022",
-        logLevel: "info",
       });
+
+      const tailwind = spawnSync(
+        "npx",
+        [
+          "@tailwindcss/cli",
+          "-i",
+          resolve(root, "src/content/annotations/content-ui.css"),
+          "-o",
+          resolve(outDir, "content/annotations.css"),
+        ],
+        { cwd: root, stdio: "inherit" },
+      );
+      if (tailwind.status !== 0) {
+        throw new Error("Failed to compile content annotation styles.");
+      }
 
       await esbuild.build({
         absWorkingDir: root,
         entryPoints: [resolve(root, "src/content/gmail/index.ts")],
-        bundle: true,
-        format: "iife",
+        ...contentScriptBuild,
         outfile: resolve(outDir, "content/gmail.js"),
-        platform: "browser",
-        target: "es2022",
-        logLevel: "info",
       });
     },
   };

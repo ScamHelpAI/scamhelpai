@@ -1,0 +1,4 @@
+@import "../../popup/styles.css";
+
+@source "../../components/ui/popover.tsx";
+@source "./annotation-highlight.tsx";

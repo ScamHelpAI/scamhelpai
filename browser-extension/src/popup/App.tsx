@@ -46,7 +46,7 @@ function VerdictSummary({
       role="status"
       aria-live="polite"
     >
-      <VerdictIcon tone={verdict.tone} />
+      <VerdictIcon tone={verdict.tone} confidence={result.risk.confidence} />
       <div className="min-w-0 space-y-1 pt-0.5">
         <p
           className={`font-heading text-lg leading-snug font-semibold ${toneTextClass(verdict.tone)}`}

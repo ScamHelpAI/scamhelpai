@@ -31,6 +31,7 @@ export function shouldSkipTextParent(parent: Element | null): boolean {
   if (!parent) return true;
   if (SKIP_TAGS.has(parent.tagName)) return true;
   if (parent.closest("[data-scamhelp-annotation]")) return true;
+  if (parent.closest("[data-scamhelp-annotation-host]")) return true;
   return false;
 }
 
