@@ -8,7 +8,6 @@ import type {
 } from "../../schemas/analysis-input.js";
 import type { Evidence, EvidenceType } from "../../schemas/evidence.js";
 import { checkThreatIntel } from "../../tools/check-threat-intel.js";
-import { inspectEmail } from "../../tools/inspect-email.js";
 import { inspectUrl } from "../../tools/inspect-url.js";
 import { lookupCryptoAddress } from "../../tools/lookup-crypto-address.js";
 import { lookupDomain } from "../../tools/lookup-domain.js";
@@ -66,10 +65,6 @@ function extractTextFromInput(input: AnalysisInput): string {
       return input.content;
     case "url":
       return input.url;
-    case "email":
-      return [input.raw, input.body, JSON.stringify(input.headers ?? {})]
-        .filter(Boolean)
-        .join("\n");
     case "image":
     case "audio":
     case "pdf":
@@ -445,49 +440,12 @@ export async function collect(request: AnalyzeRequest): Promise<Evidence[]> {
     brands: [] as string[],
   };
 
-  for (const [index, input] of request.inputs.entries()) {
-    const sourceInputId = inputId(index);
+  for (const input of request.inputs) {
     const text = extractTextFromInput(input);
     indicators = mergeIndicators(
       indicators,
       extractIndicators(text, input.type === "url" ? input.url : undefined),
     );
-
-    if (input.type === "email" && (input.raw || input.body)) {
-      try {
-        const emailResult = await inspectEmail(
-          input.headers
-            ? Object.entries(input.headers)
-                .map(([key, value]) => `${key}: ${value}`)
-                .join("\n")
-            : "",
-          input.body ?? input.raw ?? "",
-        );
-        evidences.push(
-          createEvidence({
-            id: nextId(),
-            type: "email",
-            source: "tool",
-            summary: `Email from ${emailResult.from}${emailResult.flags.length ? `; flags: ${emailResult.flags.join(", ")}` : ""}`,
-            confidence: 0.85,
-            toolName: "inspect_email",
-            sourceInputId,
-            data: {
-              from: emailResult.from,
-              flags: emailResult.flags,
-              urlCount: emailResult.urls.length,
-            },
-            createdAt,
-          }),
-        );
-        indicators = mergeIndicators(
-          indicators,
-          extractIndicators(emailResult.urls.join(" ")),
-        );
-      } catch {
-        // Email parsing can fail on partial input; continue with other indicators.
-      }
-    }
   }
 
   const toolEvidences = await investigateIndicators(

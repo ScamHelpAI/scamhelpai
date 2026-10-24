@@ -9,7 +9,8 @@ import { applyAnnotations } from "../annotations/decorate.ts";
 import { findOpenMessage, markAnnotateRoot } from "./dom.ts";
 import { getButtonStatusEl, setButtonState } from "./button.ts";
 
-function emailAnalyzeRequest(text: string, pageUrl: string): AnalyzeRequest {
+/** Same /v1/analyses text path as page scan — headers are baked into content. */
+function textAnalyzeRequest(text: string, pageUrl: string): AnalyzeRequest {
   return {
     inputs: [{ type: "text", content: text }],
     context: {
@@ -121,7 +122,7 @@ export async function scanOpenGmailEmail(
     markAnnotateRoot(open.body, doc);
 
     const initial = await requestAnalyze(
-      emailAnalyzeRequest(open.text, doc.location.href),
+      textAnalyzeRequest(open.text, doc.location.href),
     );
 
     if (initial.status === "failed") {

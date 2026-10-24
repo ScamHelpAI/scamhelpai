@@ -27,7 +27,7 @@ Host ports: Postgres `5433`, Redis `6380`, MinIO `9100` / console `9101`.
 1. `POST /v1/assets/presign` with `{ "contentType": "image/png", "filename": "shot.png" }`
 2. `PUT` the file bytes to the returned `uploadUrl` (include `requiredHeaders`)
 3. `POST /v1/assets/{assetId}/complete`
-4. Use `assetId` in analysis inputs (`image` / `pdf` / `audio` / email `assetIds`)
+4. Use `assetId` in analysis inputs (`image` / `pdf` / `audio`)
 
 ## Rate limits
 

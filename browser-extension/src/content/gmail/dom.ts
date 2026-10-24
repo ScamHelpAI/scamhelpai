@@ -33,6 +33,41 @@ function readableText(el: HTMLElement): string {
   return raw.replace(/\s+\n/g, "\n").trim();
 }
 
+function formatAddress(name: string, email: string): string {
+  if (name && email) return `${name} <${email}>`;
+  return email || name;
+}
+
+function readAddressSpans(container: HTMLElement): string[] {
+  const addresses: string[] = [];
+  for (const el of container.querySelectorAll("span[email]")) {
+    if (!(el instanceof HTMLElement)) continue;
+    const email = el.getAttribute("email")?.trim() ?? "";
+    const name = el.getAttribute("name")?.trim() ?? "";
+    const formatted = formatAddress(name, email);
+    if (!formatted) continue;
+    if (addresses.includes(formatted)) continue;
+    addresses.push(formatted);
+  }
+  return addresses;
+}
+
+/** Build plain text for the shared /v1/analyses text input. */
+export function formatEmailAnalyzeText(params: {
+  from: string;
+  cc: string[];
+  subject: string;
+  body: string;
+}): string {
+  const lines: string[] = [];
+  if (params.from) lines.push(`From: ${params.from}`);
+  if (params.cc.length > 0) lines.push(`CC: ${params.cc.join(", ")}`);
+  if (params.subject) lines.push(`Subject: ${params.subject}`);
+  if (lines.length > 0) lines.push("");
+  lines.push(params.body);
+  return lines.join("\n").slice(0, MAX_EMAIL_CHARS);
+}
+
 /** Gmail renders several `div.a3s` per message (body, quoted text, stray separators); the main body has the most text. */
 export function findMessageBody(
   container: HTMLElement,
@@ -63,21 +98,16 @@ export function findOpenMessage(
 
     const subject =
       doc.querySelector(SUBJECT_SELECTOR)?.textContent?.trim() ?? "";
-    const fromEl = container.querySelector("span[email]");
-    const fromName = fromEl?.getAttribute("name")?.trim() ?? "";
-    const fromEmail = fromEl?.getAttribute("email")?.trim() ?? "";
-    const from =
-      fromName && fromEmail
-        ? `${fromName} <${fromEmail}>`
-        : fromEmail || fromName;
+    const addresses = readAddressSpans(container);
+    const from = addresses[0] ?? "";
+    const cc = addresses.slice(1);
 
-    const parts = [
-      subject ? `Subject: ${subject}` : null,
-      from ? `From: ${from}` : null,
-      bodyText,
-    ].filter(Boolean);
-
-    const text = parts.join("\n\n").slice(0, MAX_EMAIL_CHARS);
+    const text = formatEmailAnalyzeText({
+      from,
+      cc,
+      subject,
+      body: bodyText,
+    });
 
     return { container, body, subject, from, text };
   }

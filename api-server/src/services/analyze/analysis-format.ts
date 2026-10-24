@@ -23,18 +23,6 @@ export function formatInput(input: AnalysisInput, index: number): string {
       return `${label}:\nassetId: ${input.assetId}`;
     case "pdf":
       return `${label}:\nassetId: ${input.assetId}`;
-    case "email": {
-      const parts = [label];
-      if (input.raw) parts.push(`raw:\n${input.raw}`);
-      if (input.headers) {
-        parts.push(`headers:\n${JSON.stringify(input.headers, null, 2)}`);
-      }
-      if (input.body) parts.push(`body:\n${input.body}`);
-      if (input.assetIds?.length) {
-        parts.push(`assetIds: ${input.assetIds.join(", ")}`);
-      }
-      return parts.join("\n");
-    }
     default: {
       const _exhaustive: never = input;
       return _exhaustive;

@@ -16,6 +16,8 @@ describe("gmail dom", () => {
       </div>
       <div data-legacy-message-id="m2" style="display:block">
         <span email="scam@evil.test" name="Fake Bank"></span>
+        <span email="boss@acme.com" name="Boss"></span>
+        <span email="team@acme.com" name="Team"></span>
         <div class="a3s">New body: verify within 24 hours or closed</div>
       </div>
     `;
@@ -31,9 +33,15 @@ describe("gmail dom", () => {
 
     const open = findOpenMessage(document);
     expect(open).not.toBeNull();
-    expect(open!.text).toContain("Subject: Account alert");
-    expect(open!.text).toContain("Fake Bank <scam@evil.test>");
-    expect(open!.text).toContain("New body: verify within 24 hours");
+    expect(open!.text).toBe(
+      [
+        "From: Fake Bank <scam@evil.test>",
+        "CC: Boss <boss@acme.com>, Team <team@acme.com>",
+        "Subject: Account alert",
+        "",
+        "New body: verify within 24 hours or closed",
+      ].join("\n"),
+    );
     expect(open!.text).not.toContain("Old body");
   });
 

@@ -584,31 +584,13 @@
           "assetId": { "type": "string", "minLength": 1 }
         }
       },
-      "EmailInput": {
-        "type": "object",
-        "required": ["type"],
-        "properties": {
-          "type": { "type": "string", "const": "email" },
-          "raw": { "type": "string" },
-          "headers": {
-            "type": "object",
-            "additionalProperties": { "type": "string" }
-          },
-          "body": { "type": "string" },
-          "assetIds": {
-            "type": "array",
-            "items": { "type": "string", "minLength": 1 }
-          }
-        }
-      },
       "AnalysisInput": {
         "oneOf": [
           { "$ref": "#/components/schemas/TextInput" },
           { "$ref": "#/components/schemas/UrlInput" },
           { "$ref": "#/components/schemas/ImageInput" },
           { "$ref": "#/components/schemas/AudioInput" },
-          { "$ref": "#/components/schemas/PdfInput" },
-          { "$ref": "#/components/schemas/EmailInput" }
+          { "$ref": "#/components/schemas/PdfInput" }
         ],
         "discriminator": {
           "propertyName": "type",
@@ -617,8 +599,7 @@
             "url": "#/components/schemas/UrlInput",
             "image": "#/components/schemas/ImageInput",
             "audio": "#/components/schemas/AudioInput",
-            "pdf": "#/components/schemas/PdfInput",
-            "email": "#/components/schemas/EmailInput"
+            "pdf": "#/components/schemas/PdfInput"
           }
         }
       },

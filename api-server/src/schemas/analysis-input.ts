@@ -40,13 +40,6 @@ export const analysisInputSchema = z.discriminatedUnion("type", [
     type: z.literal("pdf"),
     assetId: idSchema,
   }),
-  z.object({
-    type: z.literal("email"),
-    raw: z.string().optional(),
-    headers: z.record(z.string(), z.string()).optional(),
-    body: z.string().optional(),
-    assetIds: z.array(idSchema).optional(),
-  }),
 ]);
 
 export type AnalysisInput = z.infer<typeof analysisInputSchema>;

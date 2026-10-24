@@ -80,8 +80,7 @@ export function hasMultimodalInput(request: AnalyzeRequest): boolean {
     (input) =>
       input.type === "image" ||
       input.type === "audio" ||
-      input.type === "pdf" ||
-      (input.type === "email" && (input.assetIds?.length ?? 0) > 0),
+      input.type === "pdf",
   );
 }
 

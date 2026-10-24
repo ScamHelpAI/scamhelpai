@@ -49,14 +49,7 @@ export type AnalysisResult = {
 
 export type AnalysisInput =
   | { type: "text"; content: string }
-  | { type: "url"; url: string }
-  | {
-      type: "email";
-      raw?: string;
-      headers?: Record<string, string>;
-      body?: string;
-      assetIds?: string[];
-    };
+  | { type: "url"; url: string };
 
 export type AnalyzeRequest = {
   inputs: AnalysisInput[];
