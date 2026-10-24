@@ -27,7 +27,7 @@ function verdictUi(result: AnalysisResult) {
     : "Finding risky phrases…";
   return {
     tone: verdict.tone,
-    label: `${verdict.title} · ${verdict.riskScore}/100`,
+    label: verdict.title,
     statusMessage,
   };
 }

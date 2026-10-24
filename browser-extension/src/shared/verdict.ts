@@ -5,10 +5,10 @@ export type VerdictTone = "danger" | "warn" | "safe";
 export type Verdict = {
   title: string;
   tone: VerdictTone;
+  /** Short badge label for the UI (no numeric score). */
+  badgeLabel: string;
   reasons: string[];
-  riskScore: number;
   status: AnalysisResult["status"];
-  reviewNote?: string;
 };
 
 /** Drop meta "we received input" noise — not useful to the user. */
@@ -19,15 +19,28 @@ function isUsefulReason(summary: string): boolean {
 function copyForLevel(level: RiskLevel): {
   title: string;
   tone: VerdictTone;
+  badgeLabel: string;
 } {
   switch (level) {
     case "critical":
     case "high":
-      return { title: "This looks like a scam", tone: "danger" };
+      return {
+        title: "This looks like a scam",
+        tone: "danger",
+        badgeLabel: "High risk",
+      };
     case "medium":
-      return { title: "Be careful with this", tone: "warn" };
+      return {
+        title: "Be careful with this",
+        tone: "warn",
+        badgeLabel: "Caution",
+      };
     case "low":
-      return { title: "No clear scam signs found", tone: "safe" };
+      return {
+        title: "No clear scam signs found",
+        tone: "safe",
+        badgeLabel: "Looks okay",
+      };
     default: {
       const _exhaustive: never = level;
       return _exhaustive;
@@ -40,17 +53,12 @@ export function toVerdict(result: AnalysisResult): Verdict {
   const reasons = result.evidence
     .map((item) => item.summary)
     .filter(isUsefulReason);
-  const reviewNote =
-    result.review && result.review.verdict !== "agree"
-      ? `Reviewer: ${result.review.verdict.replaceAll("_", " ")}`
-      : undefined;
 
   return {
     title: copy.title,
     tone: copy.tone,
+    badgeLabel: copy.badgeLabel,
     reasons,
-    riskScore: Math.round(result.risk.score * 100),
     status: result.status,
-    reviewNote,
   };
 }

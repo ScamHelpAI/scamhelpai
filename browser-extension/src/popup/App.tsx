@@ -5,6 +5,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import type {
   AnalyzeResponse,
   ApplyPageAnnotationsMessage,
@@ -75,7 +76,7 @@ function VerdictCard({
               className="shrink-0 gap-1.5 px-3 py-1 text-sm"
             >
               <ToneIcon className="size-4 stroke-[2.25]" aria-hidden />
-              {verdict.riskScore}/100
+              {verdict.badgeLabel}
             </Badge>
           </div>
         </div>
@@ -84,12 +85,7 @@ function VerdictCard({
         {reviewing ? (
           <p className="flex items-center gap-2 text-base text-muted-foreground">
             <Loader2Icon className="size-4 animate-spin" />
-            Initial result — checking for review updates…
-          </p>
-        ) : null}
-        {verdict.reviewNote ? (
-          <p className="text-base text-muted-foreground">
-            {verdict.reviewNote}
+            Double-checking…
           </p>
         ) : null}
         {verdict.reasons.length > 0 ? (
@@ -113,7 +109,8 @@ async function requestAnalysis(
   message: { type: "scanActivePage" } | { type: "getAnalysis"; id: string },
 ): Promise<AnalysisResult> {
   const response = (await chrome.runtime.sendMessage(message)) as
-    AnalyzeResponse | undefined;
+    | AnalyzeResponse
+    | undefined;
 
   if (!response?.ok) {
     throw new Error(
@@ -214,9 +211,9 @@ export default function App() {
   }
 
   return (
-    <main className="flex w-[22rem] flex-col gap-6 p-6">
+    <main className="flex w-88 flex-col gap-6 p-6">
       <header className="animate-stagger-in space-y-1.5">
-        <h1 className="font-heading text-[1.75rem] leading-none font-bold tracking-tight text-foreground">
+        <h1 className="font-heading text-2xl leading-none font-bold tracking-tight text-foreground">
           ScamHelp AI
         </h1>
         <p className="text-[15px] leading-snug text-muted-foreground">
@@ -227,8 +224,6 @@ export default function App() {
       <div className="flex flex-col gap-4">
         <Button
           type="button"
-          className="animate-stagger-in w-full gap-2.5 text-[1.05rem] font-semibold shadow-[0_4px_14px_rgba(184,101,10,0.22)]"
-          style={{ animationDelay: "var(--duration-stagger)" }}
           size="lg"
           onClick={() => void scanPage()}
           disabled={loading}
@@ -254,15 +249,18 @@ export default function App() {
         {result ? <VerdictCard result={result} reviewing={reviewing} /> : null}
       </div>
 
-      <footer className="border-t border-border/80 pt-4">
-        <button
+      <footer className="space-y-4">
+        <Separator className="opacity-80" />
+        <Button
           type="button"
-          className="inline-flex items-center gap-2 rounded-full px-1 py-1 text-[15px] font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+          variant="ghost"
+          size="sm"
+          className="gap-2 text-[15px] font-medium text-muted-foreground"
           onClick={() => chrome.runtime.openOptionsPage()}
         >
-          <SettingsIcon className="size-4" aria-hidden />
+          <SettingsIcon data-icon="inline-start" className="size-4" />
           Settings
-        </button>
+        </Button>
       </footer>
     </main>
   );
