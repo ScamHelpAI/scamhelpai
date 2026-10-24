@@ -56,7 +56,11 @@ export async function insertPendingAsset(params: {
 }
 
 export async function findAssetById(id: string): Promise<Asset | null> {
-  const [row] = await db.select().from(assets).where(eq(assets.id, id)).limit(1);
+  const [row] = await db
+    .select()
+    .from(assets)
+    .where(eq(assets.id, id))
+    .limit(1);
   return row ? toAsset(row) : null;
 }
 
@@ -72,7 +76,9 @@ export async function markAssetUploaded(params: {
     .set({
       status: "ready",
       uploadedAt,
-      ...(params.sizeBytes !== undefined ? { sizeBytes: params.sizeBytes } : {}),
+      ...(params.sizeBytes !== undefined
+        ? { sizeBytes: params.sizeBytes }
+        : {}),
       ...(params.contentType ? { contentType: params.contentType } : {}),
     })
     .where(eq(assets.id, params.id))

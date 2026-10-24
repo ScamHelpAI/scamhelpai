@@ -1,11 +1,7 @@
 export type RiskLevel = "low" | "medium" | "high" | "critical";
 
 export type AnalysisStatus =
-  | "queued"
-  | "analyzing"
-  | "reviewing"
-  | "completed"
-  | "failed";
+  "queued" | "analyzing" | "reviewing" | "completed" | "failed";
 
 export type AnalysisDecision = {
   title: string;
@@ -42,10 +38,7 @@ export type AnalysisResult = {
   }[];
   review?: {
     verdict:
-      | "agree"
-      | "agree_with_adjustments"
-      | "disagree"
-      | "insufficient_evidence";
+      "agree" | "agree_with_adjustments" | "disagree" | "insufficient_evidence";
     unsupportedClaims: string[];
     contradictions: string[];
     confidenceAdjustment: number;

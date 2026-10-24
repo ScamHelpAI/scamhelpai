@@ -20,8 +20,7 @@ import { createSequentialId } from "./ids.js";
 
 const URL_RE = /https?:\/\/[^\s"'<>]+/gi;
 const EMAIL_RE = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/g;
-const PHONE_RE =
-  /(?:\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b/g;
+const PHONE_RE = /(?:\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b/g;
 const BTC_RE = /\b(?:bc1|[13])[a-zA-HJ-NP-Z0-9]{25,62}\b/g;
 const ETH_RE = /\b0x[a-fA-F0-9]{40}\b/g;
 
@@ -129,7 +128,10 @@ function extractBrands(text: string): string[] {
   return found;
 }
 
-function extractIndicators(text: string, urlInput?: string): CollectorState["indicators"] {
+function extractIndicators(
+  text: string,
+  urlInput?: string,
+): CollectorState["indicators"] {
   const urls = unique([
     ...(urlInput ? [urlInput] : []),
     ...(text.match(URL_RE) ?? []),
@@ -498,4 +500,3 @@ export async function collect(request: AnalyzeRequest): Promise<Evidence[]> {
 
   return evidences;
 }
-

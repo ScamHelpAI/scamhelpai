@@ -74,10 +74,8 @@ async function readActivePageContents(): Promise<ReadPageResponse> {
   const request = { type: "readPageContents" as const };
 
   try {
-    const response = (await chrome.tabs.sendMessage(
-      tabId,
-      request,
-    )) as ReadPageResponse | undefined;
+    const response = (await chrome.tabs.sendMessage(tabId, request)) as
+      ReadPageResponse | undefined;
     if (response) return response;
   } catch {
     // Content script not injected yet.
@@ -88,10 +86,8 @@ async function readActivePageContents(): Promise<ReadPageResponse> {
       target: { tabId },
       files: ["content/page.js"],
     });
-    const response = (await chrome.tabs.sendMessage(
-      tabId,
-      request,
-    )) as ReadPageResponse | undefined;
+    const response = (await chrome.tabs.sendMessage(tabId, request)) as
+      ReadPageResponse | undefined;
 
     if (!response) {
       return { ok: false, error: "Page script did not respond." };
@@ -141,10 +137,8 @@ async function applyPageAnnotations(
   }
 
   try {
-    const response = (await chrome.tabs.sendMessage(
-      tabId,
-      message,
-    )) as ApplyPageAnnotationsResponse | undefined;
+    const response = (await chrome.tabs.sendMessage(tabId, message)) as
+      ApplyPageAnnotationsResponse | undefined;
     if (response?.ok) return response;
   } catch {
     // Content script not injected yet.
@@ -155,10 +149,8 @@ async function applyPageAnnotations(
       target: { tabId },
       files: ["content/annotations.js"],
     });
-    const response = (await chrome.tabs.sendMessage(
-      tabId,
-      message,
-    )) as ApplyPageAnnotationsResponse | undefined;
+    const response = (await chrome.tabs.sendMessage(tabId, message)) as
+      ApplyPageAnnotationsResponse | undefined;
 
     if (!response?.ok) {
       return {

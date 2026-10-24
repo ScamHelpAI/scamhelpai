@@ -18,7 +18,12 @@ import {
   type ReviewerAssessment,
 } from "../../schemas/reviewer.js";
 import { db } from "../../db/index.js";
-import { agentRuns, analyses, analysisInputs, evidence } from "../../db/schema.js";
+import {
+  agentRuns,
+  analyses,
+  analysisInputs,
+  evidence,
+} from "../../db/schema.js";
 import { assessmentFromClassifier } from "./classifier-gate.js";
 import { toAnalysisResult } from "./analysis-mapper.js";
 
@@ -297,9 +302,7 @@ export async function getAnalysisById(
   }
 
   const review =
-    analysis.status === "completed"
-      ? toPublicReview(assessment)
-      : undefined;
+    analysis.status === "completed" ? toPublicReview(assessment) : undefined;
 
   return toAnalysisResult({
     id: analysis.id,

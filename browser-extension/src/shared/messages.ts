@@ -20,8 +20,7 @@ export type AnalyzeMessage = {
 };
 
 export type AnalyzeResponse =
-  | { ok: true; result: AnalysisResult }
-  | { ok: false; error: string };
+  { ok: true; result: AnalysisResult } | { ok: false; error: string };
 
 export type GetAnalysisMessage = {
   type: "getAnalysis";
@@ -42,8 +41,7 @@ export type CheckUrlsMessage = {
 };
 
 export type CheckUrlsResponseMessage =
-  | { ok: true; results: CheckUrlResult[] }
-  | { ok: false; error: string };
+  { ok: true; results: CheckUrlResult[] } | { ok: false; error: string };
 
 export type ApplyPageAnnotationsMessage = {
   type: "applyPageAnnotations";
@@ -54,8 +52,7 @@ export type ApplyPageAnnotationsMessage = {
 };
 
 export type ApplyPageAnnotationsResponse =
-  | { ok: true }
-  | { ok: false; error: string };
+  { ok: true } | { ok: false; error: string };
 
 export type ExtensionRequest =
   | ReadPageMessage

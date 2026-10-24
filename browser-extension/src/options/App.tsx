@@ -127,9 +127,7 @@ export default function App() {
 
       <section className="mt-8">
         <details className="group overflow-hidden rounded-2xl border border-border bg-card">
-          <summary
-            className="flex cursor-pointer list-none items-center gap-2 px-4 py-4 font-heading text-lg font-semibold tracking-tight marker:content-none [&::-webkit-details-marker]:hidden"
-          >
+          <summary className="flex cursor-pointer list-none items-center gap-2 px-4 py-4 font-heading text-lg font-semibold tracking-tight marker:content-none [&::-webkit-details-marker]:hidden">
             <ChevronRightIcon
               className="size-5 shrink-0 text-muted-foreground transition-transform group-open:rotate-90"
               aria-hidden
@@ -196,10 +194,7 @@ export default function App() {
             className="flex w-full items-center gap-3 px-4 py-4 text-left transition-colors hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
             onClick={() => navigate("privacy")}
           >
-            <FileTextIcon
-              className="size-5 shrink-0 text-trust"
-              aria-hidden
-            />
+            <FileTextIcon className="size-5 shrink-0 text-trust" aria-hidden />
             <span className="flex-1">
               <span className="block font-heading text-base font-semibold">
                 Privacy Policy

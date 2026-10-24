@@ -27,7 +27,9 @@ import {
 
 function requireS3(): void {
   if (!isS3Configured()) {
-    throw new HTTPException(503, { message: "Object storage is not configured" });
+    throw new HTTPException(503, {
+      message: "Object storage is not configured",
+    });
   }
 }
 
@@ -97,7 +99,8 @@ export async function completeAssetUpload(assetId: string): Promise<Asset> {
   const exists = await objectExists(asset.objectKey);
   if (!exists) {
     throw new HTTPException(400, {
-      message: "Upload not found in object storage. PUT the file to uploadUrl first.",
+      message:
+        "Upload not found in object storage. PUT the file to uploadUrl first.",
     });
   }
 

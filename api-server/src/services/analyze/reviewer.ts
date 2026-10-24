@@ -3,11 +3,7 @@
  * and decision-model prior, then produces the final ReviewerAssessment.
  */
 import { openai } from "@ai-sdk/openai";
-import {
-  Output,
-  generateText,
-  isStepCount,
-} from "ai";
+import { Output, generateText, isStepCount } from "ai";
 import type { AnalyzeRequest } from "../../schemas/analysis-input.js";
 import type { ClassifierResult } from "../../schemas/classifier.js";
 import type { Evidence } from "../../schemas/evidence.js";

@@ -9,10 +9,7 @@ import type { CheckUrlResult, CheckStatus } from "../../schemas/check.js";
 import type { DomainLookupResult } from "../../schemas/tool-result.js";
 import type { ThreatIntelResult } from "../../schemas/tool-result.js";
 import type { UrlInspectionResult } from "../../schemas/tool-result.js";
-import {
-  getCachedCheckUrl,
-  storeCheckUrlResult,
-} from "./check-cache.js";
+import { getCachedCheckUrl, storeCheckUrlResult } from "./check-cache.js";
 import { normalizeCheckUrl, hostnameFromCheckUrl } from "./check-cache-key.js";
 import type { DomainCacheEntry } from "./check-cache-policy.js";
 
@@ -174,8 +171,6 @@ export async function checkUrl(url: string): Promise<CheckUrlResult> {
 }
 
 export async function checkUrls(urls: string[]): Promise<CheckUrlResult[]> {
-  const uniqueUrls = [
-    ...new Set(urls.map((url) => normalizeCheckUrl(url))),
-  ];
+  const uniqueUrls = [...new Set(urls.map((url) => normalizeCheckUrl(url)))];
   return Promise.all(uniqueUrls.map((url) => checkUrl(url)));
 }

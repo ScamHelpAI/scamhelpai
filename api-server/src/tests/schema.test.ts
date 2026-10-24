@@ -15,10 +15,7 @@ function primaryKeyColumns(table: Parameters<typeof getTableConfig>[0]) {
 
 describe("evidence primary key", () => {
   it("is unique per analysis, not globally on evidence id", () => {
-    expect(primaryKeyColumns(evidence).sort()).toEqual([
-      "analysis_id",
-      "id",
-    ]);
+    expect(primaryKeyColumns(evidence).sort()).toEqual(["analysis_id", "id"]);
   });
 });
 

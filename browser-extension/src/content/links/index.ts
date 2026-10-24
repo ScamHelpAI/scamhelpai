@@ -155,8 +155,14 @@ function startObserver(): void {
   observer = new MutationObserver((mutations) => {
     if (!enabled) return;
     for (const mutation of mutations) {
-      if (mutation.type === "attributes" && mutation.target instanceof Element) {
-        if (mutation.target.tagName === "A" && !isScamhelpNode(mutation.target)) {
+      if (
+        mutation.type === "attributes" &&
+        mutation.target instanceof Element
+      ) {
+        if (
+          mutation.target.tagName === "A" &&
+          !isScamhelpNode(mutation.target)
+        ) {
           scheduleScan(document);
           return;
         }

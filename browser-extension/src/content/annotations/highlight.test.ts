@@ -3,9 +3,9 @@ import { findMatchIndex, matchLength } from "./highlight.ts";
 
 describe("findMatchIndex", () => {
   it("finds a case-sensitive match", () => {
-    expect(findMatchIndex("verify within 24 hours", "within 24 hours", true)).toBe(
-      7,
-    );
+    expect(
+      findMatchIndex("verify within 24 hours", "within 24 hours", true),
+    ).toBe(7);
   });
 
   it("finds a case-insensitive match", () => {

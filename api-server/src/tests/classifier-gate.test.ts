@@ -13,7 +13,9 @@ import {
 } from "../services/analyze/classifier-gate.js";
 
 const textRequest: AnalyzeRequest = {
-  inputs: [{ type: "text", content: "Urgent: verify your PayPal account now." }],
+  inputs: [
+    { type: "text", content: "Urgent: verify your PayPal account now." },
+  ],
 };
 
 const imageRequest: AnalyzeRequest = {
@@ -127,20 +129,16 @@ describe("shouldReview", () => {
 
   it("requires review when there is no tool-backed evidence", () => {
     expect(
-      shouldReview(
-        textRequest,
-        clearClassifier,
-        [
-          {
-            id: "ev-001",
-            type: "text",
-            source: "user_input",
-            summary: "User pasted text",
-            confidence: 1,
-            createdAt: "2026-01-01T00:00:00.000Z",
-          },
-        ],
-      ),
+      shouldReview(textRequest, clearClassifier, [
+        {
+          id: "ev-001",
+          type: "text",
+          source: "user_input",
+          summary: "User pasted text",
+          confidence: 1,
+          createdAt: "2026-01-01T00:00:00.000Z",
+        },
+      ]),
     ).toBe(true);
   });
 });

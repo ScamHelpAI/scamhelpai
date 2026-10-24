@@ -5,12 +5,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Final notice — pay outstanding balance</title>
     <style>
-      body { font-family: system-ui, sans-serif; line-height: 1.55; margin: 0; background: #f8f6f2; color: #1c1c1c; }      main { max-width: 40rem; margin: 0 auto; padding: 1.5rem 1.25rem 2.5rem; }
-      .timer { font-size: 2rem; font-weight: 700; color: #b3261e; }
-      .box { background: #fff3e0; border: 2px solid #9a5b00; border-radius: 12px; padding: 1rem; }
+      body {
+        font-family: system-ui, sans-serif;
+        line-height: 1.55;
+        margin: 0;
+        background: #f8f6f2;
+        color: #1c1c1c;
+      }
+      main {
+        max-width: 40rem;
+        margin: 0 auto;
+        padding: 1.5rem 1.25rem 2.5rem;
+      }
+      .timer {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #b3261e;
+      }
+      .box {
+        background: #fff3e0;
+        border: 2px solid #9a5b00;
+        border-radius: 12px;
+        padding: 1rem;
+      }
     </style>
   </head>
-  <body>    <main>
+  <body>
+    <main>
       <h1>IRS payment notice</h1>
       <div class="box">
         <p>
@@ -21,7 +42,9 @@
         <p>Time remaining to resolve without penalty:</p>
         <p class="timer" id="countdown">14:59</p>
         <p>
-          <a href="https://www.example.org/pay-tax-test">Pay now with debit card</a>
+          <a href="https://www.example.org/pay-tax-test"
+            >Pay now with debit card</a
+          >
         </p>
       </div>
     </main>
@@ -35,8 +58,7 @@
           seconds -= 1;
           var m = Math.floor(seconds / 60);
           var s = seconds % 60;
-          el.textContent =
-            String(m) + ":" + (s < 10 ? "0" : "") + String(s);
+          el.textContent = String(m) + ":" + (s < 10 ? "0" : "") + String(s);
         }, 1000);
       })();
     </script>

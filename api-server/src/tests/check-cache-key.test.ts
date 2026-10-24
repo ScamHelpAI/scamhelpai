@@ -7,9 +7,9 @@ import {
 
 describe("normalizeCheckUrl", () => {
   it("lowercases host and strips hash", () => {
-    expect(
-      normalizeCheckUrl("https://EXAMPLE.com/path?q=1#section"),
-    ).toBe("https://example.com/path?q=1");
+    expect(normalizeCheckUrl("https://EXAMPLE.com/path?q=1#section")).toBe(
+      "https://example.com/path?q=1",
+    );
   });
 
   it("drops default https port", () => {
@@ -21,7 +21,9 @@ describe("normalizeCheckUrl", () => {
 
 describe("hostnameFromCheckUrl", () => {
   it("strips www prefix", () => {
-    expect(hostnameFromCheckUrl("https://www.example.com/x")).toBe("example.com");
+    expect(hostnameFromCheckUrl("https://www.example.com/x")).toBe(
+      "example.com",
+    );
   });
 });
 

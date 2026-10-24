@@ -85,7 +85,9 @@ export function ensureStyles(doc: Document = document): void {
 }
 
 function closePopover(doc: Document = document): void {
-  for (const node of doc.querySelectorAll(`[${SCAMHELP_MARK}="analysis-popover"]`)) {
+  for (const node of doc.querySelectorAll(
+    `[${SCAMHELP_MARK}="analysis-popover"]`,
+  )) {
     node.remove();
   }
 }

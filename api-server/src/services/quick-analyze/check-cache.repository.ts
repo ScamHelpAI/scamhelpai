@@ -181,10 +181,15 @@ export async function pruneExpiredCheckCache(): Promise<void> {
   const now = new Date().toISOString();
   await db
     .delete(urlCheckCache)
-    .where(and(lt(urlCheckCache.expiresAt, now), lt(urlCheckCache.hitCount, 10)));
+    .where(
+      and(lt(urlCheckCache.expiresAt, now), lt(urlCheckCache.hitCount, 10)),
+    );
   await db
     .delete(domainCheckCache)
     .where(
-      and(lt(domainCheckCache.expiresAt, now), lt(domainCheckCache.hitCount, 10)),
+      and(
+        lt(domainCheckCache.expiresAt, now),
+        lt(domainCheckCache.hitCount, 10),
+      ),
     );
 }

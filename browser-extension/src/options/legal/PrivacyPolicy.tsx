@@ -70,7 +70,9 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
         <h3 className="font-heading text-lg font-semibold">
           3.1 Information you choose to send for analysis
         </h3>
-        <p>When you use “Scan this page” or similar features, we may receive:</p>
+        <p>
+          When you use “Scan this page” or similar features, we may receive:
+        </p>
         <LegalList
           items={[
             "Extracted page text or cleaned HTML (currently capped at about 20,000 characters per scan)",
@@ -142,18 +144,20 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
       <LegalSection title="5. AI processing">
         <p>
           Analysis may be performed by automated systems, including large
-          language models and decision models hosted by our AI providers. Content
-          you submit for analysis (and derived evidence) may be sent to those
-          providers solely to generate the risk assessment you requested.
+          language models and decision models hosted by our AI providers.
+          Content you submit for analysis (and derived evidence) may be sent to
+          those providers solely to generate the risk assessment you requested.
         </p>
         <p>
-          Model outputs can be incomplete or incorrect. The Service is a decision
-          aid, not a guarantee that content is safe or malicious.
+          Model outputs can be incomplete or incorrect. The Service is a
+          decision aid, not a guarantee that content is safe or malicious.
         </p>
       </LegalSection>
 
       <LegalSection title="6. Retention">
-        <p>We retain information only as long as needed for the purposes above:</p>
+        <p>
+          We retain information only as long as needed for the purposes above:
+        </p>
         <LegalList
           items={[
             "URL check cache (database): typically about 1–7 days depending on risk status; domain cache typically up to about 14 days",
@@ -215,8 +219,8 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
           Depending on where you live (for example under GDPR, UK GDPR, or the
           CCPA/CPRA), you may have rights to access, correct, delete, or export
           personal information, to object to or restrict certain processing, or
-          to opt out of “sale”/“sharing” as those terms are defined by law. We do
-          not sell personal information as commonly understood. To exercise
+          to opt out of “sale”/“sharing” as those terms are defined by law. We
+          do not sell personal information as commonly understood. To exercise
           rights, email {PRIVACY_CONTACT_EMAIL}. We may need to verify your
           request. You may also lodge a complaint with your local supervisory
           authority.
@@ -252,10 +256,11 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
 
       <LegalSection title="14. Changes">
         <p>
-          We may update this Privacy Policy from time to time. We will revise the
-          effective date above and, when changes are material, provide additional
-          notice in the Service or Chrome Web Store listing where appropriate.
-          Continued use after an update means you accept the revised policy.
+          We may update this Privacy Policy from time to time. We will revise
+          the effective date above and, when changes are material, provide
+          additional notice in the Service or Chrome Web Store listing where
+          appropriate. Continued use after an update means you accept the
+          revised policy.
         </p>
       </LegalSection>
 

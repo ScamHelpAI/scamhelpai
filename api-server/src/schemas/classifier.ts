@@ -12,8 +12,7 @@ export const SCAM_TYPE_CRITERIA: Record<ScamType, string> = {
     "Promises guaranteed returns, trading tips, or pump-and-dump schemes",
   romance:
     "Builds emotional trust to solicit money, gifts, or crypto transfers",
-  job:
-    "Fake hiring, upfront fees, or check-cashing employment offers",
+  job: "Fake hiring, upfront fees, or check-cashing employment offers",
   invoice:
     "Unexpected invoice, payment link, or billing document from an unknown sender",
   payment:
@@ -22,8 +21,7 @@ export const SCAM_TYPE_CRITERIA: Record<ScamType, string> = {
     "Requests cryptocurrency transfer, wallet seed phrase, or blockchain payment",
   account_takeover:
     "Claims account lock, suspicious activity, or urges credential reset",
-  malware:
-    "Delivers malicious attachment, download link, or drive-by install",
+  malware: "Delivers malicious attachment, download link, or drive-by install",
   other: "Fraud pattern that does not fit the other categories",
   unknown: "Indicators are too thin or ambiguous to classify",
 };

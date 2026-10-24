@@ -14,7 +14,10 @@
   "tags": [
     { "name": "Health", "description": "Liveness and readiness probes" },
     { "name": "Check", "description": "Fast deterministic URL safety checks" },
-    { "name": "Assets", "description": "Presigned uploads for images, PDFs, audio, and email files" },
+    {
+      "name": "Assets",
+      "description": "Presigned uploads for images, PDFs, audio, and email files"
+    },
     { "name": "Analyses", "description": "Full agent-based scam analysis" }
   ],
   "paths": {
@@ -173,7 +176,9 @@
             "description": "Presigned upload created",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/PresignAssetResponse" }
+                "schema": {
+                  "$ref": "#/components/schemas/PresignAssetResponse"
+                }
               }
             }
           },

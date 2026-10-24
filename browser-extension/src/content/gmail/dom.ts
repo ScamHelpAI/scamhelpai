@@ -85,7 +85,10 @@ export function findOpenMessage(
   return null;
 }
 
-export function markAnnotateRoot(body: HTMLElement, doc: Document = document): void {
+export function markAnnotateRoot(
+  body: HTMLElement,
+  doc: Document = document,
+): void {
   for (const el of doc.querySelectorAll(`[${ANNOTATE_ROOT_ATTR}]`)) {
     el.removeAttribute(ANNOTATE_ROOT_ATTR);
   }

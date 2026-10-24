@@ -126,8 +126,7 @@ export async function classifySubmission(
     answers: result.answers as Record<string, unknown>,
     providerConfidence: confidenceFromProviderMetadata(
       result.providerMetadata as
-        | Record<string, Record<string, unknown>>
-        | undefined,
+        Record<string, Record<string, unknown>> | undefined,
     ),
     modelId: result.response?.modelId,
   };

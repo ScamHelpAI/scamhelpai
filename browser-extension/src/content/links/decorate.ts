@@ -136,8 +136,7 @@ function createIcon(
   if (isButton) {
     (el as HTMLButtonElement).type = "button";
   }
-  el.innerHTML =
-    status === "warning" ? TRIANGLE_ALERT_SVG : OCTAGON_ALERT_SVG;
+  el.innerHTML = status === "warning" ? TRIANGLE_ALERT_SVG : OCTAGON_ALERT_SVG;
   return el;
 }
 
@@ -215,7 +214,8 @@ export function isScamhelpNode(node: Node): boolean {
 }
 
 export function clearDecorations(root: ParentNode = document): void {
-  const doc = root instanceof Document ? root : root.ownerDocument ?? document;
+  const doc =
+    root instanceof Document ? root : (root.ownerDocument ?? document);
   closePopover(doc);
 
   for (const icon of root.querySelectorAll(`[${SCAMHELP_MARK}="icon"]`)) {

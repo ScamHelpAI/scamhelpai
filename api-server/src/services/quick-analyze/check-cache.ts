@@ -187,11 +187,7 @@ export async function storeCheckUrlResult(params: {
     cached: false,
   };
 
-  await writeUrlToRedis(
-    urlHash,
-    { ...freshResult, cached: true },
-    urlHits,
-  );
+  await writeUrlToRedis(urlHash, { ...freshResult, cached: true }, urlHits);
 
   if (
     shouldPersistUrlToPostgres({

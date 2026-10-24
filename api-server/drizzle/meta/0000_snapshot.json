@@ -65,12 +65,8 @@
           "name": "agent_runs_analysis_id_analyses_id_fk",
           "tableFrom": "agent_runs",
           "tableTo": "analyses",
-          "columnsFrom": [
-            "analysis_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["analysis_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -189,12 +185,8 @@
           "name": "analysis_assets_analysis_id_analyses_id_fk",
           "tableFrom": "analysis_assets",
           "tableTo": "analyses",
-          "columnsFrom": [
-            "analysis_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["analysis_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -202,12 +194,8 @@
           "name": "analysis_assets_asset_id_assets_id_fk",
           "tableFrom": "analysis_assets",
           "tableTo": "assets",
-          "columnsFrom": [
-            "asset_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["asset_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -215,10 +203,7 @@
       "compositePrimaryKeys": {
         "analysis_assets_analysis_id_asset_id_pk": {
           "name": "analysis_assets_analysis_id_asset_id_pk",
-          "columns": [
-            "analysis_id",
-            "asset_id"
-          ]
+          "columns": ["analysis_id", "asset_id"]
         }
       },
       "uniqueConstraints": {},
@@ -268,12 +253,8 @@
           "name": "analysis_inputs_analysis_id_analyses_id_fk",
           "tableFrom": "analysis_inputs",
           "tableTo": "analyses",
-          "columnsFrom": [
-            "analysis_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["analysis_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -516,12 +497,8 @@
           "name": "evidence_analysis_id_analyses_id_fk",
           "tableFrom": "evidence",
           "tableTo": "analyses",
-          "columnsFrom": [
-            "analysis_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["analysis_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -529,10 +506,7 @@
       "compositePrimaryKeys": {
         "evidence_analysis_id_id_pk": {
           "name": "evidence_analysis_id_id_pk",
-          "columns": [
-            "analysis_id",
-            "id"
-          ]
+          "columns": ["analysis_id", "id"]
         }
       },
       "uniqueConstraints": {},
@@ -583,12 +557,8 @@
           "name": "feedback_analysis_id_analyses_id_fk",
           "tableFrom": "feedback",
           "tableTo": "analyses",
-          "columnsFrom": [
-            "analysis_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["analysis_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -665,12 +635,8 @@
           "name": "tool_calls_analysis_id_analyses_id_fk",
           "tableFrom": "tool_calls",
           "tableTo": "analyses",
-          "columnsFrom": [
-            "analysis_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["analysis_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -678,12 +644,8 @@
           "name": "tool_calls_agent_run_id_agent_runs_id_fk",
           "tableFrom": "tool_calls",
           "tableTo": "agent_runs",
-          "columnsFrom": [
-            "agent_run_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["agent_run_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -820,51 +782,27 @@
     "public.agent_role": {
       "name": "agent_role",
       "schema": "public",
-      "values": [
-        "analyst",
-        "reviewer"
-      ]
+      "values": ["analyst", "reviewer"]
     },
     "public.analysis_status": {
       "name": "analysis_status",
       "schema": "public",
-      "values": [
-        "queued",
-        "analyzing",
-        "reviewing",
-        "completed",
-        "failed"
-      ]
+      "values": ["queued", "analyzing", "reviewing", "completed", "failed"]
     },
     "public.asset_status": {
       "name": "asset_status",
       "schema": "public",
-      "values": [
-        "pending",
-        "uploaded",
-        "processing",
-        "ready",
-        "failed"
-      ]
+      "values": ["pending", "uploaded", "processing", "ready", "failed"]
     },
     "public.check_status": {
       "name": "check_status",
       "schema": "public",
-      "values": [
-        "safe",
-        "warning",
-        "danger"
-      ]
+      "values": ["safe", "warning", "danger"]
     },
     "public.evidence_source": {
       "name": "evidence_source",
       "schema": "public",
-      "values": [
-        "user_input",
-        "analyst",
-        "tool",
-        "reviewer"
-      ]
+      "values": ["user_input", "analyst", "tool", "reviewer"]
     },
     "public.evidence_type": {
       "name": "evidence_type",
@@ -885,21 +823,12 @@
     "public.feedback_verdict": {
       "name": "feedback_verdict",
       "schema": "public",
-      "values": [
-        "correct",
-        "incorrect",
-        "partially_correct"
-      ]
+      "values": ["correct", "incorrect", "partially_correct"]
     },
     "public.risk_level": {
       "name": "risk_level",
       "schema": "public",
-      "values": [
-        "low",
-        "medium",
-        "high",
-        "critical"
-      ]
+      "values": ["low", "medium", "high", "critical"]
     },
     "public.scam_type": {
       "name": "scam_type",

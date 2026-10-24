@@ -6,11 +6,7 @@ export const BUTTON_HOST_ATTR = "data-scamhelp-gmail-btn-host";
 export const BUTTON_TONE_ATTR = "data-tone";
 
 export type GmailButtonState =
-  | "idle"
-  | "loading"
-  | "reviewing"
-  | "done"
-  | "error";
+  "idle" | "loading" | "reviewing" | "done" | "error";
 
 export type SetButtonStateOptions = {
   message?: string;
@@ -132,14 +128,16 @@ export function setButtonState(
       applyButtonTone(button, options?.tone ?? "safe");
       button.disabled = false;
       button.textContent = options?.label ?? "Check again";
-      if (statusEl) statusEl.textContent = options?.message ?? "Check complete.";
+      if (statusEl)
+        statusEl.textContent = options?.message ?? "Check complete.";
       break;
     case "error":
       applyButtonTone(button, "danger");
       button.disabled = false;
       button.textContent = "Try again";
       if (statusEl) {
-        statusEl.textContent = options?.message ?? "Could not check this email.";
+        statusEl.textContent =
+          options?.message ?? "Could not check this email.";
       }
       break;
     default: {

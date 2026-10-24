@@ -72,8 +72,8 @@ describe("applyAnnotations scoping", () => {
     );
 
     clearAnnotations({ rootSelector: `[${ANNOTATE_ROOT_ATTR}]` });
-    expect(document.querySelectorAll(`mark[${SCAMHELP_ANNOTATION}]`)).toHaveLength(
-      0,
-    );
+    expect(
+      document.querySelectorAll(`mark[${SCAMHELP_ANNOTATION}]`),
+    ).toHaveLength(0);
   });
 });

@@ -4,12 +4,7 @@ import { VerdictIcon, iconForTone } from "@/components/verdict-icon.tsx";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type {
   AnalyzeResponse,
   ApplyPageAnnotationsMessage,
@@ -21,9 +16,7 @@ import {
 import type { AnalysisResult } from "@/shared/types.ts";
 import { toVerdict, type VerdictTone } from "@/shared/verdict.ts";
 
-function toneBadgeVariant(
-  tone: VerdictTone,
-): "danger" | "warn" | "safe" {
+function toneBadgeVariant(tone: VerdictTone): "danger" | "warn" | "safe" {
   switch (tone) {
     case "danger":
       return "danger";
@@ -95,7 +88,9 @@ function VerdictCard({
           </p>
         ) : null}
         {verdict.reviewNote ? (
-          <p className="text-base text-muted-foreground">{verdict.reviewNote}</p>
+          <p className="text-base text-muted-foreground">
+            {verdict.reviewNote}
+          </p>
         ) : null}
         {verdict.reasons.length > 0 ? (
           <div>
@@ -117,9 +112,8 @@ function VerdictCard({
 async function requestAnalysis(
   message: { type: "scanActivePage" } | { type: "getAnalysis"; id: string },
 ): Promise<AnalysisResult> {
-  const response = (await chrome.runtime.sendMessage(
-    message,
-  )) as AnalyzeResponse | undefined;
+  const response = (await chrome.runtime.sendMessage(message)) as
+    AnalyzeResponse | undefined;
 
   if (!response?.ok) {
     throw new Error(
@@ -240,7 +234,10 @@ export default function App() {
           disabled={loading}
         >
           {loading ? (
-            <Loader2Icon data-icon="inline-start" className="size-5 animate-spin" />
+            <Loader2Icon
+              data-icon="inline-start"
+              className="size-5 animate-spin"
+            />
           ) : (
             <ScanSearchIcon data-icon="inline-start" className="size-5" />
           )}

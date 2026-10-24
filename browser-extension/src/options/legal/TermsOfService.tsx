@@ -26,9 +26,8 @@ export function TermsOfService({ onBack }: TermsOfServiceProps) {
         “our”).
       </p>
       <p>
-        By installing, accessing, or using the Service, you agree to these
-        Terms and to our Privacy Policy. If you do not agree, do not use the
-        Service.
+        By installing, accessing, or using the Service, you agree to these Terms
+        and to our Privacy Policy. If you do not agree, do not use the Service.
       </p>
 
       <LegalSection title="1. The Service">
@@ -97,8 +96,8 @@ export function TermsOfService({ onBack }: TermsOfServiceProps) {
           You retain ownership of content you submit (“User Content”). You grant
           us a worldwide, non-exclusive, royalty-free license to host, process,
           transmit, and analyze User Content solely to provide, secure,
-          maintain, and improve the Service, including sharing with subprocessors
-          as described in the Privacy Policy.
+          maintain, and improve the Service, including sharing with
+          subprocessors as described in the Privacy Policy.
         </p>
         <p>
           You represent that you have all rights needed to submit User Content
@@ -129,9 +128,7 @@ export function TermsOfService({ onBack }: TermsOfServiceProps) {
           right to use the Service under these Terms, no rights are granted to
           you.
         </p>
-        <p>
-          Feedback you provide may be used by us without obligation to you.
-        </p>
+        <p>Feedback you provide may be used by us without obligation to you.</p>
       </LegalSection>
 
       <LegalSection title="8. Third-party services and self-hosted analyzers">
@@ -201,8 +198,8 @@ export function TermsOfService({ onBack }: TermsOfServiceProps) {
           extension and discontinuing API use. We may suspend or terminate
           access immediately if you breach these Terms, if required by law, or
           if we discontinue the Service. Sections that by their nature should
-          survive (including ownership, disclaimers, limitations, and
-          indemnity) will survive termination.
+          survive (including ownership, disclaimers, limitations, and indemnity)
+          will survive termination.
         </p>
       </LegalSection>
 
@@ -218,11 +215,11 @@ export function TermsOfService({ onBack }: TermsOfServiceProps) {
       <LegalSection title="15. Governing law and disputes">
         <p>
           These Terms are governed by the laws of {GOVERNING_LAW}, without
-          regard to conflict-of-law rules. Courts located in{" "}
-          {GOVERNING_LAW} will have exclusive jurisdiction over disputes,
-          except that either party may seek injunctive relief in any competent
-          court. If you are a consumer in a jurisdiction that requires different
-          rules, those mandatory protections still apply.
+          regard to conflict-of-law rules. Courts located in {GOVERNING_LAW}{" "}
+          will have exclusive jurisdiction over disputes, except that either
+          party may seek injunctive relief in any competent court. If you are a
+          consumer in a jurisdiction that requires different rules, those
+          mandatory protections still apply.
         </p>
       </LegalSection>
 

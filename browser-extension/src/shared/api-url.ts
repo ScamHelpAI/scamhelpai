@@ -18,7 +18,10 @@ export function analyzerErrorMessage(status: number, bodyText: string): string {
   }
   if (bodyText.trim()) {
     try {
-      const parsed = JSON.parse(bodyText) as { message?: string; error?: string };
+      const parsed = JSON.parse(bodyText) as {
+        message?: string;
+        error?: string;
+      };
       if (typeof parsed.message === "string" && parsed.message) {
         return parsed.message;
       }

@@ -36,7 +36,7 @@ export function shouldSkipTextParent(parent: Element | null): boolean {
 
 export function collectTextNodes(root: ParentNode): Text[] {
   const doc =
-    root instanceof Document ? root : root.ownerDocument ?? document;
+    root instanceof Document ? root : (root.ownerDocument ?? document);
   const nodes: Text[] = [];
   const walker = doc.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
     acceptNode(node) {
@@ -78,7 +78,10 @@ export function wrapTextMatch(
   const mark = createMark(matched);
 
   if (before) {
-    parent.insertBefore(textNode.ownerDocument.createTextNode(before), textNode);
+    parent.insertBefore(
+      textNode.ownerDocument.createTextNode(before),
+      textNode,
+    );
   }
   parent.insertBefore(mark, textNode);
   if (after) {

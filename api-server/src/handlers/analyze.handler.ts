@@ -59,11 +59,16 @@ export async function createAnalysisHandler(c: Context) {
   const createdAt = await createPendingAnalysis(id, body);
 
   try {
-    const { evidences, assessment, classifier, classifierModel, reviewerModel } =
-      await runInitialAnalysis(body, {
-        reviewerModel: REVIEWER_MODEL,
-        classifierModel: CLASSIFIER_MODEL,
-      });
+    const {
+      evidences,
+      assessment,
+      classifier,
+      classifierModel,
+      reviewerModel,
+    } = await runInitialAnalysis(body, {
+      reviewerModel: REVIEWER_MODEL,
+      classifierModel: CLASSIFIER_MODEL,
+    });
 
     const result = await saveInitialAnalysis({
       id,

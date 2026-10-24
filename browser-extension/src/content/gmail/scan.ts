@@ -39,7 +39,9 @@ function doneStatusMessage(highlighted: number): string {
   return "No risky parts found in this email.";
 }
 
-async function requestAnalyze(request: AnalyzeRequest): Promise<AnalysisResult> {
+async function requestAnalyze(
+  request: AnalyzeRequest,
+): Promise<AnalysisResult> {
   const response = (await chrome.runtime.sendMessage({
     type: "analyze",
     request,

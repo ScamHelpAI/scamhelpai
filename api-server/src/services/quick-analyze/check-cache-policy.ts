@@ -28,7 +28,10 @@ export function hitCountMultiplier(hitCount: number): number {
   return 1;
 }
 
-export function redisUrlTtlSeconds(status: CheckStatus, hitCount: number): number {
+export function redisUrlTtlSeconds(
+  status: CheckStatus,
+  hitCount: number,
+): number {
   const base = REDIS_URL_BASE_TTL[status];
   const scaled = base * hitCountMultiplier(hitCount);
   return Math.min(scaled, REDIS_URL_MAX_TTL);

@@ -8,10 +8,7 @@ import type { ClassifierResult } from "../../schemas/classifier.js";
 import type { Evidence } from "../../schemas/evidence.js";
 import type { ReviewerAssessment } from "../../schemas/reviewer.js";
 import { collect } from "./collector.js";
-import {
-  DEFAULT_CLASSIFIER_MODEL,
-  classifySubmission,
-} from "./classifier.js";
+import { DEFAULT_CLASSIFIER_MODEL, classifySubmission } from "./classifier.js";
 import { assessmentFromClassifier } from "./classifier-gate.js";
 import { runLlmReview } from "./reviewer.js";
 

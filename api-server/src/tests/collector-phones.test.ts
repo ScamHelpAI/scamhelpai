@@ -46,9 +46,11 @@ describe("collect phone indicators", () => {
     const phoneEvidence = evidences.filter(
       (item) => item.toolName === "lookup_phone",
     );
-    expect(phoneEvidence.some((item) => item.summary.includes("9359873056908"))).toBe(
-      false,
+    expect(
+      phoneEvidence.some((item) => item.summary.includes("9359873056908")),
+    ).toBe(false);
+    expect(phoneEvidence.some((item) => item.summary.includes("555"))).toBe(
+      true,
     );
-    expect(phoneEvidence.some((item) => item.summary.includes("555"))).toBe(true);
   });
 });

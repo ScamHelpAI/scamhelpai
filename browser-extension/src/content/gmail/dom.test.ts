@@ -21,7 +21,9 @@ describe("gmail dom", () => {
     `;
 
     // jsdom: getClientRects is empty by default — stub visibility via offsetParent-like path
-    for (const el of document.querySelectorAll("[data-legacy-message-id], .a3s")) {
+    for (const el of document.querySelectorAll(
+      "[data-legacy-message-id], .a3s",
+    )) {
       Object.defineProperty(el, "getClientRects", {
         value: () => [{ width: 10, height: 10 }],
       });
@@ -42,7 +44,9 @@ describe("gmail dom", () => {
         <div class="a3s" id="main">Your account will be closed within 24 hours.</div>
       </div>
     `;
-    for (const el of document.querySelectorAll("[data-legacy-message-id], .a3s")) {
+    for (const el of document.querySelectorAll(
+      "[data-legacy-message-id], .a3s",
+    )) {
       Object.defineProperty(el, "getClientRects", {
         value: () => [{ width: 10, height: 10 }],
       });
