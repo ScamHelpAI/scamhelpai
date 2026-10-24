@@ -1,16 +1,8 @@
 import { useEffect, useState } from "react";
 import { Loader2Icon, ScanSearchIcon, SettingsIcon } from "lucide-react";
-import { VerdictIcon, iconForTone } from "@/components/verdict-icon.tsx";
+import { VerdictIcon } from "@/components/verdict-icon.tsx";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import type {
   AnalyzeResponse,
@@ -23,14 +15,14 @@ import {
 import type { AnalysisResult } from "@/shared/types.ts";
 import { toVerdict, type VerdictTone } from "@/shared/verdict.ts";
 
-function toneBadgeVariant(tone: VerdictTone): "danger" | "warn" | "safe" {
+function toneTextClass(tone: VerdictTone): string {
   switch (tone) {
     case "danger":
-      return "danger";
+      return "text-risk-high";
     case "warn":
-      return "warn";
+      return "text-risk-medium";
     case "safe":
-      return "safe";
+      return "text-risk-low";
     default: {
       const _exhaustive: never = tone;
       return _exhaustive;
@@ -38,22 +30,8 @@ function toneBadgeVariant(tone: VerdictTone): "danger" | "warn" | "safe" {
   }
 }
 
-function toneCardClass(tone: VerdictTone): string {
-  switch (tone) {
-    case "danger":
-      return "bg-risk-high-bg ring-risk-high/35";
-    case "warn":
-      return "bg-risk-medium-bg ring-risk-medium/35";
-    case "safe":
-      return "bg-risk-low-bg ring-risk-low/35";
-    default: {
-      const _exhaustive: never = tone;
-      return _exhaustive;
-    }
-  }
-}
-
-function VerdictCard({
+/** Plain icon + title — no card, no evidence dump. */
+function VerdictSummary({
   result,
   reviewing,
 }: {
@@ -61,46 +39,32 @@ function VerdictCard({
   reviewing: boolean;
 }) {
   const verdict = toVerdict(result);
-  const ToneIcon = iconForTone(verdict.tone);
 
   return (
-    <Card
-      className={`animate-panel-in ${toneCardClass(verdict.tone)}`}
-      size="sm"
+    <div
+      className="animate-panel-in flex items-start gap-3"
       role="status"
       aria-live="polite"
     >
-      <CardHeader>
-        <div className="flex items-start gap-3">
-          <VerdictIcon tone={verdict.tone} />
-          <CardTitle>{verdict.title}</CardTitle>
-        </div>
-        <CardAction>
-          <Badge variant={toneBadgeVariant(verdict.tone)}>
-            <ToneIcon data-icon="inline-start" aria-hidden />
-            {verdict.badgeLabel}
-          </Badge>
-        </CardAction>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-3">
+      <VerdictIcon tone={verdict.tone} />
+      <div className="min-w-0 space-y-1 pt-0.5">
+        <p
+          className={`font-heading text-lg leading-snug font-semibold ${toneTextClass(verdict.tone)}`}
+        >
+          {verdict.title}
+        </p>
         {reviewing ? (
-          <p className="flex items-center gap-2 text-muted-foreground">
+          <p className="flex items-center gap-2 text-[15px] text-muted-foreground">
             <Loader2Icon className="size-4 animate-spin" />
             Double-checking…
           </p>
-        ) : null}
-        {verdict.reasons.length > 0 ? (
-          <div className="space-y-2">
-            <p className="font-heading font-semibold">Why we think so</p>
-            <ul className="list-disc space-y-2 pl-5 text-muted-foreground">
-              {verdict.reasons.slice(0, 6).map((reason) => (
-                <li key={reason}>{reason}</li>
-              ))}
-            </ul>
-          </div>
-        ) : null}
-      </CardContent>
-    </Card>
+        ) : (
+          <p className="text-[15px] text-muted-foreground">
+            {verdict.badgeLabel}
+          </p>
+        )}
+      </div>
+    </div>
   );
 }
 
@@ -242,7 +206,9 @@ export default function App() {
           </Alert>
         ) : null}
 
-        {result ? <VerdictCard result={result} reviewing={reviewing} /> : null}
+        {result ? (
+          <VerdictSummary result={result} reviewing={reviewing} />
+        ) : null}
       </div>
 
       <footer className="space-y-4">
