@@ -1,13 +1,5 @@
 import type { Metadata } from "next";
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-
 export const metadata: Metadata = {
   title: "The Extension | Scam Help.AI",
   description: "How the Scam Help.AI extension checks a page in five steps.",
@@ -38,39 +30,37 @@ const steps = [
 
 export default function ExtensionPage() {
   return (
-    <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-8 px-5 pt-10 pb-24 sm:px-8 sm:pt-14">
-      <header className="flex flex-col gap-3 text-center">
-        <h1 className="animate-panel-in font-heading text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
-          How the extension works
-        </h1>
-        <p className="text-lg text-muted-foreground">
-          Every page you check goes through the same five steps.
-        </p>
-      </header>
+    <main className="mx-auto w-full max-w-2xl flex-1 px-5 pt-10 pb-24 sm:px-8 sm:pt-14">
+      <article className="animate-panel-in">
+        <header className="mb-10 border-b border-border pb-8">
+          <h1 className="font-heading text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
+            How the extension works
+          </h1>
+          <p className="mt-4 text-lg leading-relaxed text-muted-foreground">
+            Every page you check goes through the same five steps.
+          </p>
+        </header>
 
-      <ol className="flex flex-col gap-4">
-        {steps.map((step, i) => (
-          <li key={step.title}>
-            <Card>
-              <CardHeader>
-                <CardTitle className="font-heading text-xl">
-                  {i + 1}. {step.title}
-                </CardTitle>
-                <CardDescription className="text-base">
-                  {step.body}
-                </CardDescription>
-              </CardHeader>
-            </Card>
-          </li>
-        ))}
-      </ol>
+        <div className="flex flex-col gap-10 text-[1.05rem] leading-relaxed text-foreground">
+          {steps.map((step, i) => (
+            <section key={step.title} aria-labelledby={`step-${i + 1}`}>
+              <h2
+                id={`step-${i + 1}`}
+                className="font-heading text-xl font-semibold tracking-tight text-foreground"
+              >
+                <span className="mr-2 text-muted-foreground">{i + 1}.</span>
+                {step.title}
+              </h2>
+              <p className="mt-3 text-muted-foreground">{step.body}</p>
+            </section>
+          ))}
 
-      <Card>
-        <CardContent className="text-base text-muted-foreground">
-          Confirmed scams are turned into lessons that help both AIs and our
-          users spot the next one.
-        </CardContent>
-      </Card>
+          <aside className="border-t border-border pt-8 text-muted-foreground">
+            Confirmed scams are turned into lessons that help both AIs and our
+            users spot the next one.
+          </aside>
+        </div>
+      </article>
     </main>
   );
 }
