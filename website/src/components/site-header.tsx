@@ -2,7 +2,7 @@ import { SiteLogo } from "@/components/site-logo";
 
 const navItems = [
   { href: "#", label: "How it works" },
-  { href: "#", label: "Extension" },
+  { href: "/extension", label: "Extension" },
   { href: "#", label: "About" },
   {
     href: "https://studentsagainstscams.org",
