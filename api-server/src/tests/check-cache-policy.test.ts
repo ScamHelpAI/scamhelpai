@@ -15,14 +15,14 @@ describe("hitCountMultiplier", () => {
 
 describe("redisUrlTtlSeconds", () => {
   it("applies popularity multiplier without exceeding max ttl", () => {
-    expect(redisUrlTtlSeconds("safe", 100)).toBe(4 * 3600);
-    expect(redisUrlTtlSeconds("safe", 100)).toBeLessThanOrEqual(24 * 3600);
+    expect(redisUrlTtlSeconds("safe", 100)).toBe(16 * 3600);
+    expect(redisUrlTtlSeconds("safe", 100)).toBeLessThanOrEqual(96 * 3600);
   });
 });
 
 describe("redisDomainTtlSeconds", () => {
   it("applies popularity multiplier without exceeding max ttl", () => {
-    expect(redisDomainTtlSeconds(100)).toBe(24 * 3600);
-    expect(redisDomainTtlSeconds(100)).toBeLessThanOrEqual(48 * 3600);
+    expect(redisDomainTtlSeconds(100)).toBe(96 * 3600);
+    expect(redisDomainTtlSeconds(100)).toBeLessThanOrEqual(192 * 3600);
   });
 });
