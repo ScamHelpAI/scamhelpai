@@ -47,6 +47,22 @@ export function AnalysisVerdict({
   result: AnalysisResult;
   reviewing: boolean;
 }) {
+  if (reviewing) {
+    return (
+      <div
+        className="rounded-xl border border-border bg-card p-5"
+        role="status"
+        aria-live="polite"
+        aria-busy="true"
+      >
+        <p className="flex items-center gap-2 text-[15px] text-muted-foreground">
+          <Loader2Icon className="size-4 animate-spin" aria-hidden />
+          Double-checking…
+        </p>
+      </div>
+    );
+  }
+
   const verdict = toVerdict(result);
 
   return (
@@ -67,22 +83,15 @@ export function AnalysisVerdict({
         <div className="min-w-0 space-y-1">
           <p
             className={cn(
-              "font-heading text-lg font-semibold leading-snug",
+              "font-heading text-lg font-bold leading-snug",
               toneTextClass(verdict.tone),
             )}
           >
             {verdict.title}
           </p>
-          {reviewing ? (
-            <p className="flex items-center gap-2 text-[15px] text-muted-foreground">
-              <Loader2Icon className="size-4 animate-spin" aria-hidden />
-              Double-checking…
-            </p>
-          ) : (
-            <p className="text-[15px] text-muted-foreground">
-              {verdict.badgeLabel}
-            </p>
-          )}
+          <p className="text-[15px] text-muted-foreground">
+            {verdict.badgeLabel}
+          </p>
         </div>
       </div>
 

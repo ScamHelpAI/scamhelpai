@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -155,18 +154,10 @@ export function FraudAnalyzer() {
     (tab === "file" ? file !== null : text.trim().length > 0);
 
   return (
-    <div className="w-full space-y-6">
-      <p className="text-center text-[15px] text-muted-foreground">
-        Paste a message or upload a screenshot, PDF, audio, plain text (.txt), or email (.eml).
-      </p>
-
+    <div className="w-full">
       <Card>
         <CardHeader>
           <CardTitle>Analyze suspicious content</CardTitle>
-          <CardDescription>
-            We send your submission to Scam Help for a risk review. Do not include
-            passwords or payment details.
-          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-5">
           <Tabs
@@ -253,6 +244,17 @@ export function FraudAnalyzer() {
           {result ? (
             <AnalysisVerdict result={result} reviewing={reviewing} />
           ) : null}
+
+          <div className="space-y-2 border-t border-border pt-4 text-sm text-muted-foreground">
+            <p>
+              Paste a message or upload a screenshot, PDF, audio, plain text
+              (.txt), or email (.eml).
+            </p>
+            <p>
+              We send your submission to Scam Help for a risk review. Do not
+              include passwords or payment details.
+            </p>
+          </div>
         </CardContent>
       </Card>
     </div>

@@ -1,0 +1,10 @@
+@font-face {
+  font-family: "Mikado";
+  src:
+    local("Mikado Bold"),
+    local("Mikado-Bold"),
+    url("/fonts/mikado-bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}

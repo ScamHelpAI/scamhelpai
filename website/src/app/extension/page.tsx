@@ -46,7 +46,7 @@ export default function ExtensionPage() {
             <section key={step.title} aria-labelledby={`step-${i + 1}`}>
               <h2
                 id={`step-${i + 1}`}
-                className="font-heading text-xl font-semibold tracking-tight text-foreground"
+                className="font-heading text-xl font-bold tracking-tight text-foreground"
               >
                 <span className="mr-2 text-muted-foreground">{i + 1}.</span>
                 {step.title}

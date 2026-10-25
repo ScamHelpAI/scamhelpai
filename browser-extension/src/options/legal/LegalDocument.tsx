@@ -50,7 +50,7 @@ export function LegalSection({
 }) {
   return (
     <section className="space-y-3">
-      <h2 className="font-heading text-xl font-semibold tracking-tight">
+      <h2 className="font-heading text-xl font-bold tracking-tight">
         {title}
       </h2>
       <div className="space-y-3 text-foreground/90">{children}</div>

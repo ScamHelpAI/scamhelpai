@@ -5,20 +5,17 @@ export function SiteLogo() {
   return (
     <Link
       href="/"
-      className="inline-flex items-center gap-2.5 rounded-md border-2 border-brand bg-card px-2.5 py-1.5 text-foreground transition-senior hover:bg-accent focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+      className="inline-flex items-center rounded-md border-2 px-2.5 py-1.5 transition-senior focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
       aria-label="Scam Help AI home"
     >
       <Image
         src="/logo.png"
-        alt=""
-        width={28}
-        height={28}
-        className="size-7 rounded-sm"
+        alt="Scam Help AI"
+        width={1024}
+        height={429}
+        className="h-9 w-auto sm:h-10"
         priority
       />
-      <span className="font-heading text-sm font-bold tracking-wide uppercase sm:text-base">
-        Scam Help.AI
-      </span>
     </Link>
   );
 }

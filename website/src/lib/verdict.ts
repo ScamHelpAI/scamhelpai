@@ -11,7 +11,13 @@ export type Verdict = {
 };
 
 function isUsefulReason(summary: string): boolean {
-  return !/submission includes \w+ content \(\d+ characters?\)/i.test(summary);
+  if (/submission includes \w+ content \(\d+ characters?\)/i.test(summary)) {
+    return false;
+  }
+  if (/^File .+ \([^)]+, \d+ bytes\); malware scan:/i.test(summary)) {
+    return false;
+  }
+  return true;
 }
 
 function copyForLevel(level: RiskLevel): {

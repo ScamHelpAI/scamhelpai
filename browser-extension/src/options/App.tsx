@@ -130,7 +130,7 @@ export default function App() {
 
       <section className="mt-8">
         <details className="group space-y-3">
-          <summary className="flex cursor-pointer list-none items-center gap-2 font-heading text-lg font-semibold tracking-tight marker:content-none [&::-webkit-details-marker]:hidden">
+          <summary className="flex cursor-pointer list-none items-center gap-2 font-heading text-lg font-bold tracking-tight marker:content-none [&::-webkit-details-marker]:hidden">
             <ChevronRightIcon
               className="size-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-90"
               aria-hidden
@@ -186,7 +186,7 @@ export default function App() {
       </section>
 
       <section className="mt-10 space-y-3">
-        <h2 className="font-heading text-lg font-semibold tracking-tight">
+        <h2 className="font-heading text-lg font-bold tracking-tight">
           Legal
         </h2>
         <p className="text-base leading-relaxed text-muted-foreground">

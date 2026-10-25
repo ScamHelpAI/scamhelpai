@@ -8,6 +8,17 @@
 
 @custom-variant dark (&:is(.dark *));
 
+@font-face {
+  font-family: "Mikado";
+  src:
+    local("Mikado Bold"),
+    local("Mikado-Bold"),
+    url("/fonts/mikado-bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 /*
   Same theme tokens as browser-extension/src/popup/styles.css
   Prioritize higher readability for senior citizens.
@@ -96,8 +107,8 @@
     "Atkinson Hyperlegible Next", system-ui, -apple-system, "Segoe UI",
     sans-serif;
   --font-heading:
-    "Atkinson Hyperlegible Next", system-ui, -apple-system, "Segoe UI",
-    sans-serif;
+    "Mikado", "Atkinson Hyperlegible Next", system-ui, -apple-system,
+    "Segoe UI", sans-serif;
 
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
@@ -206,15 +217,15 @@
   h4,
   h5,
   h6 {
-    @apply font-heading;
+    @apply font-heading font-bold;
   }
   button,
   [data-slot="button"] {
-    @apply font-heading;
+    @apply font-heading font-bold;
   }
   [data-slot="alert-title"],
   [data-slot="card-title"] {
-    @apply font-heading;
+    @apply font-heading font-bold;
   }
 }
 

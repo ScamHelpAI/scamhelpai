@@ -67,7 +67,7 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
           personal information that appears on a page or in a file you submit.
         </p>
 
-        <h3 className="font-heading text-lg font-semibold">
+        <h3 className="font-heading text-lg font-bold">
           3.1 Information you choose to send for analysis
         </h3>
         <p>
@@ -82,7 +82,7 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
           ]}
         />
 
-        <h3 className="font-heading text-lg font-semibold">
+        <h3 className="font-heading text-lg font-bold">
           3.2 Information stored in your browser
         </h3>
         <p>
@@ -93,7 +93,7 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
           account.
         </p>
 
-        <h3 className="font-heading text-lg font-semibold">
+        <h3 className="font-heading text-lg font-bold">
           3.3 Technical and security information
         </h3>
         <p>Our servers may process:</p>
@@ -107,7 +107,7 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
           ]}
         />
 
-        <h3 className="font-heading text-lg font-semibold">
+        <h3 className="font-heading text-lg font-bold">
           3.4 Permissions the extension uses
         </h3>
         <LegalList

@@ -59,7 +59,7 @@ async function getActiveTab(): Promise<chrome.tabs.Tab> {
     throw new Error("No active tab found.");
   }
   if (!tab.url || !/^https?:/i.test(tab.url)) {
-    throw new Error("Open a normal http or https page first.");
+    throw new Error("Please go to a webpage first.");
   }
   return tab;
 }
