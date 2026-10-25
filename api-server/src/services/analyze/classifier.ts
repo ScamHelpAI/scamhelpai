@@ -15,6 +15,7 @@ import {
 } from "../../schemas/classifier.js";
 import type { Evidence } from "../../schemas/evidence.js";
 import { buildCollectorState } from "./collector.js";
+import { logModelCost } from "../cost-log.js";
 
 export const DEFAULT_CLASSIFIER_MODEL: OpenAIDecisionModelId = "gpt-6-luna";
 
@@ -121,6 +122,11 @@ export async function classifySubmission(
     state,
     questions: buildQuestions(),
   });
+
+  const modelId = result.response?.modelId ?? DEFAULT_CLASSIFIER_MODEL;
+  if (result.usage) {
+    logModelCost("classifier", modelId, result.usage);
+  }
 
   return {
     answers: result.answers as Record<string, unknown>,

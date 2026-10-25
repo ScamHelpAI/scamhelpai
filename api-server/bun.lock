@@ -7,6 +7,7 @@
       "dependencies": {
         "@ai-sdk/openai": "^4.0.91",
         "ai": "^7.0.137",
+        "ai-sdk-cost-calculator": "^7.1.16",
         "cheerio": "^1.2.0",
         "drizzle-orm": "^0.45.2",
         "hono": "^4.13.1",
@@ -308,6 +309,8 @@
     "@zone-eu/mailsplit": ["@zone-eu/mailsplit@5.4.15", "", { "dependencies": { "libbase64": "1.3.0", "libmime": "5.4.2", "libqp": "2.1.1" } }, "sha512-c7ZpxauvF4AEkDJlKDYO7iMUtMuqJMBnDWNff1cyx+d7zaBVR3iFEmXhNHOVoMmVyVF3pTZLsLIJsEFKDldOAA=="],
 
     "ai": ["ai@7.0.137", "", { "dependencies": { "@ai-sdk/gateway": "4.0.110", "@ai-sdk/provider": "4.0.26", "@ai-sdk/provider-utils": "5.0.58" }, "peerDependencies": { "zod": "^3.25.76 || ^4.1.8" } }, "sha512-JxrPkSQknxIN/gYqS3UQksExS6eWI23QMPBrKMGXeeFHhru6xFtF4MuMq17WaHD+lXPh0lne6H0BM2Z2VMW9EQ=="],
+
+    "ai-sdk-cost-calculator": ["ai-sdk-cost-calculator@7.1.16", "", { "peerDependencies": { "ai": ">=6.0.0" } }, "sha512-TB3KfAXoVKZsgJIyZtjkT/FuOtJRR6yUOshvJYgQOBPpqDnuB0vUT3itImHVOHB5I76UcJ2M0rRZyrPD45OgbQ=="],
 
     "assertion-error": ["assertion-error@2.0.1", "", {}, "sha512-Izi8RQcffqCeNVgFigKli1ssklIbpHnCYc6AknXGYoB6grJqyeby7jv12JUQgmTAnIDnbck1uxksT4dzN3PWBA=="],
 

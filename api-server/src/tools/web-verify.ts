@@ -1,5 +1,6 @@
 import { openai } from "@ai-sdk/openai";
 import { generateText } from "ai";
+import { logModelCost } from "../services/cost-log.js";
 
 type SearchSnippet = {
   title: string;
@@ -32,6 +33,10 @@ export async function webVerify(query: string) {
       web_search: webSearchTool,
     },
     toolChoice: { type: "tool", toolName: "web_search" },
+  });
+
+  logModelCost("web_verify", WEB_VERIFY_MODEL, search.usage, {
+    result: search,
   });
 
   const toolResult = [...search.toolResults, ...search.staticToolResults].find(

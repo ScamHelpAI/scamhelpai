@@ -13,6 +13,7 @@ import {
 } from "../../schemas/reviewer.js";
 import { createReviewerTools } from "../../tools/index.js";
 import { buildReviewerPrompt } from "./analysis-format.js";
+import { logModelCost } from "../cost-log.js";
 
 type OpenAILanguageModelId = Parameters<typeof openai>[0];
 
@@ -60,6 +61,10 @@ export async function runLlmReview(
     }),
     stopWhen: isStepCount(20),
     prompt: buildReviewerPrompt({ request, evidences, classifier }),
+  });
+
+  logModelCost("reviewer", model, reviewerResult.usage, {
+    result: reviewerResult,
   });
 
   return reviewerResult.output;

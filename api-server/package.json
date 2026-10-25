@@ -5,6 +5,7 @@
   "dependencies": {
     "@ai-sdk/openai": "^4.0.91",
     "ai": "^7.0.137",
+    "ai-sdk-cost-calculator": "^7.1.16",
     "cheerio": "^1.2.0",
     "drizzle-orm": "^0.45.2",
     "hono": "^4.13.1",

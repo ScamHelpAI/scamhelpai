@@ -17,6 +17,7 @@ import {
   saveInitialAnalysis,
   saveReviewCompletion,
 } from "../services/analyze/analysis.repository.js";
+import { withAnalysisCostLogging } from "../services/cost-log.js";
 
 const REVIEWER_MODEL: OpenAILanguageModelId = "gpt-6-luna";
 const CLASSIFIER_MODEL = "gpt-6-luna";
@@ -31,11 +32,15 @@ function startBackgroundReview(params: {
 }): void {
   void (async () => {
     try {
-      const assessment = await runVerifierReview(
-        params.request,
-        params.evidences,
-        params.classifier,
-        params.reviewerModel,
+      const assessment = await withAnalysisCostLogging(
+        `${params.id}:review`,
+        () =>
+          runVerifierReview(
+            params.request,
+            params.evidences,
+            params.classifier,
+            params.reviewerModel,
+          ),
       );
       await saveReviewCompletion({
         id: params.id,
@@ -65,10 +70,12 @@ export async function createAnalysisHandler(c: Context) {
       classifier,
       classifierModel,
       reviewerModel,
-    } = await runInitialAnalysis(body, {
-      reviewerModel: REVIEWER_MODEL,
-      classifierModel: CLASSIFIER_MODEL,
-    });
+    } = await withAnalysisCostLogging(`${id}:initial`, () =>
+      runInitialAnalysis(body, {
+        reviewerModel: REVIEWER_MODEL,
+        classifierModel: CLASSIFIER_MODEL,
+      }),
+    );
 
     const result = await saveInitialAnalysis({
       id,
