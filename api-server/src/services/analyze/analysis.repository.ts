@@ -4,10 +4,14 @@
  */
 import { and, eq } from "drizzle-orm";
 import type { AnalyzeRequest } from "../../schemas/analysis-input.js";
+import type { ScamType } from "../../schemas/analyst.js";
+import { scamTypeSchema } from "../../schemas/analyst.js";
 import type {
   AnalysisResult,
   AnalysisReview,
+  RiskLevel,
 } from "../../schemas/analysis-result.js";
+import { riskLevelSchema } from "../../schemas/analysis-result.js";
 import type { Evidence } from "../../schemas/evidence.js";
 import {
   classifierResultSchema,
@@ -194,6 +198,39 @@ export async function markAnalysisCompletedWithoutReview(
       completedAt: new Date().toISOString(),
     })
     .where(eq(analyses.id, id));
+}
+
+export async function getAnalysisRiskLevel(
+  id: string,
+): Promise<RiskLevel | null> {
+  const snapshot = await getAnalysisCompletionSnapshot(id);
+  return snapshot?.riskLevel ?? null;
+}
+
+export async function getAnalysisCompletionSnapshot(
+  id: string,
+): Promise<{ riskLevel: RiskLevel; scamType: ScamType | null } | null> {
+  const [row] = await db
+    .select({
+      riskLevel: analyses.riskLevel,
+      scamType: analyses.scamType,
+    })
+    .from(analyses)
+    .where(eq(analyses.id, id))
+    .limit(1);
+
+  if (!row?.riskLevel) return null;
+  const risk = riskLevelSchema.safeParse(row.riskLevel);
+  if (!risk.success) return null;
+
+  const scam = row.scamType
+    ? scamTypeSchema.safeParse(row.scamType)
+    : null;
+
+  return {
+    riskLevel: risk.data,
+    scamType: scam?.success ? scam.data : null,
+  };
 }
 
 function toPublicReview(assessment: ReviewerAssessment): AnalysisReview {

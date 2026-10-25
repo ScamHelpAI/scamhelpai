@@ -101,6 +101,18 @@ export const analyses = pgTable("analyses", {
   }),
 });
 
+/** Aggregate counters that survive low/medium content purge. */
+export const analysisStatCounters = pgTable("analysis_stat_counters", {
+  key: text("key").primaryKey(),
+  value: integer("value").notNull().default(0),
+  updatedAt: timestamp("updated_at", {
+    withTimezone: true,
+    mode: "string",
+  })
+    .notNull()
+    .defaultNow(),
+});
+
 export const analysisInputs = pgTable("analysis_inputs", {
   id: text("id").primaryKey(),
   analysisId: text("analysis_id")

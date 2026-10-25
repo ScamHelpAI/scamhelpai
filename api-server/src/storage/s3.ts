@@ -67,3 +67,9 @@ export async function readObjectBytes(
   if (!(await file.exists())) return null;
   return new Uint8Array(await file.arrayBuffer());
 }
+
+export async function deleteObject(objectKey: string): Promise<void> {
+  const file = getS3Client().file(objectKey);
+  if (!(await file.exists())) return;
+  await file.delete();
+}

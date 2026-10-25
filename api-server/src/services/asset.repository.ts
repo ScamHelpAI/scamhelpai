@@ -5,7 +5,7 @@ import { eq } from "drizzle-orm";
 import type { Asset, AssetMetadata } from "../schemas/asset.js";
 import { assetMetadataSchema } from "../schemas/asset.js";
 import { db } from "../db/index.js";
-import { assets } from "../db/schema.js";
+import { analysisAssets, assets } from "../db/schema.js";
 
 function toAsset(row: typeof assets.$inferSelect): Asset {
   let metadata: AssetMetadata | undefined;
@@ -85,4 +85,25 @@ export async function markAssetUploaded(params: {
     .returning();
 
   return row ? toAsset(row) : null;
+}
+
+export async function listAssetsForAnalysis(
+  analysisId: string,
+): Promise<Asset[]> {
+  const rows = await db
+    .select({ asset: assets })
+    .from(analysisAssets)
+    .innerJoin(assets, eq(analysisAssets.assetId, assets.id))
+    .where(eq(analysisAssets.analysisId, analysisId));
+
+  return rows.map((row) => toAsset(row.asset));
+}
+
+/** Deletes the asset row; analysis_assets links cascade via FK. */
+export async function deleteAssetById(id: string): Promise<boolean> {
+  const deleted = await db
+    .delete(assets)
+    .where(eq(assets.id, id))
+    .returning({ id: assets.id });
+  return deleted.length > 0;
 }
