@@ -1,0 +1,533 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="scamhelp-qa" content="fixture — example.org only, no data collected" />
+    <title>Amazon Sign-In</title>
+    <style>
+      :root {
+        --text: #0f1111;
+        --muted: #565959;
+        --link: #2162a1;
+        --link-hover: #c45500;
+        --border: #d5d9d9;
+        --input-border: #888c8c;
+        --error: #cc0c39;
+        --yellow: #ffd814;
+        --yellow-hover: #f7ca00;
+        --yellow-border: #fcd200;
+        --bg: #ffffff;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        font-family:
+          "Amazon Ember",
+          "Arial",
+          -apple-system,
+          BlinkMacSystemFont,
+          sans-serif;
+        font-size: 14px;
+        color: var(--text);
+        background: var(--bg);
+        line-height: 1.4;
+        -webkit-font-smoothing: antialiased;
+      }
+      a {
+        color: var(--link);
+        text-decoration: none;
+      }
+      a:hover {
+        color: var(--link-hover);
+        text-decoration: underline;
+      }
+      .logo-wrap {
+        text-align: center;
+        padding: 20px 0 16px;
+      }
+      .logo {
+        display: inline-flex;
+        flex-direction: column;
+        align-items: center;
+        text-decoration: none;
+        color: #232f3e;
+      }
+      .logo:hover {
+        text-decoration: none;
+        color: #232f3e;
+      }
+      .logo-word {
+        font-size: 34px;
+        font-weight: 500;
+        letter-spacing: -0.8px;
+        line-height: 1;
+        position: relative;
+        padding-bottom: 8px;
+      }
+      .logo-word .tld {
+        font-size: 15px;
+        font-weight: 400;
+        vertical-align: super;
+        margin-left: 1px;
+      }
+      .logo-smile {
+        width: 72px;
+        height: 12px;
+        margin-top: -10px;
+        margin-left: 22px;
+      }
+      .main {
+        width: 100%;
+        max-width: 368px;
+        margin: 0 auto;
+        padding: 0 14px 32px;
+        flex: 1;
+      }
+      .alert {
+        background: #fff;
+        border: 1px solid #f5c6cb;
+        border-radius: 12px;
+        padding: 14px 16px;
+        margin-bottom: 16px;
+        box-shadow: 0 1px 2px rgba(15, 17, 17, 0.04);
+      }
+      .alert-head {
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+        margin-bottom: 10px;
+      }
+      .alert-icon {
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        background: var(--error);
+        color: #fff;
+        font-size: 14px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        margin-top: 1px;
+      }
+      .alert-title {
+        color: var(--error);
+        font-size: 15px;
+        font-weight: 700;
+        line-height: 1.3;
+      }
+      .alert p {
+        margin: 0 0 10px;
+        font-size: 14px;
+      }
+      .alert p:last-child {
+        margin-bottom: 0;
+      }
+      .order {
+        background: #f7f8f8;
+        border-radius: 10px;
+        padding: 12px 14px;
+        margin: 12px 0;
+        font-size: 13px;
+      }
+      .order-item {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        margin-bottom: 12px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid #e7e7e7;
+      }
+      .order-thumb {
+        width: 52px;
+        height: 52px;
+        border-radius: 8px;
+        background: linear-gradient(145deg, #f5f5f5, #e8e8e8);
+        border: 1px solid #ddd;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        font-weight: 700;
+        color: #666;
+        flex-shrink: 0;
+      }
+      .order-name {
+        font-weight: 600;
+        font-size: 14px;
+      }
+      .order-meta {
+        color: var(--muted);
+        font-size: 12px;
+        margin-top: 2px;
+      }
+      .order-rows {
+        display: grid;
+        gap: 6px;
+      }
+      .order-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+      }
+      .order-row .k {
+        color: var(--muted);
+      }
+      .order-row .v {
+        font-weight: 600;
+        text-align: right;
+      }
+      .card {
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 22px 26px 26px;
+        background: #fff;
+      }
+      .card h1 {
+        margin: 0 0 6px;
+        font-size: 28px;
+        font-weight: 400;
+        line-height: 1.2;
+      }
+      .card .sub {
+        margin: 0 0 18px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+      label {
+        display: block;
+        font-size: 13px;
+        font-weight: 700;
+        margin-bottom: 4px;
+      }
+      .field {
+        margin-bottom: 14px;
+      }
+      input[type="email"],
+      input[type="password"],
+      input[type="text"] {
+        width: 100%;
+        height: 36px;
+        padding: 6px 10px;
+        border: 1px solid var(--input-border);
+        border-radius: 8px;
+        font: inherit;
+        font-size: 14px;
+        outline: none;
+        background: #fff;
+        transition:
+          border-color 0.1s,
+          box-shadow 0.1s;
+      }
+      input:focus {
+        border-color: #007185;
+        box-shadow: 0 0 0 3px rgba(0, 130, 150, 0.25);
+      }
+      .hint {
+        margin: -6px 0 14px;
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .btn {
+        display: block;
+        width: 100%;
+        height: 36px;
+        border-radius: 20px;
+        border: 1px solid transparent;
+        font: inherit;
+        font-size: 14px;
+        cursor: pointer;
+        text-align: center;
+        text-decoration: none;
+        line-height: 34px;
+        margin-top: 4px;
+      }
+      .btn:hover {
+        text-decoration: none;
+      }
+      .btn-primary {
+        background: var(--yellow);
+        border-color: var(--yellow-border);
+        color: var(--text);
+      }
+      .btn-primary:hover {
+        background: var(--yellow-hover);
+      }
+      .legal {
+        margin: 16px 0 0;
+        font-size: 12px;
+        line-height: 1.5;
+        color: var(--text);
+      }
+      .keep {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        margin: 16px 0 0;
+        font-size: 13px;
+      }
+      .keep input {
+        margin-top: 2px;
+        accent-color: #007185;
+      }
+      .help {
+        margin-top: 18px;
+      }
+      .help summary {
+        list-style: none;
+        cursor: pointer;
+        color: var(--link);
+        font-size: 13px;
+      }
+      .help summary::-webkit-details-marker {
+        display: none;
+      }
+      .help summary::before {
+        content: "";
+        display: inline-block;
+        width: 0;
+        height: 0;
+        border-left: 4px solid transparent;
+        border-right: 4px solid transparent;
+        border-top: 5px solid #565959;
+        margin-right: 6px;
+        vertical-align: middle;
+        transform: rotate(-90deg);
+      }
+      .help[open] summary::before {
+        transform: rotate(0deg);
+      }
+      .help ul {
+        margin: 10px 0 0;
+        padding-left: 18px;
+      }
+      .help li {
+        margin-bottom: 8px;
+      }
+      .divider {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 24px 0 14px;
+        color: var(--muted);
+        font-size: 12px;
+      }
+      .divider::before,
+      .divider::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: var(--border);
+      }
+      .btn-secondary {
+        background: #fff;
+        border-color: #d5d9d9;
+        color: var(--text);
+        box-shadow: 0 2px 5px rgba(15, 17, 17, 0.08);
+      }
+      .btn-secondary:hover {
+        background: #f7fafa;
+      }
+      .footer {
+        margin-top: auto;
+        padding: 28px 16px 36px;
+        text-align: center;
+        border-top: 1px solid #e7e7e7;
+        background: linear-gradient(180deg, #f7f8f8 0%, #fff 55%);
+      }
+      .footer-links a {
+        margin: 0 12px;
+        font-size: 12px;
+      }
+      .footer-copy {
+        margin-top: 10px;
+        color: var(--muted);
+        font-size: 11px;
+      }
+      .hidden-qa {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+      }
+    </style>
+  </head>
+  <body>
+    <p class="hidden-qa" aria-hidden="true">
+      ScamHelp local QA page. All links use example.org. Do not enter real
+      credentials.
+    </p>
+
+    <div class="logo-wrap">
+      <a class="logo" href="https://www.example.org/amazon-home-test" aria-label="Amazon">
+        <span class="logo-word">amazon<span class="tld">.com</span></span>
+        <svg class="logo-smile" viewBox="0 0 80 14" aria-hidden="true">
+          <path
+            d="M4 4c18 12 54 12 72 0"
+            fill="none"
+            stroke="#ff9900"
+            stroke-width="3"
+            stroke-linecap="round"
+          />
+          <path
+            d="M68 3l8 3-6 5"
+            fill="none"
+            stroke="#ff9900"
+            stroke-width="3"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </a>
+    </div>
+
+    <main class="main">
+      <div class="alert" role="alert">
+        <div class="alert-head">
+          <span class="alert-icon" aria-hidden="true">!</span>
+          <div class="alert-title">Unusual order — account temporarily locked</div>
+        </div>
+        <p>
+          We placed a security hold after an unrecognized purchase on your
+          account. Sign in to cancel the order or the charge will post and the
+          gift card will be delivered.
+        </p>
+        <div class="order">
+          <div class="order-item">
+            <div class="order-thumb" aria-hidden="true">GIFT</div>
+            <div>
+              <div class="order-name">Apple Gift Card — App Store &amp; iTunes</div>
+              <div class="order-meta">Email delivery · Qty 1</div>
+            </div>
+          </div>
+          <div class="order-rows">
+            <div class="order-row">
+              <span class="k">Order #</span>
+              <span class="v">112-8492031-7748290</span>
+            </div>
+            <div class="order-row">
+              <span class="k">Placed</span>
+              <span class="v">Today, 3:41 AM PDT</span>
+            </div>
+            <div class="order-row">
+              <span class="k">Payment</span>
+              <span class="v">Visa ending in 4812</span>
+            </div>
+            <div class="order-row">
+              <span class="k">Order total</span>
+              <span class="v">$500.00</span>
+            </div>
+          </div>
+        </div>
+        <p>
+          Case
+          <a href="https://www.example.org/amazon-case-test">A-92844107-US</a>
+          · Cancel before
+          <strong id="deadline">11:59 PM tonight</strong> ·
+          <a href="https://www.example.org/amazon-cancel-test"
+            >https://www.amazon.com/gp/your-account/order-details?orderID=112-8492031-7748290</a
+          >
+        </p>
+      </div>
+
+      <div class="card">
+        <h1>Sign in</h1>
+        <p class="sub">to cancel order 112-8492031-7748290</p>
+
+        <form action="#" method="get" onsubmit="return false;" autocomplete="off">
+          <div class="field">
+            <label for="ap_email">Email or mobile phone number</label>
+            <input id="ap_email" name="email" type="email" autocomplete="off" />
+          </div>
+
+          <div class="field">
+            <label for="ap_password">Password</label>
+            <input
+              id="ap_password"
+              name="password"
+              type="password"
+              autocomplete="off"
+            />
+          </div>
+
+          <div class="field">
+            <label for="ap_otp">One-time password (OTP)</label>
+            <input
+              id="ap_otp"
+              name="otp"
+              type="text"
+              inputmode="numeric"
+              maxlength="6"
+              placeholder="6-digit code"
+              autocomplete="off"
+            />
+          </div>
+          <p class="hint">
+            We texted a code to the number ending in ••47. Enter it to verify
+            it’s you.
+          </p>
+
+          <button class="btn btn-primary" type="submit">Continue</button>
+        </form>
+
+        <p class="legal">
+          By continuing, you agree to Amazon's
+          <a href="https://www.example.org/amazon-conditions-test"
+            >Conditions of Use</a
+          >
+          and
+          <a href="https://www.example.org/amazon-privacy-test"
+            >Privacy Notice</a
+          >.
+        </p>
+
+        <label class="keep">
+          <input type="checkbox" name="rememberDevice" />
+          <span>Keep me signed in. <a href="https://www.example.org/amazon-details-test">Details</a></span>
+        </label>
+
+        <details class="help">
+          <summary>Need help?</summary>
+          <ul>
+            <li>
+              <a href="https://www.example.org/amazon-forgot-test"
+                >Forgot password?</a
+              >
+            </li>
+            <li>
+              <a href="https://www.example.org/amazon-other-issues-test"
+                >Other issues with Sign-In</a
+              >
+            </li>
+          </ul>
+        </details>
+      </div>
+
+      <div class="divider">New to Amazon?</div>
+      <a class="btn btn-secondary" href="https://www.example.org/amazon-register-test"
+        >Create your Amazon account</a
+      >
+    </main>
+
+    <footer class="footer">
+      <div class="footer-links">
+        <a href="https://www.example.org/amazon-conditions-test"
+          >Conditions of Use</a
+        >
+        <a href="https://www.example.org/amazon-privacy-test">Privacy Notice</a>
+        <a href="https://www.example.org/amazon-help-test">Help</a>
+      </div>
+      <div class="footer-copy">
+        © 1996-2026, Amazon.com, Inc. or its affiliates
+      </div>
+    </footer>
+  </body>
+</html>

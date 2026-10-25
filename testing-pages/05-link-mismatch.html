@@ -3,46 +3,115 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Account message — Example Bank</title>
+    <title>DocuSign — Complete with Docusign: Wire Instructions</title>
     <style>
       body {
-        font-family: system-ui, sans-serif;
-        line-height: 1.55;
+        font-family: Arial, Helvetica, sans-serif;
+        line-height: 1.5;
         margin: 0;
-        background: #f8f6f2;
-        color: #1c1c1c;
+        background: #eaeaea;
+        color: #333;
       }
-      main {
-        max-width: 40rem;
+      .wrap {
+        max-width: 600px;
         margin: 0 auto;
-        padding: 1.5rem 1.25rem 2.5rem;
+        padding: 1.5rem 1rem 2.5rem;
       }
-      .alert {
-        background: #fff3e0;
-        border: 2px solid #9a5b00;
-        border-radius: 12px;
-        padding: 1rem;
+      .card {
+        background: #fff;
+        border: 1px solid #d9d9d9;
+        border-radius: 2px;
+      }
+      .hdr {
+        padding: 1.25rem 1.5rem 0.5rem;
+        border-bottom: 1px solid #eee;
+      }
+      .hdr img-placeholder,
+      .logo {
+        font-weight: 700;
+        font-size: 1.1rem;
+        color: #1e1e1e;
+        letter-spacing: -0.02em;
+      }
+      .logo span {
+        color: #f9b000;
+      }
+      .body {
+        padding: 1.25rem 1.5rem 1.5rem;
+        font-size: 14px;
+      }
+      .btn {
+        display: inline-block;
+        background: #f9b000;
+        color: #1e1e1e;
+        font-weight: 700;
+        text-decoration: none;
+        padding: 0.65rem 1.5rem;
+        border-radius: 2px;
+        margin: 0.75rem 0;
+      }
+      .muted {
+        color: #666;
+        font-size: 12px;
+      }
+      a {
+        color: #0b5cab;
+      }
+      .envelope {
+        background: #f7f7f7;
+        border-left: 4px solid #f9b000;
+        padding: 0.75rem 1rem;
+        margin: 1rem 0;
+        font-size: 13px;
       }
     </style>
   </head>
   <body>
-    <main>
-      <h1>Secure message center</h1>
-      <div class="alert">
-        <p>
-          You have a new secure document. Open it using the link below to review
-          your statement.
-        </p>
-        <p>
-          <a href="https://www.example.org/secure/statement-test">
-            https://www.example.com/secure/statement
-          </a>
-        </p>
+    <div class="wrap">
+      <div class="card">
+        <div class="hdr">
+          <div class="logo">Docu<span>Sign</span></div>
+        </div>
+        <div class="body">
+          <p>Hello,</p>
+          <p>
+            <strong>Northbridge Property Group</strong> has sent you a document
+            to review and sign:
+          </p>
+          <div class="envelope">
+            <strong>Envelope ID:</strong> 8F2A91C4-7B3E-44D1-A902<br />
+            <strong>Subject:</strong> Updated wire instructions — closing 10/28
+          </div>
+          <p>
+            Please complete this by end of business today so funds can be
+            released to escrow. All parties have signed except you.
+          </p>
+          <p>
+            <a
+              class="btn"
+              href="https://www.example.org/docusign-review-test"
+              >REVIEW DOCUMENT</a
+            >
+          </p>
+          <p class="muted">
+            Or copy this link into your browser:<br />
+            <a href="https://www.example.org/docusign-review-test"
+              >https://app.docusign.com/documents/details/8F2A91C4</a
+            >
+          </p>
+          <p class="muted">
+            Do not share this email. DocuSign will never ask for your password by
+            email. If you have questions, contact your agent directly — not this
+            mailbox.
+          </p>
+          <hr style="border: none; border-top: 1px solid #eee; margin: 1.25rem 0" />
+          <p class="muted">
+            This message was sent to you by Northbridge Property Group using the
+            DocuSign Electronic Signature Service. If you would rather not receive
+            email from this sender, contact the sender with your request.
+          </p>
+        </div>
       </div>
-      <p>
-        If you did not expect this message, contact
-        <a href="https://www.example.com/contact">example.com/contact</a>.
-      </p>
-    </main>
+    </div>
   </body>
 </html>

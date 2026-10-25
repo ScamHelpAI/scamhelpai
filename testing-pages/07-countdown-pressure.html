@@ -3,62 +3,131 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Final notice — pay outstanding balance</title>
+    <title>USPS® - Package Action Required</title>
     <style>
       body {
-        font-family: system-ui, sans-serif;
-        line-height: 1.55;
+        font-family: Arial, Helvetica, sans-serif;
+        line-height: 1.5;
         margin: 0;
-        background: #f8f6f2;
-        color: #1c1c1c;
+        background: #ececec;
+        color: #333;
+      }
+      .bar {
+        background: #333366;
+        color: #fff;
+        padding: 0.5rem 1rem;
+        font-size: 13px;
+        text-align: center;
       }
       main {
-        max-width: 40rem;
+        max-width: 480px;
         margin: 0 auto;
-        padding: 1.5rem 1.25rem 2.5rem;
+        padding: 1.5rem 1rem 2.5rem;
+      }
+      .card {
+        background: #fff;
+        border: 1px solid #ccc;
+        padding: 1.25rem 1.5rem;
+      }
+      h1 {
+        font-size: 1.2rem;
+        margin: 0 0 0.75rem;
+        color: #333366;
+      }
+      .tracking {
+        font-family: ui-monospace, monospace;
+        font-size: 14px;
+        background: #f4f4f4;
+        padding: 0.5rem 0.65rem;
+        border: 1px solid #ddd;
+        margin-bottom: 1rem;
+      }
+      .timer-wrap {
+        text-align: center;
+        margin: 1.25rem 0;
+        padding: 1rem;
+        background: #fff8e6;
+        border: 1px solid #e6c200;
+      }
+      .timer-label {
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: #7a5d00;
+        margin-bottom: 0.35rem;
       }
       .timer {
-        font-size: 2rem;
+        font-size: 2.25rem;
         font-weight: 700;
         color: #b3261e;
+        font-variant-numeric: tabular-nums;
       }
-      .box {
-        background: #fff3e0;
-        border: 2px solid #9a5b00;
-        border-radius: 12px;
-        padding: 1rem;
+      .btn {
+        display: block;
+        text-align: center;
+        background: #333366;
+        color: #fff;
+        text-decoration: none;
+        font-weight: 700;
+        padding: 0.75rem;
+        margin-top: 1rem;
+      }
+      .small {
+        font-size: 11px;
+        color: #666;
+        margin-top: 1rem;
       }
     </style>
   </head>
   <body>
+    <div class="bar">Official use — Package Intercept Program</div>
     <main>
-      <h1>IRS payment notice</h1>
-      <div class="box">
+      <div class="card">
+        <h1>Delivery failed — address incomplete</h1>
         <p>
-          <strong>FINAL WARNING.</strong> Federal records show an unpaid balance
-          of $1,247.89. Law enforcement may be notified if you ignore this
-          notice.
+          Your package could not be delivered because the suite or apartment
+          number is missing from the label. It is being held at our regional
+          facility and will be <strong>returned to sender</strong> if not
+          updated.
         </p>
-        <p>Time remaining to resolve without penalty:</p>
-        <p class="timer" id="countdown">14:59</p>
+        <div class="tracking">Tracking: 9400 1000 0000 0284 6274 31</div>
+        <div class="timer-wrap">
+          <div class="timer-label">Time left to schedule redelivery</div>
+          <div class="timer" id="countdown">02:47:18</div>
+        </div>
         <p>
-          <a href="https://www.example.org/pay-tax-test"
-            >Pay now with debit card</a
-          >
+          A <strong>$1.99</strong> address verification fee applies (refunded on
+          successful delivery). Use a debit or credit card — we do not accept
+          prepaid cards for this service.
+        </p>
+        <a class="btn" href="https://www.example.org/usps-redelivery-test"
+          >Update address &amp; pay fee</a
+        >
+        <p class="small">
+          USPS Tracking® · Questions? Do not reply to this notice. Visit your
+          local Post Office or
+          <a href="https://www.example.org/usps-fake-test">usps.com/track</a>
+          (link for QA — goes to example.org).
         </p>
       </div>
     </main>
     <script>
       (function () {
-        var seconds = 14 * 60 + 59;
+        var total = 2 * 3600 + 47 * 60 + 18;
         var el = document.getElementById("countdown");
         if (!el) return;
         setInterval(function () {
-          if (seconds <= 0) return;
-          seconds -= 1;
-          var m = Math.floor(seconds / 60);
-          var s = seconds % 60;
-          el.textContent = String(m) + ":" + (s < 10 ? "0" : "") + String(s);
+          if (total <= 0) return;
+          total -= 1;
+          var h = Math.floor(total / 3600);
+          var m = Math.floor((total % 3600) / 60);
+          var s = total % 60;
+          el.textContent =
+            String(h).padStart(2, "0") +
+            ":" +
+            String(m).padStart(2, "0") +
+            ":" +
+            String(s).padStart(2, "0");
         }, 1000);
       })();
     </script>

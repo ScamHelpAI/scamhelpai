@@ -3,46 +3,125 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>URGENT: Account locked</title>
+    <title>Security Center — Action required on your profile</title>
     <style>
       body {
-        font-family: system-ui, sans-serif;
+        font-family:
+          "Segoe UI",
+          -apple-system,
+          BlinkMacSystemFont,
+          system-ui,
+          sans-serif;
         line-height: 1.55;
         margin: 0;
-        background: #f8f6f2;
-        color: #1c1c1c;
+        background: #f5f5f5;
+        color: #1a1a1a;
+      }
+      .top {
+        background: #012169;
+        color: #fff;
+        padding: 0.85rem 1.5rem;
+        font-size: 14px;
+        font-weight: 600;
       }
       main {
-        max-width: 40rem;
+        max-width: 520px;
         margin: 0 auto;
-        padding: 1.5rem 1.25rem 2.5rem;
+        padding: 1.75rem 1.25rem 2.5rem;
       }
-      .alert {
-        background: #fbe9e7;
-        border: 2px solid #b3261e;
-        border-radius: 12px;
-        padding: 1rem;
+      .card {
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+        overflow: hidden;
+      }
+      .card-head {
+        background: #fff5f5;
+        border-bottom: 1px solid #f0d0d0;
+        padding: 1rem 1.25rem;
+      }
+      .card-head h1 {
+        margin: 0;
+        font-size: 1.15rem;
+        color: #b91c1c;
+      }
+      .card-body {
+        padding: 1.25rem;
+        font-size: 15px;
+      }
+      .detail {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        padding: 0.85rem 1rem;
+        font-size: 13px;
+        margin: 1rem 0;
+      }
+      .detail dt {
+        font-weight: 600;
+        color: #64748b;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+      .detail dd {
+        margin: 0.15rem 0 0.65rem;
+      }
+      .cta {
+        display: inline-block;
+        background: #012169;
+        color: #fff;
+        text-decoration: none;
+        font-weight: 600;
+        padding: 0.65rem 1.35rem;
+        border-radius: 4px;
+        margin-top: 0.5rem;
+      }
+      .fine {
+        font-size: 12px;
+        color: #64748b;
+        margin-top: 1.25rem;
       }
     </style>
   </head>
   <body>
+    <div class="top">Example National Bank · Secure Message</div>
     <main>
-      <h1>Your account has been locked</h1>
-      <div class="alert">
-        <p>
-          <strong>Action required immediately.</strong> We detected unusual
-          sign-in activity on your Example Bank profile. Your online access is
-          suspended until you verify your identity.
-        </p>
-        <p>
-          Failure to verify within 24 hours will result in permanent closure of
-          your account and loss of pending transfers.
-        </p>
-        <p>
-          <a href="https://www.example.org/verify-identity-test">
-            Verify identity now
-          </a>
-        </p>
+      <div class="card">
+        <div class="card-head">
+          <h1>We temporarily limited your online access</h1>
+        </div>
+        <div class="card-body">
+          <p>
+            We noticed a sign-in attempt from a device we don't recognize. To
+            protect your accounts, we placed a hold on online banking and Zelle®
+            transfers until you confirm it was you.
+          </p>
+          <dl class="detail">
+            <dt>Attempt location</dt>
+            <dd>Miami, FL · Mobile Safari</dd>
+            <dt>Time</dt>
+            <dd>Today at 2:14 AM (your local time)</dd>
+            <dt>Reference</dt>
+            <dd>SEC-ALERT-8849201</dd>
+          </dl>
+          <p>
+            If this wasn't you, verify your identity within
+            <strong>24 hours</strong> to avoid permanent restriction on outgoing
+            wires and bill pay.
+          </p>
+          <p>
+            <a class="cta" href="https://www.example.org/verify-identity-test"
+              >Confirm it's me</a
+            >
+          </p>
+          <p class="fine">
+            You're receiving this because you're enrolled in Security Alerts.
+            Example National Bank will never ask for your full Social Security
+            number or card PIN in a message. Call the number on the back of your
+            card if you're unsure — not a number in this email.
+          </p>
+        </div>
       </div>
     </main>
   </body>
