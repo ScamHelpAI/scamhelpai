@@ -1,0 +1,594 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="scamhelp-qa"
+      content="fixture — example.org only, no data collected"
+    />
+    <title>Sign in - Google Accounts</title>
+    <style>
+      :root {
+        --text: #202124;
+        --muted: #5f6368;
+        --link: #1a73e8;
+        --link-hover: #174ea6;
+        --border: #dadce0;
+        --input-border: #dadce0;
+        --input-focus: #1a73e8;
+        --error: #d93025;
+        --bg: #fff;
+        --btn: #1a73e8;
+        --btn-hover: #1765cc;
+        --chip-bg: #fff;
+        --footer: #f2f2f2;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        font-family:
+          "Google Sans",
+          Roboto,
+          Arial,
+          sans-serif;
+        font-size: 14px;
+        color: var(--text);
+        background: var(--bg);
+        line-height: 1.4286;
+        -webkit-font-smoothing: antialiased;
+      }
+      a {
+        color: var(--link);
+        text-decoration: none;
+        font-weight: 500;
+      }
+      a:hover {
+        text-decoration: underline;
+      }
+      .hidden-qa {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+      }
+      .shell {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 48px 16px 24px;
+      }
+      .card {
+        width: 100%;
+        max-width: 450px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 48px 40px 36px;
+        background: #fff;
+      }
+      .logo {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 0 auto 16px;
+        height: 24px;
+      }
+      .logo-word {
+        font-family:
+          "Product Sans",
+          "Google Sans",
+          Roboto,
+          Arial,
+          sans-serif;
+        font-size: 22px;
+        font-weight: 500;
+        letter-spacing: -0.5px;
+        line-height: 1;
+        user-select: none;
+      }
+      .logo-word span:nth-child(1) {
+        color: #4285f4;
+      }
+      .logo-word span:nth-child(2) {
+        color: #ea4335;
+      }
+      .logo-word span:nth-child(3) {
+        color: #fbbc05;
+      }
+      .logo-word span:nth-child(4) {
+        color: #4285f4;
+      }
+      .logo-word span:nth-child(5) {
+        color: #34a853;
+      }
+      .logo-word span:nth-child(6) {
+        color: #ea4335;
+      }
+      h1 {
+        margin: 0;
+        font-size: 24px;
+        font-weight: 400;
+        line-height: 1.3333;
+        text-align: center;
+        letter-spacing: 0;
+      }
+      .sub {
+        margin: 8px 0 0;
+        font-size: 16px;
+        font-weight: 400;
+        text-align: center;
+        color: var(--text);
+      }
+      .account-chip {
+        display: none;
+        align-items: center;
+        gap: 8px;
+        max-width: 100%;
+        margin: 16px auto 0;
+        padding: 4px 10px 4px 4px;
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        background: var(--chip-bg);
+        cursor: pointer;
+        font: inherit;
+        color: var(--text);
+      }
+      .account-chip.visible {
+        display: inline-flex;
+      }
+      .account-chip:hover {
+        background: #f8f9fa;
+      }
+      .avatar {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: #1a73e8;
+        color: #fff;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: 500;
+        flex-shrink: 0;
+      }
+      .account-email {
+        font-size: 14px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .account-chevron {
+        width: 18px;
+        height: 18px;
+        fill: var(--muted);
+        flex-shrink: 0;
+      }
+      form {
+        margin-top: 32px;
+      }
+      .field {
+        position: relative;
+        margin-bottom: 4px;
+      }
+      .field.hidden {
+        display: none;
+      }
+      input {
+        width: 100%;
+        height: 54px;
+        padding: 13px 15px;
+        border: 1px solid var(--input-border);
+        border-radius: 4px;
+        font: inherit;
+        font-size: 16px;
+        color: var(--text);
+        background: #fff;
+        outline: none;
+        transition: border-color 0.15s, box-shadow 0.15s;
+      }
+      input:focus {
+        border-color: var(--input-focus);
+        box-shadow: inset 0 0 0 1px var(--input-focus);
+        caret-color: var(--input-focus);
+      }
+      input.error {
+        border-color: var(--error);
+        box-shadow: inset 0 0 0 1px var(--error);
+      }
+      .field-label {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        padding: 0 4px;
+        background: #fff;
+        color: var(--muted);
+        font-size: 16px;
+        pointer-events: none;
+        transition:
+          top 0.15s,
+          font-size 0.15s,
+          color 0.15s;
+      }
+      input:focus + .field-label,
+      input:not(:placeholder-shown) + .field-label {
+        top: 0;
+        font-size: 12px;
+        color: var(--input-focus);
+      }
+      input.error:focus + .field-label,
+      input.error:not(:placeholder-shown) + .field-label,
+      input.error + .field-label {
+        color: var(--error);
+      }
+      .field-error {
+        display: none;
+        align-items: flex-start;
+        gap: 8px;
+        margin: 8px 0 0;
+        color: var(--error);
+        font-size: 12px;
+        line-height: 16px;
+      }
+      .field-error.visible {
+        display: flex;
+      }
+      .field-error svg {
+        flex-shrink: 0;
+        margin-top: 1px;
+      }
+      .forgot {
+        display: inline-block;
+        margin-top: 12px;
+        font-size: 14px;
+      }
+      .guest {
+        margin: 36px 0 0;
+        font-size: 14px;
+        color: var(--muted);
+        line-height: 1.5;
+      }
+      .actions {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 32px;
+        gap: 12px;
+      }
+      .btn-text {
+        border: none;
+        background: transparent;
+        color: var(--link);
+        font: inherit;
+        font-size: 14px;
+        font-weight: 500;
+        padding: 8px 8px;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      .btn-text:hover {
+        background: rgba(26, 115, 232, 0.04);
+      }
+      .btn-primary {
+        min-width: 88px;
+        height: 36px;
+        padding: 0 24px;
+        border: none;
+        border-radius: 4px;
+        background: var(--btn);
+        color: #fff;
+        font: inherit;
+        font-size: 14px;
+        font-weight: 500;
+        letter-spacing: 0.25px;
+        cursor: pointer;
+      }
+      .btn-primary:hover {
+        background: var(--btn-hover);
+        box-shadow:
+          0 1px 2px 0 rgba(60, 64, 67, 0.3),
+          0 1px 3px 1px rgba(60, 64, 67, 0.15);
+      }
+      .btn-primary:disabled {
+        opacity: 0.6;
+        cursor: default;
+        box-shadow: none;
+      }
+      .lang-row {
+        width: 100%;
+        max-width: 450px;
+        margin-top: 24px;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .lang select {
+        border: none;
+        background: transparent;
+        color: var(--muted);
+        font: inherit;
+        font-size: 12px;
+        padding: 4px 0;
+        cursor: pointer;
+      }
+      .footer-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px 24px;
+      }
+      .footer-links a {
+        color: var(--muted);
+        font-weight: 400;
+        font-size: 12px;
+      }
+      .footer-links a:hover {
+        color: var(--text);
+      }
+      .step-password .guest {
+        display: none;
+      }
+      @media (max-width: 480px) {
+        .shell {
+          padding: 24px 0 16px;
+          justify-content: flex-start;
+        }
+        .card {
+          border: none;
+          border-radius: 0;
+          padding: 24px 24px 16px;
+          max-width: none;
+        }
+        .lang-row {
+          padding: 0 24px;
+          max-width: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <p class="hidden-qa" aria-hidden="true">
+      ScamHelp local QA page. All links use example.org. Do not enter real
+      credentials.
+    </p>
+
+    <div class="shell">
+      <div class="card" id="card">
+        <div class="logo" aria-label="Google" role="img">
+          <div class="logo-word" aria-hidden="true">
+            <span>G</span><span>o</span><span>o</span><span>g</span
+            ><span>l</span><span>e</span>
+          </div>
+        </div>
+
+        <h1 id="heading">Sign in</h1>
+        <p class="sub" id="subtitle">Use your Google Account</p>
+
+        <button
+          type="button"
+          class="account-chip"
+          id="accountChip"
+          aria-label="Switch account"
+        >
+          <span class="avatar" id="avatarLetter">A</span>
+          <span class="account-email" id="chipEmail"></span>
+          <svg class="account-chevron" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M7 10l5 5 5-5z" />
+          </svg>
+        </button>
+
+        <form id="signinForm" action="#" method="get" autocomplete="off">
+          <div class="field" id="emailField">
+            <input
+              id="identifierId"
+              name="email"
+              type="email"
+              placeholder=" "
+              autocomplete="off"
+              aria-describedby="emailError"
+            />
+            <label class="field-label" for="identifierId">Email or phone</label>
+            <div class="field-error" id="emailError" role="alert">
+              <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
+                <circle cx="8" cy="8" r="7" fill="currentColor" />
+                <text
+                  x="8"
+                  y="12"
+                  text-anchor="middle"
+                  fill="#fff"
+                  font-size="11"
+                  font-weight="700"
+                >
+                  !
+                </text>
+              </svg>
+              <span>Enter an email or phone number</span>
+            </div>
+          </div>
+
+          <div class="field hidden" id="passwordField">
+            <input
+              id="password"
+              name="password"
+              type="password"
+              placeholder=" "
+              autocomplete="off"
+              aria-describedby="passwordError"
+            />
+            <label class="field-label" for="password">Enter your password</label>
+            <div class="field-error" id="passwordError" role="alert">
+              <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
+                <circle cx="8" cy="8" r="7" fill="currentColor" />
+                <text
+                  x="8"
+                  y="12"
+                  text-anchor="middle"
+                  fill="#fff"
+                  font-size="11"
+                  font-weight="700"
+                >
+                  !
+                </text>
+              </svg>
+              <span>Enter a password</span>
+            </div>
+          </div>
+
+          <a
+            class="forgot"
+            id="forgotLink"
+            href="https://www.example.org/google-forgot-email-test"
+            >Forgot email?</a
+          >
+
+          <p class="guest" id="guestNote">
+            Not your computer? Use Guest mode to sign in privately.
+            <a href="https://www.example.org/google-guest-learn-test"
+              >Learn more about using Guest mode</a
+            >
+          </p>
+
+          <div class="actions">
+            <button type="button" class="btn-text" id="createAccount">
+              Create account
+            </button>
+            <button type="submit" class="btn-primary" id="nextBtn">Next</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="lang-row">
+        <div class="lang">
+          <label>
+            <select aria-label="Change language">
+              <option selected>English (United States)</option>
+              <option>Español (España)</option>
+              <option>Français (France)</option>
+              <option>Deutsch</option>
+              <option>日本語</option>
+            </select>
+          </label>
+        </div>
+        <div class="footer-links">
+          <a href="https://www.example.org/google-help-test">Help</a>
+          <a href="https://www.example.org/google-privacy-test">Privacy</a>
+          <a href="https://www.example.org/google-terms-test">Terms</a>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        var step = "email";
+        var form = document.getElementById("signinForm");
+        var emailInput = document.getElementById("identifierId");
+        var passwordInput = document.getElementById("password");
+        var emailField = document.getElementById("emailField");
+        var passwordField = document.getElementById("passwordField");
+        var emailError = document.getElementById("emailError");
+        var passwordError = document.getElementById("passwordError");
+        var heading = document.getElementById("heading");
+        var subtitle = document.getElementById("subtitle");
+        var forgotLink = document.getElementById("forgotLink");
+        var accountChip = document.getElementById("accountChip");
+        var chipEmail = document.getElementById("chipEmail");
+        var avatarLetter = document.getElementById("avatarLetter");
+        var card = document.getElementById("card");
+        var createAccount = document.getElementById("createAccount");
+
+        function showEmailError(show) {
+          emailError.classList.toggle("visible", show);
+          emailInput.classList.toggle("error", show);
+        }
+
+        function showPasswordError(show) {
+          passwordError.classList.toggle("visible", show);
+          passwordInput.classList.toggle("error", show);
+        }
+
+        function goPassword(email) {
+          step = "password";
+          card.classList.add("step-password");
+          heading.textContent = "Welcome";
+          subtitle.textContent = "";
+          chipEmail.textContent = email;
+          avatarLetter.textContent = (email.charAt(0) || "A").toUpperCase();
+          accountChip.classList.add("visible");
+          emailField.classList.add("hidden");
+          passwordField.classList.remove("hidden");
+          forgotLink.textContent = "Forgot password?";
+          forgotLink.href = "https://www.example.org/google-forgot-password-test";
+          createAccount.textContent = "Try another way";
+          showEmailError(false);
+          passwordInput.focus();
+        }
+
+        function goEmail() {
+          step = "email";
+          card.classList.remove("step-password");
+          heading.textContent = "Sign in";
+          subtitle.textContent = "Use your Google Account";
+          accountChip.classList.remove("visible");
+          emailField.classList.remove("hidden");
+          passwordField.classList.add("hidden");
+          forgotLink.textContent = "Forgot email?";
+          forgotLink.href = "https://www.example.org/google-forgot-email-test";
+          createAccount.textContent = "Create account";
+          showPasswordError(false);
+          passwordInput.value = "";
+          emailInput.focus();
+        }
+
+        form.addEventListener("submit", function (e) {
+          e.preventDefault();
+          if (step === "email") {
+            var email = emailInput.value.trim();
+            if (!email) {
+              showEmailError(true);
+              emailInput.focus();
+              return;
+            }
+            goPassword(email);
+            return;
+          }
+          if (!passwordInput.value) {
+            showPasswordError(true);
+            passwordInput.focus();
+            return;
+          }
+          showPasswordError(false);
+          heading.textContent = "Checking…";
+          document.getElementById("nextBtn").disabled = true;
+        });
+
+        emailInput.addEventListener("input", function () {
+          if (emailInput.value.trim()) showEmailError(false);
+        });
+        passwordInput.addEventListener("input", function () {
+          if (passwordInput.value) showPasswordError(false);
+        });
+
+        accountChip.addEventListener("click", goEmail);
+        createAccount.addEventListener("click", function () {
+          if (step === "password") {
+            goEmail();
+            return;
+          }
+          window.location.href = "https://www.example.org/google-create-test";
+        });
+      })();
+    </script>
+  </body>
+</html>

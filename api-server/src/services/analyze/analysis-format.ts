@@ -77,7 +77,7 @@ export function buildReviewerPrompt(params: {
     params.request,
     params.extractedTextByInputIndex ?? new Map(),
   );
-  return `Review this submission. A fast classifier produced a prior assessment; challenge it rather than copying it blindly.
+  return `Review this submission. The classifier prior below is the default final answer unless your tool checks clearly refute it. Start from agree; adjust only with evidence.
 
 For decision and riskyParts, quote only contiguous substrings that appear in the submission inputs below. Each riskyParts.message should explain that quote in one short sentence.
 
