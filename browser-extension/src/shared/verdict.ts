@@ -27,24 +27,58 @@ function copyForLevel(level: RiskLevel): {
       return {
         title: "This looks like a scam",
         tone: "danger",
-        badgeLabel: "High risk",
+        badgeLabel: "HIGH RISK",
       };
     case "medium":
       return {
         title: "Be careful with this",
         tone: "warn",
-        badgeLabel: "Caution",
+        badgeLabel: "CAUTION",
       };
     case "low":
       return {
         title: "No clear scam signs found",
         tone: "safe",
-        badgeLabel: "Looks okay",
+        badgeLabel: "LOOKS OKAY",
       };
     default: {
       const _exhaustive: never = level;
       return _exhaustive;
     }
+  }
+}
+
+/** Short uppercase label for the classification pill. */
+export function classificationLabel(primary: string): string {
+  switch (primary) {
+    case "credential_phishing":
+      return "PHISHING";
+    case "account_takeover":
+      return "ACCOUNT TAKEOVER";
+    case "tech_support":
+      return "TECH SUPPORT";
+    case "impersonation":
+      return "IMPERSONATION";
+    case "investment":
+      return "INVESTMENT";
+    case "romance":
+      return "ROMANCE";
+    case "job":
+      return "JOB SCAM";
+    case "invoice":
+      return "INVOICE";
+    case "payment":
+      return "PAYMENT";
+    case "crypto":
+      return "CRYPTO";
+    case "malware":
+      return "MALWARE";
+    case "other":
+      return "OTHER";
+    case "unknown":
+      return "NONE";
+    default:
+      return primary.replaceAll("_", " ").toUpperCase();
   }
 }
 

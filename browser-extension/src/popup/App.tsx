@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { Loader2Icon, ScanSearchIcon, SettingsIcon } from "lucide-react";
-import { VerdictIcon } from "@/components/verdict-icon.tsx";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { VerdictSummary } from "@/components/verdict-summary.tsx";
 import type {
   AnalyzeResponse,
   ApplyPageAnnotationsMessage,
@@ -13,60 +13,6 @@ import {
   REVIEW_POLL_MS,
 } from "@/shared/analysis-poll.ts";
 import type { AnalysisResult } from "@/shared/types.ts";
-import { toVerdict, type VerdictTone } from "@/shared/verdict.ts";
-
-function toneTextClass(tone: VerdictTone): string {
-  switch (tone) {
-    case "danger":
-      return "text-risk-high";
-    case "warn":
-      return "text-risk-medium";
-    case "safe":
-      return "text-risk-low";
-    default: {
-      const _exhaustive: never = tone;
-      return _exhaustive;
-    }
-  }
-}
-
-/** Plain icon + title — no card, no evidence dump. */
-function VerdictSummary({
-  result,
-  reviewing,
-}: {
-  result: AnalysisResult;
-  reviewing: boolean;
-}) {
-  const verdict = toVerdict(result);
-
-  return (
-    <div
-      className="animate-panel-in flex items-start gap-3"
-      role="status"
-      aria-live="polite"
-    >
-      <VerdictIcon tone={verdict.tone} confidence={result.risk.confidence} />
-      <div className="min-w-0 space-y-1 pt-0.5">
-        <p
-          className={`font-heading text-lg leading-snug font-semibold ${toneTextClass(verdict.tone)}`}
-        >
-          {verdict.title}
-        </p>
-        {reviewing ? (
-          <p className="flex items-center gap-2 text-[15px] text-muted-foreground">
-            <Loader2Icon className="size-4 animate-spin" />
-            Double-checking…
-          </p>
-        ) : (
-          <p className="text-[15px] text-muted-foreground">
-            {verdict.badgeLabel}
-          </p>
-        )}
-      </div>
-    </div>
-  );
-}
 
 async function requestAnalysis(
   message: { type: "scanActivePage" } | { type: "getAnalysis"; id: string },

@@ -237,6 +237,11 @@
   .animate-stagger-in {
     animation: stagger-in var(--duration-panel) var(--ease-senior) both;
   }
+
+  .animate-score-ring {
+    animation: score-ring var(--duration-score) var(--ease-senior)
+      var(--duration-score-delay) both;
+  }
 }
 
 @keyframes panel-in {
@@ -261,9 +266,19 @@
   }
 }
 
+@keyframes score-ring {
+  from {
+    stroke-dashoffset: var(--score-circumference);
+  }
+  to {
+    stroke-dashoffset: var(--score-offset);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-panel-in,
-  .animate-stagger-in {
+  .animate-stagger-in,
+  .animate-score-ring {
     animation: none;
   }
 }
