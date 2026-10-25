@@ -49,10 +49,18 @@ export function ensureButtonStyles(doc: Document = document): void {
   style.textContent = `
     [${BUTTON_HOST_ATTR}] {
       display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
+      margin: 8px 0 12px;
+      max-width: 22rem;
+    }
+    [${BUTTON_HOST_ATTR}] > div:first-of-type {
+      display: flex;
       align-items: center;
       gap: 8px;
-      margin: 8px 0 12px;
       flex-wrap: wrap;
+      width: 100%;
     }
     [${BUTTON_ATTR}] {
       appearance: none;
@@ -116,20 +124,19 @@ export function setButtonState(
       if (statusEl) statusEl.textContent = "Sending this email to ScamHelp…";
       break;
     case "reviewing":
-      applyButtonTone(button, options?.tone ?? "warn");
+      applyButtonTone(button, "brand");
       button.disabled = true;
-      button.textContent = options?.label ?? "Quick result";
+      button.textContent = "Checking…";
       if (statusEl) {
         statusEl.textContent =
-          options?.message ?? "Quick check done — finding risky phrases…";
+          options?.message ?? "Double-checking with ScamHelp…";
       }
       break;
     case "done":
-      applyButtonTone(button, options?.tone ?? "safe");
+      applyButtonTone(button, "brand");
       button.disabled = false;
-      button.textContent = options?.label ?? "Check again";
-      if (statusEl)
-        statusEl.textContent = options?.message ?? "Check complete.";
+      button.textContent = "Check again";
+      if (statusEl) statusEl.textContent = options?.message ?? "";
       break;
     case "error":
       applyButtonTone(button, "danger");
@@ -162,6 +169,8 @@ export function injectScanButton(
   const host = doc.createElement("div");
   host.setAttribute(BUTTON_HOST_ATTR, "1");
 
+  const row = doc.createElement("div");
+
   const button = doc.createElement("button");
   button.type = "button";
   button.setAttribute(BUTTON_ATTR, "1");
@@ -175,7 +184,8 @@ export function injectScanButton(
   status.setAttribute("data-scamhelp-gmail-status", "1");
 
   setButtonState(button, "idle", status);
-  host.append(button, status);
+  row.append(button, status);
+  host.append(row);
 
   const body = container.querySelector("div.a3s");
   if (body?.parentElement) {

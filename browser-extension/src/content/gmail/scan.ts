@@ -4,10 +4,10 @@ import {
   REVIEW_POLL_MAX_ATTEMPTS,
   REVIEW_POLL_MS,
 } from "../../shared/analysis-poll.ts";
-import { toVerdict } from "../../shared/verdict.ts";
 import { applyAnnotations } from "../annotations/decorate.ts";
 import { findOpenMessage, markAnnotateRoot } from "./dom.ts";
 import { getButtonStatusEl, setButtonState } from "./button.ts";
+import { clearGmailVerdict, renderGmailVerdict } from "./mount-verdict.tsx";
 
 /** Same /v1/analyses text path as page scan — headers are baked into content. */
 function textAnalyzeRequest(text: string, pageUrl: string): AnalyzeRequest {
@@ -17,19 +17,6 @@ function textAnalyzeRequest(text: string, pageUrl: string): AnalyzeRequest {
       source: "browser_extension",
       pageUrl,
     },
-  };
-}
-
-function verdictUi(result: AnalysisResult) {
-  const verdict = toVerdict(result);
-  const topReason = verdict.reasons[0];
-  const statusMessage = topReason
-    ? `${topReason} Finding risky phrases…`
-    : "Finding risky phrases…";
-  return {
-    tone: verdict.tone,
-    label: verdict.title,
-    statusMessage,
   };
 }
 
@@ -112,6 +99,11 @@ export async function scanOpenGmailEmail(
 ): Promise<void> {
   const statusEl = getButtonStatusEl(button);
   setButtonState(button, "loading", statusEl);
+  renderGmailVerdict(doc, button, {
+    loading: true,
+    reviewing: false,
+    result: null,
+  });
 
   try {
     const open = findOpenMessage(doc);
@@ -130,15 +122,30 @@ export async function scanOpenGmailEmail(
     }
 
     let result = initial;
-    const quickUi = verdictUi(initial);
+
+    renderGmailVerdict(doc, button, {
+      loading: false,
+      reviewing: initial.status === "reviewing",
+      result: initial,
+      footerMessage:
+        initial.status === "reviewing"
+          ? "Finding risky phrases in this email…"
+          : undefined,
+    });
 
     if (initial.status === "reviewing") {
       setButtonState(button, "reviewing", statusEl, {
-        tone: quickUi.tone,
-        label: quickUi.label,
-        message: quickUi.statusMessage,
+        message: "Double-checking with ScamHelp…",
       });
       result = await waitForCompletion(initial.id);
+      renderGmailVerdict(doc, button, {
+        loading: false,
+        reviewing: false,
+        result,
+        footerMessage: "Finding risky phrases in this email…",
+      });
+    } else {
+      setButtonState(button, "done", statusEl, { message: "" });
     }
 
     if (result.status === "failed") {
@@ -149,14 +156,20 @@ export async function scanOpenGmailEmail(
     }
 
     const highlighted = applyHighlights(result, open.body, doc);
-    const finalUi = verdictUi(result);
+    const footerMessage = doneStatusMessage(highlighted);
+
+    renderGmailVerdict(doc, button, {
+      loading: false,
+      reviewing: false,
+      result,
+      footerMessage,
+    });
 
     setButtonState(button, "done", statusEl, {
-      tone: finalUi.tone,
-      label: finalUi.label,
-      message: doneStatusMessage(highlighted),
+      message: footerMessage,
     });
   } catch (error) {
+    clearGmailVerdict(doc, button);
     setButtonState(button, "error", statusEl, {
       message:
         error instanceof Error ? error.message : "Could not check this email.",

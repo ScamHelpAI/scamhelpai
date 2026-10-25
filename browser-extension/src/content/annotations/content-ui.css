@@ -1,4 +1,7 @@
 @import "../../popup/styles.css";
 
 @source "../../components/ui/popover.tsx";
+@source "../../components/verdict-summary.tsx";
+@source "../../components/score-gauge.tsx";
+@source "../gmail/verdict-view.tsx";
 @source "./annotation-highlight.tsx";
