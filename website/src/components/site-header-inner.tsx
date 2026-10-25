@@ -41,13 +41,14 @@ export function SiteHeaderInner() {
 
   return (
     <>
-      <header className="relative flex items-center justify-center px-5 py-5 sm:px-8">
-        <div className="absolute left-5 top-1/2 -translate-y-1/2 sm:left-8">
+      <header
+        className="relative flex w-full items-center justify-center px-5 py-5 sm:justify-between sm:px-8"
+      >
+        <div className="absolute top-1/2 left-5 -translate-y-1/2 sm:hidden">
           <Button
             type="button"
             variant="outline"
             size="icon"
-            className="sm:hidden"
             aria-expanded={menuOpen}
             aria-controls={menuId}
             aria-label={menuOpen ? "Close menu" : "Open menu"}
@@ -61,7 +62,7 @@ export function SiteHeaderInner() {
 
         <nav
           aria-label="Primary"
-          className="absolute right-5 top-1/2 hidden -translate-y-1/2 items-center gap-6 sm:right-8 sm:flex"
+          className="hidden items-center gap-6 sm:flex"
         >
           {siteHeaderNavItems.map((item) => (
             <a

@@ -3,8 +3,10 @@ export const PRODUCT_NAME = "ScamHelp AI";
 export const OPERATOR_NAME = "ScamHelp AI";
 export const PRIVACY_CONTACT_EMAIL = "privacy@scamhelp.ai";
 export const SUPPORT_CONTACT_EMAIL = "support@scamhelp.ai";
-export const EFFECTIVE_DATE = "October 19, 2026";
+export const EFFECTIVE_DATE = "October 25, 2026";
 export const GOVERNING_LAW = "the State of California, United States";
+export const WEBSITE_PRIVACY_URL = "https://scamhelp.ai/privacy";
+export const WEBSITE_TERMS_URL = "https://scamhelp.ai/terms";
 
 export type LegalView = "settings" | "privacy" | "terms";
 
