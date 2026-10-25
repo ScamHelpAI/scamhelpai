@@ -34,7 +34,7 @@ export function sniffFileContentType(file: File): string {
   }
 
   const ext = lowerName.slice(dot);
-  return EXTENSION_MIME[ext] ?? normalized || "application/octet-stream";
+  return EXTENSION_MIME[ext] ?? (normalized || "application/octet-stream");
 }
 
 async function readError(res: Response): Promise<string> {
