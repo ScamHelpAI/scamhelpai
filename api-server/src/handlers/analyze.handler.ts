@@ -17,6 +17,10 @@ import {
   saveInitialAnalysis,
   saveReviewCompletion,
 } from "../services/analyze/analysis.repository.js";
+import {
+  assertAnalysisAssetsReady,
+  listAnalysisAssetIds,
+} from "../services/analyze/asset-validate.js";
 import { withAnalysisCostLogging } from "../services/cost-log.js";
 
 const REVIEWER_MODEL: OpenAILanguageModelId = "gpt-6-luna";
@@ -29,6 +33,8 @@ function startBackgroundReview(params: {
   evidences: Evidence[];
   classifier: ClassifierResult;
   reviewerModel: OpenAILanguageModelId;
+  extractedTextByInputIndex: Map<number, string>;
+  allowedAssetIds: string[];
 }): void {
   void (async () => {
     try {
@@ -40,6 +46,8 @@ function startBackgroundReview(params: {
             params.evidences,
             params.classifier,
             params.reviewerModel,
+            params.extractedTextByInputIndex,
+            params.allowedAssetIds,
           ),
       );
       await saveReviewCompletion({
@@ -59,13 +67,15 @@ function startBackgroundReview(params: {
 
 export async function createAnalysisHandler(c: Context) {
   const body = analyzeRequestSchema.parse(await c.req.json());
-  const id = crypto.randomUUID();
+  await assertAnalysisAssetsReady(body);
 
+  const id = crypto.randomUUID();
   const createdAt = await createPendingAnalysis(id, body);
 
   try {
     const {
       evidences,
+      extractedTextByInputIndex,
       assessment,
       classifier,
       classifierModel,
@@ -93,6 +103,8 @@ export async function createAnalysisHandler(c: Context) {
       evidences,
       classifier,
       reviewerModel,
+      extractedTextByInputIndex,
+      allowedAssetIds: listAnalysisAssetIds(body),
     });
 
     return c.json(result, 201);

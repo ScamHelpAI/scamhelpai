@@ -21,6 +21,7 @@ export type RunAnalysisOptions = {
 
 export type InitialAnalysisResult = {
   evidences: Evidence[];
+  extractedTextByInputIndex: Map<number, string>;
   assessment: ReviewerAssessment;
   classifier: ClassifierResult;
   classifierModel: string;
@@ -31,16 +32,18 @@ export async function runInitialAnalysis(
   request: AnalyzeRequest,
   options: RunAnalysisOptions,
 ): Promise<InitialAnalysisResult> {
-  const evidences = await collect(request);
+  const { evidences, extractedTextByInputIndex } = await collect(request);
   const classifierModel = options.classifierModel ?? DEFAULT_CLASSIFIER_MODEL;
   const classifier = await classifySubmission(
     request,
     evidences,
+    extractedTextByInputIndex,
     openai.decisionModel(classifierModel),
   );
 
   return {
     evidences,
+    extractedTextByInputIndex,
     assessment: assessmentFromClassifier(classifier, evidences),
     classifier,
     classifierModel,
@@ -53,6 +56,15 @@ export async function runVerifierReview(
   evidences: Evidence[],
   classifier: ClassifierResult,
   reviewerModel: OpenAILanguageModelId,
+  extractedTextByInputIndex: Map<number, string> = new Map(),
+  allowedAssetIds: string[] = [],
 ): Promise<ReviewerAssessment> {
-  return runLlmReview(request, evidences, classifier, reviewerModel);
+  return runLlmReview(
+    request,
+    evidences,
+    classifier,
+    reviewerModel,
+    extractedTextByInputIndex,
+    allowedAssetIds,
+  );
 }

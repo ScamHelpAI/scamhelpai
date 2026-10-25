@@ -21,9 +21,11 @@ import { db } from "../../db/index.js";
 import {
   agentRuns,
   analyses,
+  analysisAssets,
   analysisInputs,
   evidence,
 } from "../../db/schema.js";
+import { listAnalysisAssetIds } from "./asset-validate.js";
 import { assessmentFromClassifier } from "./classifier-gate.js";
 import { toAnalysisResult } from "./analysis-mapper.js";
 
@@ -49,6 +51,17 @@ export async function createPendingAnalysis(
         createdAt,
       })),
     );
+
+    const assetIds = listAnalysisAssetIds(request);
+    if (assetIds.length > 0) {
+      await tx.insert(analysisAssets).values(
+        assetIds.map((assetId) => ({
+          analysisId: id,
+          assetId,
+          createdAt,
+        })),
+      );
+    }
   });
 
   return createdAt;

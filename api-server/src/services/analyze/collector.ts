@@ -15,6 +15,7 @@ import { parsePhoneNumberFromString } from "libphonenumber-js";
 import { lookupPhone } from "../../tools/lookup-phone.js";
 import { BRAND_DOMAINS } from "../../tools/shared/brands.js";
 import { verifyBrandIdentity } from "../../tools/verify-brand-identity.js";
+import { ingestAssetInputs } from "./asset-ingest.js";
 import { createSequentialId } from "./ids.js";
 
 const URL_RE = /https?:\/\/[^\s"'<>]+/gi;
@@ -59,7 +60,11 @@ function truncateForModel(text: string, max = 20_000): string {
   return `${text.slice(0, head)}\n\n…[truncated]…\n\n${text.slice(-tail)}`;
 }
 
-function extractTextFromInput(input: AnalysisInput): string {
+function extractTextFromInput(
+  input: AnalysisInput,
+  inputIndex: number,
+  extractedTextByInputIndex: Map<number, string>,
+): string {
   switch (input.type) {
     case "text":
       return input.content;
@@ -68,13 +73,18 @@ function extractTextFromInput(input: AnalysisInput): string {
     case "image":
     case "audio":
     case "pdf":
-      return "";
+      return extractedTextByInputIndex.get(inputIndex) ?? "";
     default: {
       const _exhaustive: never = input;
       return _exhaustive;
     }
   }
 }
+
+export type CollectResult = {
+  evidences: Evidence[];
+  extractedTextByInputIndex: Map<number, string>;
+};
 
 function hostnameFromUrl(url: string): string | null {
   try {
@@ -397,22 +407,25 @@ const EMPTY_INDICATORS: CollectorState["indicators"] = {
 export function buildCollectorState(
   request: AnalyzeRequest,
   evidences: Evidence[],
+  extractedTextByInputIndex: Map<number, string> = new Map(),
 ): CollectorState {
   const inputs = request.inputs.map((input, index) => ({
     id: inputId(index),
     type: input.type,
-    text: truncateForModel(extractTextFromInput(input)),
+    text: truncateForModel(
+      extractTextFromInput(input, index, extractedTextByInputIndex),
+    ),
   }));
 
   return {
     inputs,
     context: request.context,
     indicators: request.inputs.reduce<CollectorState["indicators"]>(
-      (acc, input) =>
+      (acc, input, index) =>
         mergeIndicators(
           acc,
           extractIndicators(
-            extractTextFromInput(input),
+            extractTextFromInput(input, index, extractedTextByInputIndex),
             input.type === "url" ? input.url : undefined,
           ),
         ),
@@ -426,10 +439,14 @@ export function buildCollectorState(
   };
 }
 
-export async function collect(request: AnalyzeRequest): Promise<Evidence[]> {
+export async function collect(request: AnalyzeRequest): Promise<CollectResult> {
   const createdAt = new Date().toISOString();
   const evidences: Evidence[] = [];
   const nextId = createSequentialId("ev");
+
+  const ingest = await ingestAssetInputs(request, nextId, createdAt);
+  evidences.push(...ingest.evidences);
+  const extractedTextByInputIndex = ingest.extractedTextByInputIndex;
 
   let indicators = {
     urls: [] as string[],
@@ -440,8 +457,13 @@ export async function collect(request: AnalyzeRequest): Promise<Evidence[]> {
     brands: [] as string[],
   };
 
-  for (const input of request.inputs) {
-    const text = extractTextFromInput(input);
+  for (let index = 0; index < request.inputs.length; index += 1) {
+    const input = request.inputs[index];
+    const text = extractTextFromInput(
+      input,
+      index,
+      extractedTextByInputIndex,
+    );
     indicators = mergeIndicators(
       indicators,
       extractIndicators(text, input.type === "url" ? input.url : undefined),
@@ -456,5 +478,5 @@ export async function collect(request: AnalyzeRequest): Promise<Evidence[]> {
   );
   evidences.push(...toolEvidences);
 
-  return evidences;
+  return { evidences, extractedTextByInputIndex };
 }

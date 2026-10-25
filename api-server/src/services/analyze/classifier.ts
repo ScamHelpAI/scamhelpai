@@ -112,11 +112,16 @@ function confidenceFromProviderMetadata(
 export async function classifySubmission(
   request: AnalyzeRequest,
   evidences: Evidence[],
+  extractedTextByInputIndex: Map<number, string> = new Map(),
   model: Experimental_DecisionModel = openai.decisionModel(
     DEFAULT_CLASSIFIER_MODEL,
   ),
 ): Promise<ClassifierResult> {
-  const state = buildCollectorState(request, evidences);
+  const state = buildCollectorState(
+    request,
+    evidences,
+    extractedTextByInputIndex,
+  );
   const result = await decide({
     model,
     state,

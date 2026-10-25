@@ -27,7 +27,8 @@ Work in this order:
 Tool use:
 - verify_evidence first when you need to re-run a specific prior finding.
 - inspect_url, lookup_domain, inspect_email, check_threat_intel, and verify_brand_identity when the collector skipped them or the result looks thin or stale.
-- decode_qr and scan_file for images, QR codes, and file attachments.
+- Prefer ingest evidence (ingest_image, ingest_pdf, ingest_audio, scan_file, decode_qr) before re-fetching files.
+- load_submission_asset then decode_qr or scan_file when you need to re-check binary content.
 - web_search to confirm or refute impersonation and "official" contact details.
 Do not call tools to pad the record. Call them when a claim would change the assessment if it were wrong.
 
@@ -49,18 +50,25 @@ export async function runLlmReview(
   evidences: Evidence[],
   classifier: ClassifierResult,
   model: OpenAILanguageModelId,
+  extractedTextByInputIndex: Map<number, string> = new Map(),
+  allowedAssetIds: string[] = [],
 ): Promise<ReviewerAssessment> {
   const reviewerResult = await generateText({
     model: openai(model),
     instructions: REVIEWER_INSTRUCTIONS,
-    tools: createReviewerTools(),
+    tools: createReviewerTools(allowedAssetIds),
     output: Output.object({
       schema: reviewerAssessmentSchema,
       description:
         "Final reviewed assessment of scam risk after verifying collector evidence and classifier prior.",
     }),
     stopWhen: isStepCount(20),
-    prompt: buildReviewerPrompt({ request, evidences, classifier }),
+    prompt: buildReviewerPrompt({
+      request,
+      evidences,
+      classifier,
+      extractedTextByInputIndex,
+    }),
   });
 
   logModelCost("reviewer", model, reviewerResult.usage, {

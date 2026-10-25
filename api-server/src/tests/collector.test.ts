@@ -52,11 +52,18 @@ vi.mock("../tools/inspect-email.js", () => ({
   inspectEmail: vi.fn(),
 }));
 
+vi.mock("../services/analyze/asset-ingest.js", () => ({
+  ingestAssetInputs: vi.fn(async () => ({
+    extractedTextByInputIndex: new Map(),
+    evidences: [],
+  })),
+}));
+
 import { collect } from "../services/analyze/collector.js";
 
 describe("collect", () => {
   it("assigns unique evidence ids across tool findings", async () => {
-    const evidences = await collect({
+    const { evidences } = await collect({
       inputs: [{ type: "url", url: "https://example.com/login" }],
       context: { pageUrl: "https://example.com/login" },
     });

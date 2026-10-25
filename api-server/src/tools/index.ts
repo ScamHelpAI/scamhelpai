@@ -9,6 +9,7 @@ import { lookupPhoneTool } from "./lookup-phone.js";
 import { scanFileTool } from "./scan-file.js";
 import { traceRedirectsTool } from "./trace-redirects.js";
 import { verifyBrandIdentityTool } from "./verify-brand-identity.js";
+import { createLoadSubmissionAssetTool } from "./load-submission-asset.js";
 import { verifyEvidenceTool } from "./verify-evidence.js";
 import { webSearchTool } from "./web-verify.js";
 
@@ -29,7 +30,7 @@ export function createScannerTools() {
   };
 }
 
-export function createReviewerTools() {
+export function createReviewerTools(allowedAssetIds: string[] = []) {
   return {
     verify_evidence: verifyEvidenceTool,
     inspect_url: inspectUrlTool,
@@ -39,6 +40,7 @@ export function createReviewerTools() {
     inspect_email: inspectEmailTool,
     decode_qr: decodeQrTool,
     scan_file: scanFileTool,
+    load_submission_asset: createLoadSubmissionAssetTool(allowedAssetIds),
     web_search: webSearchTool,
   };
 }

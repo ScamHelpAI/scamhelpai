@@ -5,6 +5,38 @@ import type {
 } from "@/lib/analysis-types";
 import { analyzerErrorMessage } from "@/lib/scamhelp-api-base";
 
+const EXTENSION_MIME: Record<string, string> = {
+  ".png": "image/png",
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".webp": "image/webp",
+  ".gif": "image/gif",
+  ".heic": "image/heic",
+  ".pdf": "application/pdf",
+  ".mp3": "audio/mpeg",
+  ".wav": "audio/wav",
+  ".m4a": "audio/mp4",
+  ".ogg": "audio/ogg",
+  ".txt": "text/plain",
+  ".eml": "message/rfc822",
+};
+
+export function sniffFileContentType(file: File): string {
+  const normalized = file.type.split(";")[0]?.trim().toLowerCase() ?? "";
+  if (normalized && normalized !== "application/octet-stream") {
+    return normalized;
+  }
+
+  const lowerName = file.name.toLowerCase();
+  const dot = lowerName.lastIndexOf(".");
+  if (dot === -1) {
+    return normalized || "application/octet-stream";
+  }
+
+  const ext = lowerName.slice(dot);
+  return EXTENSION_MIME[ext] ?? normalized || "application/octet-stream";
+}
+
 async function readError(res: Response): Promise<string> {
   const bodyText = await res.text().catch(() => "");
   return analyzerErrorMessage(res.status, bodyText);
@@ -68,15 +100,17 @@ export async function completeAsset(assetId: string): Promise<void> {
 export async function uploadFileForAnalysis(
   file: File,
 ): Promise<Extract<AnalyzeRequest["inputs"][number], { assetId: string }>> {
+  const contentType = sniffFileContentType(file);
+
   const presign = await presignAsset({
-    contentType: file.type || "application/octet-stream",
+    contentType,
     filename: file.name,
     sizeBytes: file.size,
   });
 
   const uploadHeaders = new Headers(presign.requiredHeaders ?? {});
   if (!uploadHeaders.has("Content-Type")) {
-    uploadHeaders.set("Content-Type", file.type || "application/octet-stream");
+    uploadHeaders.set("Content-Type", contentType);
   }
 
   const uploadRes = await fetch(presign.uploadUrl, {
@@ -91,14 +125,15 @@ export async function uploadFileForAnalysis(
 
   await completeAsset(presign.assetId);
 
-  const inputType = assetInputType(file);
+  const inputType = assetInputType(file, contentType);
   return { type: inputType, assetId: presign.assetId };
 }
 
 function assetInputType(
   file: File,
+  contentType: string,
 ): "image" | "pdf" | "audio" {
-  const type = file.type;
+  const type = contentType || sniffFileContentType(file);
   if (type.startsWith("image/")) return "image";
   if (type === "application/pdf") return "pdf";
   if (type.startsWith("audio/")) return "audio";

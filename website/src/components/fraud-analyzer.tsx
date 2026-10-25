@@ -156,14 +156,9 @@ export function FraudAnalyzer() {
 
   return (
     <div className="w-full space-y-6">
-      <div className="text-center">
-        <h2 className="font-heading text-xl font-semibold text-foreground sm:text-2xl">
-          Scam check
-        </h2>
-        <p className="mt-1 text-[15px] text-muted-foreground">
-          Paste a message or upload a screenshot, PDF, or audio clip.
-        </p>
-      </div>
+      <p className="text-center text-[15px] text-muted-foreground">
+        Paste a message or upload a screenshot, PDF, audio, plain text (.txt), or email (.eml).
+      </p>
 
       <Card>
         <CardHeader>
@@ -205,7 +200,7 @@ export function FraudAnalyzer() {
               >
                 <FileUpIcon className="size-8 text-muted-foreground" aria-hidden />
                 <p className="text-[15px] text-muted-foreground">
-                  Image, PDF, audio, or plain text (.txt)
+                  Image, PDF, audio, .txt, or .eml
                 </p>
                 <Input
                   id="scam-file"
