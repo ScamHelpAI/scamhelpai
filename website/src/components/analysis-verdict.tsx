@@ -1,23 +1,56 @@
+import type { LucideIcon } from "lucide-react";
 import {
+  BanknoteIcon,
+  BriefcaseIcon,
+  BugIcon,
   CircleAlertIcon,
   CircleCheckIcon,
+  CircleHelpIcon,
+  CoinsIcon,
+  FishIcon,
+  HeartIcon,
   Loader2Icon,
-  OctagonAlertIcon,
+  ShieldAlertIcon,
+  TriangleAlertIcon,
+  UserRoundXIcon,
+  WrenchIcon,
 } from "lucide-react";
 
+import { ScoreGauge } from "@/components/score-gauge";
 import type { AnalysisResult } from "@/lib/analysis-types";
-import { toneTextClass, toVerdict, type VerdictTone } from "@/lib/verdict";
+import {
+  classificationLabel,
+  toVerdict,
+  type VerdictTone,
+} from "@/lib/verdict";
 import { cn } from "@/lib/utils";
 
-function VerdictGlyph({ tone }: { tone: VerdictTone }) {
-  const className = "size-6";
+const toneBorderClass: Record<VerdictTone, string> = {
+  danger: "border-risk-high text-foreground",
+  warn: "border-risk-medium text-foreground",
+  safe: "border-risk-low text-foreground",
+};
+
+const toneIconClass: Record<VerdictTone, string> = {
+  danger: "text-risk-high",
+  warn: "text-risk-medium",
+  safe: "text-risk-low",
+};
+
+const toneFillClass: Record<VerdictTone, string> = {
+  danger: "bg-risk-high text-white",
+  warn: "bg-risk-medium text-white",
+  safe: "bg-risk-low text-white",
+};
+
+function riskBadgeIcon(tone: VerdictTone): LucideIcon {
   switch (tone) {
     case "danger":
-      return <OctagonAlertIcon className={className} aria-hidden />;
+      return TriangleAlertIcon;
     case "warn":
-      return <CircleAlertIcon className={className} aria-hidden />;
+      return CircleAlertIcon;
     case "safe":
-      return <CircleCheckIcon className={className} aria-hidden />;
+      return CircleCheckIcon;
     default: {
       const _exhaustive: never = tone;
       return _exhaustive;
@@ -25,18 +58,34 @@ function VerdictGlyph({ tone }: { tone: VerdictTone }) {
   }
 }
 
-function toneSurfaceClass(tone: VerdictTone): string {
-  switch (tone) {
-    case "danger":
-      return "bg-risk-high-bg text-risk-high";
-    case "warn":
-      return "bg-risk-medium-bg text-risk-medium";
-    case "safe":
-      return "bg-risk-low-bg text-risk-low";
-    default: {
-      const _exhaustive: never = tone;
-      return _exhaustive;
-    }
+function classificationIcon(primary: string): LucideIcon {
+  switch (primary) {
+    case "credential_phishing":
+      return FishIcon;
+    case "account_takeover":
+      return UserRoundXIcon;
+    case "tech_support":
+      return WrenchIcon;
+    case "impersonation":
+      return UserRoundXIcon;
+    case "investment":
+    case "crypto":
+      return CoinsIcon;
+    case "romance":
+      return HeartIcon;
+    case "job":
+      return BriefcaseIcon;
+    case "invoice":
+    case "payment":
+      return BanknoteIcon;
+    case "malware":
+      return BugIcon;
+    case "other":
+      return ShieldAlertIcon;
+    case "unknown":
+      return CircleHelpIcon;
+    default:
+      return ShieldAlertIcon;
   }
 }
 
@@ -47,67 +96,48 @@ export function AnalysisVerdict({
   result: AnalysisResult;
   reviewing: boolean;
 }) {
-  if (reviewing) {
-    return (
-      <div
-        className="rounded-xl border border-border bg-card p-5"
-        role="status"
-        aria-live="polite"
-        aria-busy="true"
+  const verdict = toVerdict(result);
+  const RiskIcon = riskBadgeIcon(verdict.tone);
+  const ClassIcon = classificationIcon(result.classification.primary);
+  const classLabel = classificationLabel(result.classification.primary);
+
+  return (
+    <div
+      className="animate-panel-in flex flex-col items-center gap-4 rounded-xl border border-border bg-card px-5 py-6"
+      role="status"
+      aria-live="polite"
+      aria-busy={reviewing}
+    >
+      <span
+        className={cn(
+          "inline-flex h-10 w-full max-w-56 items-center justify-center gap-2 rounded-full border-2 bg-card px-4 font-heading text-sm font-semibold tracking-wide",
+          toneBorderClass[verdict.tone],
+        )}
       >
+        <RiskIcon
+          className={cn("size-5 stroke-[2.5]", toneIconClass[verdict.tone])}
+          aria-hidden
+        />
+        {verdict.badgeLabel}
+      </span>
+
+      <ScoreGauge score={result.risk.score} tone={verdict.tone} />
+
+      {reviewing ? (
         <p className="flex items-center gap-2 text-[15px] text-muted-foreground">
           <Loader2Icon className="size-4 animate-spin" aria-hidden />
           Double-checking…
         </p>
-      </div>
-    );
-  }
-
-  const verdict = toVerdict(result);
-
-  return (
-    <div
-      className="animate-panel-in space-y-4 rounded-xl border border-border bg-card p-5"
-      role="status"
-      aria-live="polite"
-    >
-      <div className="flex items-start gap-3">
+      ) : (
         <span
           className={cn(
-            "inline-flex size-11 shrink-0 items-center justify-center rounded-full",
-            toneSurfaceClass(verdict.tone),
+            "inline-flex h-10 w-full max-w-56 items-center justify-center gap-2 rounded-full px-4 font-heading text-sm font-semibold tracking-wide",
+            toneFillClass[verdict.tone],
           )}
         >
-          <VerdictGlyph tone={verdict.tone} />
+          <ClassIcon className="size-5 stroke-[2.5]" aria-hidden />
+          {classLabel}
         </span>
-        <div className="min-w-0 space-y-1">
-          <p
-            className={cn(
-              "font-heading text-lg font-bold leading-snug",
-              toneTextClass(verdict.tone),
-            )}
-          >
-            {verdict.title}
-          </p>
-          <p className="text-[15px] text-muted-foreground">
-            {verdict.badgeLabel}
-          </p>
-        </div>
-      </div>
-
-      <p className="text-[15px] leading-relaxed text-foreground">
-        {result.summary}
-      </p>
-
-      {verdict.reasons.length > 0 && (
-        <ul className="space-y-2 text-[15px] text-muted-foreground">
-          {verdict.reasons.map((reason) => (
-            <li key={reason} className="flex gap-2">
-              <span aria-hidden className="text-brand">•</span>
-              <span>{reason}</span>
-            </li>
-          ))}
-        </ul>
       )}
     </div>
   );
