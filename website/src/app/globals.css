@@ -10,10 +10,8 @@
 
 @font-face {
   font-family: "Mikado";
-  src:
-    local("Mikado Bold"),
-    local("Mikado-Bold"),
-    url("/fonts/mikado-bold.woff2") format("woff2");
+  /* ?v=2 busts caches still holding the old demo font at the same path. */
+  src: url("/fonts/mikado-bold.woff2?v=2") format("woff2");
   font-weight: 700;
   font-style: normal;
   font-display: swap;
