@@ -1,5 +1,5 @@
 export const siteHeaderNavItems = [
-  { href: "#", label: "How it works" },
+  { href: "/how-it-works", label: "How it works" },
   { href: "/extension", label: "Extension" },
   { href: "#", label: "About" },
   {

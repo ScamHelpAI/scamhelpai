@@ -1,0 +1,372 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>How ScamHelp.AI works</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:wght@400;500;600;700;800&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#425ACF}a:hover{color:#2E3F99}
+.hw-btn{height:52px;padding:0 24px;display:inline-flex;align-items:center;gap:10px;border-radius:9999px;font:inherit;font-size:18px;font-weight:700;cursor:pointer;border:0}
+.hw-btn:focus-visible,.nd:focus-visible{outline:3px solid #425ACF;outline-offset:3px}
+.hw-run{background:#1C1C1C;color:#FFFFFF}
+.hw-run:hover{background:#000000}
+.hw-run[disabled]{background:#8A867C;cursor:default}
+.hw-ghost{background:#FFFFFF;color:#1C1C1C;border:2px solid #E4E0D8}
+.hw-ghost:hover{border-color:#CFC9BE}
+.hw-stage{background-color:#FBFAF7;background-image:radial-gradient(#E4E0D8 1.4px,transparent 1.4px);background-size:24px 24px}
+.nd{position:absolute;width:232px;height:156px;padding:0;border:0;background:transparent;perspective:1100px;cursor:grab;font:inherit;color:inherit;text-align:left;touch-action:none;user-select:none}
+.nd:active{cursor:grabbing}
+.nd-in{position:absolute;inset:0;transition:transform .6s cubic-bezier(.22,1,.36,1);transform-style:preserve-3d}
+.nd.flipped .nd-in{transform:rotateY(180deg)}
+.nd-face{position:absolute;inset:0;box-sizing:border-box;border-radius:18px;backface-visibility:hidden;-webkit-backface-visibility:hidden;display:flex;flex-direction:column;padding:14px 16px}
+.nd-front{background:#FFFFFF;border:2px solid #E4E0D8;box-shadow:0 8px 20px rgba(28,28,28,.06);transition:border-color .3s,box-shadow .3s}
+.nd-back{background:#1C1C1C;color:#FFFFFF;transform:rotateY(180deg);gap:6px}
+.nd.sel .nd-front{border-color:#1C1C1C}
+.nd.active .nd-front{border-color:#FFAD2C;box-shadow:0 0 0 6px rgba(255,173,44,.35),0 12px 28px rgba(184,101,10,.18)}
+.nd.active .nd-back{box-shadow:0 0 0 6px rgba(255,173,44,.35)}
+.nd.done .nd-dot{background:#1E6B34}
+.nd.active .nd-dot{background:#FFAD2C;animation:hw-pulse 1s ease-in-out infinite}
+@keyframes hw-pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.5)}}
+.nd-dot{width:10px;height:10px;border-radius:9999px;background:#E4E0D8;flex-shrink:0}
+.k{height:24px;padding:0 9px;border-radius:9999px;display:inline-flex;align-items:center;font-size:12px;font-weight:800;letter-spacing:.06em}
+.k-det{background:#EEF1FC;color:#2E3F99}.k-ai{background:#FFF3DF;color:#8A4B00}.k-agent{background:#FBE9E7;color:#8E1F17}.k-ui{background:#ECE8E1;color:#56534B}
+.edge{fill:none;stroke:#CFC9BE;stroke-width:2.5;transition:stroke .3s}
+.edge.dash{stroke-dasharray:6 6}
+.edge.on{stroke:#B8650A;stroke-dasharray:8 8;animation:hw-flow .6s linear infinite}
+@keyframes hw-flow{to{stroke-dashoffset:-16}}
+.lg{animation:hw-in .25s ease-out both}
+@keyframes hw-in{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.code{margin:0;padding:14px 16px;border-radius:12px;background:#1C1C1C;color:#F1EEE8;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:14px;line-height:21px;white-space:pre-wrap;word-break:break-word}
+.tool{height:32px;padding:0 12px;border-radius:8px;background:#FFF3DF;display:inline-flex;align-items:center;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:14px;font-weight:500;color:#1C1C1C}
+@media (prefers-reduced-motion: reduce){.nd-in{transition:none}.edge.on,.nd.active .nd-dot{animation:none}}
+</style>
+</helmet>
+<div style="min-height: 1960px; background: #F1EEE8; font-family: 'Atkinson Hyperlegible Next', system-ui, sans-serif; color: #1C1C1C">
+
+  <div style="max-width: 1440px; margin: 0 auto; box-sizing: border-box; padding: 0 40px">
+    <div style="height: 80px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap">
+      <div style="display: flex; align-items: center; gap: 12px; font-size: 20px; font-weight: 800">
+        <img src="/_blob/686a555160c6a02e60a022d0233a2745" alt="" style="width: 40px; height: 40px; border-radius: 10px; display: block">
+        ScamHelp.AI
+        <span style="height: 28px; padding: 0 12px; border-radius: 9999px; background: #1C1C1C; color: #FFFFFF; font-size: 13px; font-weight: 800; letter-spacing: .08em; display: inline-flex; align-items: center">FOR BUILDERS</span>
+      </div>
+      <span style="font-size: 16px; color: #56534B">How it works</span>
+    </div>
+
+    <div style="padding: 48px 0 36px; display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 32px">
+      <div style="flex: 1 1 560px; min-width: 0; display: flex; flex-direction: column; gap: 14px">
+        <div style="font-size: 18px; line-height: 24px; font-weight: 800; letter-spacing: .12em; color: #B8650A">TRANSPARENT AI</div>
+        <h1 style="margin: 0; font-size: 60px; line-height: 66px; font-weight: 800; letter-spacing: -.01em">Want to learn how it's made?</h1>
+        <p style="margin: 0; max-width: 760px; font-size: 21px; line-height: 32px; color: #56534B">Every check runs through the same pipeline. Drag the blocks to explore it, click one to flip it over, then run a live trace to watch what each model and tool actually does.</p>
+      </div>
+      <div style="display: flex; flex-wrap: wrap; gap: 12px">
+        <button class="hw-btn hw-run" onClick="{{run}}" disabled="{{running}}">
+          <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l13-7.5z"></path></svg>
+          {{runLabel}}
+        </button>
+        <button class="hw-btn hw-ghost" onClick="{{resetLayout}}">
+          <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"></path><path d="M3 4v5h5"></path></svg>
+          Reset layout
+        </button>
+      </div>
+    </div>
+
+    <div style="overflow-x: auto; border-radius: 24px; border: 1px solid #E4E0D8; background: #FBFAF7">
+      <div ref="{{stageRef}}" class="hw-stage" style="position: relative; width: 1360px; height: 720px">
+        <div style="position: absolute; left: 20px; top: 16px; display: flex; align-items: center; gap: 16px; font-size: 14px; font-weight: 600; color: #56534B; pointer-events: none">
+          <span style="display: inline-flex; align-items: center; gap: 6px"><span class="k k-ui">INPUT · UI</span></span>
+          <span class="k k-det">DETERMINISTIC</span>
+          <span class="k k-ai">AI MODEL</span>
+          <span class="k k-agent">AGENT</span>
+          <span>Drag to move · Click to flip</span>
+        </div>
+        <div style="position: absolute; left: 520px; top: 56px; width: 830px; height: 600px; border-radius: 24px; border: 2px dashed #FFC366; background: rgba(255,173,44,.06); pointer-events: none"></div>
+        <div style="position: absolute; left: 540px; top: 66px; font-size: 14px; font-weight: 800; color: #B8650A; pointer-events: none">API server · api.scamhelp.ai</div>
+
+        <sc-for list="{{edges}}" as="e" hint-placeholder-count="8">
+          <svg aria-hidden="true" width="1360" height="720" viewBox="0 0 1360 720" style="position: absolute; left: 0; top: 0; overflow: visible; pointer-events: none"><path class="{{e.cls}}" d="{{e.d}}"></path><circle cx="{{e.tx}}" cy="{{e.ty}}" r="5" fill="{{e.dotColor}}"></circle></svg>
+        </sc-for>
+
+        <sc-for list="{{nodes}}" as="n" hint-placeholder-count="8">
+          <button class="{{n.cls}}" style="left: {{n.x}}px; top: {{n.y}}px" onPointerDown="{{n.down}}" onClick="{{n.click}}" aria-pressed="{{n.flipped}}" aria-label="{{n.aria}}">
+            <span class="nd-in">
+              <span class="nd-face nd-front">
+                <span style="display: flex; align-items: center; justify-content: space-between; gap: 8px">
+                  <span class="{{n.kcls}}">{{n.kind}}</span>
+                  <span style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 800; color: #8A867C"><span class="nd-dot"></span>{{n.num}}</span>
+                </span>
+                <span style="display: block; margin-top: 12px; font-size: 21px; line-height: 26px; font-weight: 800">{{n.title}}</span>
+                <span style="display: block; margin-top: 4px; font-size: 15px; line-height: 20px; color: #56534B">{{n.sub}}</span>
+                <span style="margin-top: auto; display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: #8A867C">
+                  <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"></path><path d="M3 4v5h5"></path></svg>Click to flip
+                </span>
+              </span>
+              <span class="nd-face nd-back">
+                <span style="display: block; font-size: 12px; font-weight: 800; letter-spacing: .08em; color: #FFC366">{{n.title}}</span>
+                <span style="display: block; font-size: 14px; line-height: 19px"><b style="color: #FFC366">In</b> {{n.bin}}</span>
+                <span style="display: block; font-size: 14px; line-height: 19px"><b style="color: #FFC366">Does</b> {{n.bdo}}</span>
+                <span style="display: block; font-size: 14px; line-height: 19px"><b style="color: #FFC366">Out</b> {{n.bout}}</span>
+              </span>
+            </span>
+          </button>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 24px; padding: 28px 0 56px">
+      <section aria-label="Inspector" style="flex: 999 1 640px; min-width: 0; box-sizing: border-box; padding: 28px 32px; border-radius: 24px; background: #FFFFFF; border: 1px solid #E4E0D8; display: flex; flex-direction: column; gap: 18px">
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap">
+          <div style="display: flex; flex-direction: column; gap: 6px">
+            <span style="font-size: 14px; font-weight: 800; letter-spacing: .1em; color: #8A867C">INSPECTOR · STEP {{sel.num}}</span>
+            <h2 style="margin: 0; font-size: 34px; line-height: 40px; font-weight: 800">{{sel.title}}</h2>
+          </div>
+          <span class="{{sel.kcls}}" style="height: 32px; font-size: 14px; padding: 0 14px">{{sel.kind}}</span>
+        </div>
+        <p style="margin: 0; font-size: 19px; line-height: 29px; color: #3A3832">{{sel.why}}</p>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px">
+          <div style="display: flex; flex-direction: column; gap: 8px; min-width: 0">
+            <span style="font-size: 15px; font-weight: 800; letter-spacing: .06em; color: #56534B">WHAT GOES IN</span>
+            <pre class="code">{{sel.inJson}}</pre>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 8px; min-width: 0">
+            <span style="font-size: 15px; font-weight: 800; letter-spacing: .06em; color: #56534B">WHAT COMES OUT</span>
+            <pre class="code">{{sel.outJson}}</pre>
+          </div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 10px">
+          <span style="font-size: 15px; font-weight: 800; letter-spacing: .06em; color: #56534B">WHAT HAPPENS, STEP BY STEP</span>
+          <ol style="margin: 0; padding-left: 24px; display: flex; flex-direction: column; gap: 6px; font-size: 18px; line-height: 27px">
+            <sc-for list="{{sel.steps}}" as="s" hint-placeholder-count="3"><li>{{s}}</li></sc-for>
+          </ol>
+        </div>
+        <sc-if value="{{sel.hasTools}}" hint-placeholder-val="{{ true }}">
+          <div style="display: flex; flex-direction: column; gap: 10px">
+            <span style="font-size: 15px; font-weight: 800; letter-spacing: .06em; color: #56534B">TOOLS IT CAN CALL</span>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px"><sc-for list="{{sel.tools}}" as="t" hint-placeholder-count="4"><span class="tool">{{t}}</span></sc-for></div>
+          </div>
+        </sc-if>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap">
+          <button class="hw-btn hw-ghost" onClick="{{prev}}" style="height: 44px; font-size: 16px">← Previous step</button>
+          <button class="hw-btn hw-ghost" onClick="{{next}}" style="height: 44px; font-size: 16px">Next step →</button>
+        </div>
+      </section>
+
+      <section aria-label="Live trace" style="flex: 1 1 400px; min-width: 0; box-sizing: border-box; border-radius: 24px; background: #1C1C1C; color: #F1EEE8; display: flex; flex-direction: column; overflow: hidden">
+        <div style="padding: 20px 24px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #34322D">
+          <span style="display: flex; align-items: center; gap: 10px; font-size: 16px; font-weight: 800; letter-spacing: .08em"><span style="width: 10px; height: 10px; border-radius: 9999px; background: {{liveDot}}"></span>LIVE TRACE</span>
+          <span style="font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 14px; color: #A39E93">{{traceStatus}}</span>
+        </div>
+        <div role="log" aria-live="polite" style="flex-grow: 1; min-height: 420px; max-height: 640px; overflow-y: auto; padding: 16px 24px 24px; display: flex; flex-direction: column; gap: 10px; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 14px; line-height: 21px">
+          <sc-if value="{{noLogs}}" hint-placeholder-val="{{ true }}">
+            <span style="color: #A39E93">Press “Run a live trace” to send an example phishing email through the pipeline. Every model call and tool result shows up here.</span>
+          </sc-if>
+          <sc-for list="{{logs}}" as="l" hint-placeholder-count="0"><div class="lg" style="display: flex; gap: 12px"><span style="color: #8A867C; flex-shrink: 0">{{l.t}}</span><span style="color: {{l.c}}; flex-shrink: 0; font-weight: 700">{{l.who}}</span><span>{{l.text}}</span></div></sc-for>
+        </div>
+      </section>
+    </div>
+
+    <div style="padding: 0 0 64px; display: flex; flex-wrap: wrap; align-items: center; gap: 12px; font-size: 16px; color: #56534B">
+      <b style="color: #1C1C1C">Built with</b>
+      <span class="tool" style="background: #FFFFFF; border: 1px solid #E4E0D8">Bun + Hono</span>
+      <span class="tool" style="background: #FFFFFF; border: 1px solid #E4E0D8">Vercel AI SDK</span>
+      <span class="tool" style="background: #FFFFFF; border: 1px solid #E4E0D8">OpenAI</span>
+      <span class="tool" style="background: #FFFFFF; border: 1px solid #E4E0D8">PostgreSQL</span>
+      <span class="tool" style="background: #FFFFFF; border: 1px solid #E4E0D8">Redis</span>
+      <span class="tool" style="background: #FFFFFF; border: 1px solid #E4E0D8">S3</span>
+      <span style="margin-left: auto">Example trace uses a sample phishing email. Values are illustrative.</span>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1960}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.W = 232; this.H = 156; this.SW = 1360; this.SH = 720;
+    this.state = { pos: this.defaults(), flipped: {}, sel: 'input', active: null, done: {}, logs: [], running: false, finished: false };
+    this.stage = null; this.drag = null; this.justDragged = false; this.timers = [];
+    var self = this;
+    this.onMove = function (e) {
+      var d = self.drag; if (!d) return;
+      var dx = (e.clientX - d.sx) / d.k, dy = (e.clientY - d.sy) / d.k;
+      if (!d.moved && Math.abs(dx) + Math.abs(dy) < 5) return;
+      d.moved = true;
+      var pos = Object.assign({}, self.state.pos);
+      pos[d.id] = { x: Math.max(0, Math.min(self.SW - self.W, Math.round(d.ox + dx))), y: Math.max(0, Math.min(self.SH - self.H, Math.round(d.oy + dy))) };
+      self.setState({ pos: pos });
+    };
+    this.onUp = function () {
+      if (self.drag && self.drag.moved) { self.justDragged = true; setTimeout(function () { self.justDragged = false; }, 50); }
+      self.drag = null;
+    };
+  }
+  componentDidMount() { window.addEventListener('pointermove', this.onMove); window.addEventListener('pointerup', this.onUp); }
+  componentWillUnmount() {
+    window.removeEventListener('pointermove', this.onMove); window.removeEventListener('pointerup', this.onUp);
+    this.timers.forEach(function (t) { clearTimeout(t); });
+  }
+  defaults() {
+    return {
+      input: { x: 24, y: 282 }, ext: { x: 280, y: 282 }, url: { x: 560, y: 110 }, decision: { x: 560, y: 470 },
+      quick: { x: 830, y: 470 }, reviewer: { x: 830, y: 110 }, verdict: { x: 1104, y: 282 }, results: { x: 1104, y: 520 }
+    };
+  }
+  data() {
+    return [
+      { id: 'input', num: '01', kind: 'INPUT', k: 'ui', title: 'User input', sub: 'An email, page, text or screenshot',
+        bin: 'Whatever is on screen', bdo: 'Captures it as raw content', bout: 'A raw payload',
+        why: 'Everything starts with what the person is looking at. Nothing is judged yet: we just capture the raw content so every later step works from the same source.',
+        inJson: 'Gmail message (open)\n  From: Account Security Team\n        <alerts@secure-acct-verify.co>\n  Subject: Urgent: Your account\n           has been suspended',
+        outJson: '{\n  "source": "gmail",\n  "hasLinks": true,\n  "hasImages": false\n}',
+        steps: ['The person clicks “Check this email” or right-clicks and picks Analyze Email.', 'The open message is captured: sender, subject, body and links.', 'Nothing leaves the browser until the next step packages it.'], tools: [],
+        log: ['captured open Gmail message', 'sender alerts@secure-acct-verify.co · 1 link · 0 images'] },
+      { id: 'ext', num: '02', kind: 'INPUT', k: 'ui', title: 'Browser extension', sub: 'Packages it and calls the API',
+        bin: 'The raw message', bdo: 'Cleans text, pulls links, adds page context', bout: 'POST /analyze',
+        why: 'The extension’s background worker is the only thing that calls our API, so a page’s own security rules can never block a check. It trims the text and lists every link before sending.',
+        inJson: '{\n  "source": "gmail",\n  "hasLinks": true\n}',
+        outJson: 'POST /analyze\n{\n  "type": "text",\n  "text": "We detected unusual\n    sign-in activity…",\n  "urls": [\n    "http://secure-acct-verify.co/login"\n  ]\n}',
+        steps: ['Reads the sender, subject, body text and every link.', 'Caps text at 20,000 characters.', 'The background worker sends one request to api.scamhelp.ai.'], tools: [],
+        log: ['POST /analyze · type=text · 1,284 chars', 'urls[0] = http://secure-acct-verify.co/login'] },
+      { id: 'url', num: '03', kind: 'DETERMINISTIC', k: 'det', title: 'URL check', sub: 'Checks every link, cache first',
+        bin: 'Every link found', bdo: 'Traces redirects, domain age, threat lists', bout: 'Hard facts per link',
+        why: 'Links get facts, not opinions. The same link always gets the same answer, so results are cached in Redis and repeat checks come back instantly.',
+        inJson: '{\n  "urls": [\n    "http://secure-acct-verify.co/login"\n  ]\n}',
+        outJson: '{\n  "domain": "secure-acct-verify.co",\n  "domainAgeDays": 3,\n  "redirects": 2,\n  "finalHost": "verify-login.help",\n  "threatIntel": "listed",\n  "cache": "miss → stored"\n}',
+        steps: ['Normalizes each URL and checks Redis for a recent answer.', 'On a miss, follows redirects to the final destination.', 'Looks up domain age and threat-intel lists, then caches the result.'], tools: ['inspect_url', 'lookup_domain', 'check_threat_intel'],
+        log: ['redis GET url:9f3a… → miss', 'inspect_url → 2 redirects → verify-login.help', 'lookup_domain → registered 3 days ago', 'check_threat_intel → listed (phishing)'] },
+      { id: 'decision', num: '04', kind: 'AI MODEL', k: 'ai', title: 'Decision model', sub: 'A fast first read of the content',
+        bin: 'Text + link facts', bdo: 'Classifies the scam pattern', bout: 'Label + confidence',
+        why: 'A fast classifier reads the message the way a careful person would: urgency, threats, requests for private data. It is quick and cheap, so it gives a first answer in about a second.',
+        inJson: '{\n  "text": "…verify your identity\n    within 24 hours…",\n  "linkFacts": { "domainAgeDays": 3 }\n}',
+        outJson: '{\n  "label": "phishing",\n  "confidence": 0.91,\n  "signals": [\n    "urgency", "credential request",\n    "new domain"\n  ]\n}',
+        steps: ['Formats the text and link facts into one prompt.', 'Classifies against known scam types.', 'Returns a label, a confidence and the signals it used.'], tools: [],
+        log: ['classifier ← text + linkFacts', 'label=phishing · confidence=0.91'] },
+      { id: 'quick', num: '05', kind: 'AI MODEL', k: 'ai', title: 'Quick verdict', sub: 'A first call: scam or safe',
+        bin: 'Label + evidence', bdo: 'Scores risk 0–100', bout: 'Draft score + evidence set',
+        why: 'The first answer is a draft. It comes with the exact evidence behind it, so the next step can check each claim instead of trusting the score.',
+        inJson: '{\n  "label": "phishing",\n  "confidence": 0.91\n}',
+        outJson: '{\n  "draftScore": 88,\n  "evidence": [\n    "sender domain is 3 days old",\n    "link redirects twice",\n    "asks for card PIN",\n    "mentions a bank by name"\n  ]\n}',
+        steps: ['Turns confidence and signals into a 0–100 draft score.', 'Lists every piece of evidence behind it.', 'Hands the draft to the reviewer, never straight to the user.'], tools: [],
+        log: ['draftScore=88 · 4 evidence items', 'handing off to reviewer…'] },
+      { id: 'reviewer', num: '06', kind: 'AGENT', k: 'agent', title: 'Reviewer agent', sub: 'Fact-checks every piece of evidence',
+        bin: 'Draft + evidence', bdo: 'Calls tools to verify each claim', bout: 'Kept, dropped, adjusted',
+        why: 'A multimodal agent re-checks every claim with its own tools. Weak or wrong evidence is thrown out and the score is corrected. This is the step that turned a real Google page from 92 to 2 in our demo.',
+        inJson: '{\n  "draftScore": 88,\n  "evidence": [ 4 items ]\n}',
+        outJson: '{\n  "kept": 3,\n  "dropped": 1,\n  "reason": "no bank named",\n  "scoreChange": +2\n}',
+        steps: ['Takes each evidence item one at a time.', 'Calls a tool to confirm it: domain, brand, email headers, the web.', 'Keeps what holds up, drops what doesn’t, and adjusts the score.'], tools: ['verify_evidence', 'inspect_url', 'lookup_domain', 'check_threat_intel', 'verify_brand_identity', 'inspect_email', 'decode_qr', 'scan_file', 'load_submission_asset', 'web_search'],
+        log: ['verify_evidence #1 domain age → confirmed', 'verify_evidence #2 redirects → confirmed', 'inspect_email → asks for PIN → confirmed', 'verify_brand_identity #4 → no bank named → dropped', 'score 88 → 90'] },
+      { id: 'verdict', num: '07', kind: 'DETERMINISTIC', k: 'det', title: 'Verdict', sub: 'Scam yes or no · risk score 0–100',
+        bin: 'Verified evidence', bdo: 'Sets level and scam type', bout: 'The final answer',
+        why: 'Only verified evidence reaches the final verdict. The score maps to a clear level and a scam type, and the full analysis is saved to Postgres.',
+        inJson: '{\n  "score": 90,\n  "kept": 3\n}',
+        outJson: '{\n  "isScam": true,\n  "score": 90,\n  "level": "high",\n  "type": "phishing"\n}',
+        steps: ['Maps the score to a level: high, be careful or looks safe.', 'Attaches the scam type and the evidence that survived review.', 'Saves the whole analysis to Postgres.'], tools: [],
+        log: ['level=high · type=phishing', 'postgres INSERT analysis #a71c'] },
+      { id: 'results', num: '08', kind: 'UI', k: 'ui', title: 'Results panel', sub: 'Red highlights and what to do next',
+        bin: 'The verdict', bdo: 'Highlights the risky parts', bout: 'Plain-English guidance',
+        why: 'The answer arrives in plain English: a score, a level, the scam type, the sketchy parts highlighted in red, and clear next steps.',
+        inJson: '{\n  "level": "high",\n  "type": "phishing",\n  "evidence": [ 3 items ]\n}',
+        outJson: 'HIGH RISK · 90 / 100\nPHISHING SCAM\n\n✗ Don’t click any links.\n✓ Call your bank using the\n  number on your card.',
+        steps: ['The panel slides in from the right.', 'Each verified piece of evidence becomes a red highlight in the email.', 'Hovering a highlight explains it and says what to do.'], tools: [],
+        log: ['render panel · 3 highlights', 'done in 7.8s'] }
+    ];
+  }
+  edgeList() {
+    return [['input', 'ext'], ['ext', 'url'], ['ext', 'decision'], ['decision', 'quick'], ['quick', 'reviewer'], ['url', 'reviewer', 1], ['reviewer', 'verdict'], ['verdict', 'results']];
+  }
+  run() {
+    var self = this;
+    this.timers.forEach(function (t) { clearTimeout(t); });
+    this.timers = [];
+    var order = ['input', 'ext', 'url', 'decision', 'quick', 'reviewer', 'verdict', 'results'];
+    var byId = {}; this.data().forEach(function (n) { byId[n.id] = n; });
+    var colors = { ui: '#A39E93', det: '#9DB0F2', ai: '#FFC366', agent: '#F0A08F' };
+    this.setState({ running: true, finished: false, logs: [], done: {}, active: null });
+    var t = 0, ms = 0;
+    order.forEach(function (id, i) {
+      var n = byId[id];
+      self.timers.push(setTimeout(function () {
+        var done = Object.assign({}, self.state.done); if (i > 0) done[order[i - 1]] = true;
+        self.setState({ active: id, sel: id, done: done });
+      }, t));
+      n.log.forEach(function (line, j) {
+        var at = t + 250 + j * 330;
+        ms += 180 + j * 140 + (id === 'reviewer' ? 520 : 0);
+        var stamp = (ms / 1000).toFixed(2) + 's';
+        self.timers.push(setTimeout(function () {
+          self.setState({ logs: self.state.logs.concat([{ t: stamp, who: n.title.split(' ')[0].toLowerCase(), c: colors[n.k], text: line }]) });
+        }, at));
+      });
+      t += 450 + n.log.length * 330;
+    });
+    this.timers.push(setTimeout(function () {
+      var done = {}; order.forEach(function (id) { done[id] = true; });
+      self.setState({ active: null, done: done, running: false, finished: true });
+    }, t));
+  }
+  renderVals() {
+    var self = this, s = this.state, W = this.W, H = this.H;
+    var list = this.data();
+    var ids = list.map(function (n) { return n.id; });
+    var nodes = list.map(function (n) {
+      var p = s.pos[n.id];
+      var cls = 'nd' + (s.flipped[n.id] ? ' flipped' : '') + (s.active === n.id ? ' active' : '') + (s.done[n.id] ? ' done' : '') + (s.sel === n.id ? ' sel' : '');
+      return {
+        x: p.x, y: p.y, cls: cls, num: n.num, kind: n.kind, kcls: 'k k-' + n.k, title: n.title, sub: n.sub,
+        bin: n.bin, bdo: n.bdo, bout: n.bout, flipped: !!s.flipped[n.id],
+        aria: n.title + ', step ' + n.num + '. Press to flip and inspect.',
+        down: function (e) {
+          if (e.button !== undefined && e.button !== 0) return;
+          var k = self.stage ? (self.stage.getBoundingClientRect().width / self.SW) || 1 : 1;
+          self.drag = { id: n.id, sx: e.clientX, sy: e.clientY, ox: p.x, oy: p.y, k: k, moved: false };
+        },
+        click: function () {
+          if (self.justDragged) return;
+          var f = Object.assign({}, self.state.flipped); f[n.id] = !f[n.id];
+          self.setState({ flipped: f, sel: n.id });
+        }
+      };
+    });
+    var edges = this.edgeList().map(function (e) {
+      var a = s.pos[e[0]], b = s.pos[e[1]];
+      var ax = a.x + W / 2, ay = a.y + H / 2, bx = b.x + W / 2, by = b.y + H / 2;
+      var dx = bx - ax, dy = by - ay, sx, sy, tx, ty, d;
+      if (Math.abs(dx) >= Math.abs(dy) * 1.2) {
+        sx = dx > 0 ? a.x + W : a.x; sy = ay; tx = dx > 0 ? b.x : b.x + W; ty = by;
+        var mx = (sx + tx) / 2;
+        d = 'M' + sx + ' ' + sy + ' C' + mx + ' ' + sy + ' ' + mx + ' ' + ty + ' ' + tx + ' ' + ty;
+      } else {
+        sx = ax; sy = dy > 0 ? a.y + H : a.y; tx = bx; ty = dy > 0 ? b.y : b.y + H;
+        var my = (sy + ty) / 2;
+        d = 'M' + sx + ' ' + sy + ' C' + sx + ' ' + my + ' ' + tx + ' ' + my + ' ' + tx + ' ' + ty;
+      }
+      var on = s.active === e[1] || (s.done[e[0]] && s.done[e[1]] && s.running);
+      return { d: d, tx: tx, ty: ty, cls: 'edge' + (e[2] ? ' dash' : '') + (on ? ' on' : ''), dotColor: on ? '#B8650A' : '#CFC9BE' };
+    });
+    var cur = list[ids.indexOf(s.sel)] || list[0];
+    var i = ids.indexOf(cur.id);
+    return {
+      stageRef: function (el) { self.stage = el; },
+      nodes: nodes, edges: edges,
+      sel: { num: cur.num, title: cur.title, kind: cur.kind, kcls: 'k k-' + cur.k, why: cur.why, inJson: cur.inJson, outJson: cur.outJson, steps: cur.steps, tools: cur.tools, hasTools: cur.tools.length > 0 },
+      prev: function () { self.setState({ sel: ids[(i + ids.length - 1) % ids.length] }); },
+      next: function () { self.setState({ sel: ids[(i + 1) % ids.length] }); },
+      run: function () { self.run(); },
+      running: s.running,
+      runLabel: s.running ? 'Running…' : s.finished ? 'Run it again' : 'Run a live trace',
+      resetLayout: function () { self.setState({ pos: self.defaults(), flipped: {} }); },
+      logs: s.logs, noLogs: s.logs.length === 0,
+      liveDot: s.running ? '#FFAD2C' : s.finished ? '#4CAF6E' : '#6F6B62',
+      traceStatus: s.running ? 'running' : s.finished ? 'complete · 8 steps' : 'idle'
+    };
+  }
+}
+</script>
+</body>
+</html>

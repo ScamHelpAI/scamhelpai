@@ -1,25 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FileUpIcon, Loader2Icon } from "lucide-react";
 
 import { AnalysisVerdict } from "@/components/analysis-verdict";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  REVIEW_POLL_MAX_ATTEMPTS,
-  REVIEW_POLL_MS,
-} from "@/lib/analysis-poll";
+import { REVIEW_POLL_MAX_ATTEMPTS, REVIEW_POLL_MS } from "@/lib/analysis-poll";
 import type { AnalysisResult } from "@/lib/analysis-types";
 import {
   createAnalysis,
@@ -27,6 +19,7 @@ import {
   isTextFile,
   uploadFileForAnalysis,
 } from "@/lib/analyzer-client";
+import { cn } from "@/lib/utils";
 
 const ACCEPTED_FILE_TYPES =
   "image/*,application/pdf,audio/*,.txt,.eml,text/plain";
@@ -37,10 +30,14 @@ export function FraudAnalyzer() {
   const [tab, setTab] = useState<AnalyzerTab>("text");
   const [text, setText] = useState("");
   const [file, setFile] = useState<File | null>(null);
+  const [dragging, setDragging] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [reviewing, setReviewing] = useState(false);
+  // Remembers that this result went through the in-depth pass, so "2 of 2" survives completion.
+  const [sawReview, setSawReview] = useState(false);
 
   useEffect(() => {
     if (!result || result.status !== "reviewing") {
@@ -88,6 +85,11 @@ export function FraudAnalyzer() {
     setResult(null);
     setLoading(true);
 
+    function showFirstResult(analysis: AnalysisResult) {
+      setResult(analysis);
+      setSawReview(analysis.status === "reviewing");
+    }
+
     try {
       const context = {
         source: "web_app" as const,
@@ -109,7 +111,7 @@ export function FraudAnalyzer() {
             inputs: [{ type: "text", content }],
             context,
           });
-          setResult(analysis);
+          showFirstResult(analysis);
           return;
         }
 
@@ -118,7 +120,7 @@ export function FraudAnalyzer() {
           inputs: [assetInput],
           context,
         });
-        setResult(analysis);
+        showFirstResult(analysis);
         return;
       }
 
@@ -131,7 +133,7 @@ export function FraudAnalyzer() {
         inputs: [{ type: "text", content: trimmed }],
         context,
       });
-      setResult(analysis);
+      showFirstResult(analysis);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
     } finally {
@@ -150,12 +152,21 @@ export function FraudAnalyzer() {
   }
 
   const canSubmit =
-    !loading &&
-    (tab === "file" ? file !== null : text.trim().length > 0);
+    !loading && (tab === "file" ? file !== null : text.trim().length > 0);
+
+  const stage = !result
+    ? null
+    : result.status === "reviewing"
+      ? reviewing
+        ? "Analysis 1 of 2 done · running in-depth review (2 of 2)…"
+        : "Analysis 1 of 2 · in-depth review did not finish"
+      : sawReview
+        ? "Analysis 2 of 2 · in-depth review complete"
+        : "Analysis complete · no in-depth review needed";
 
   return (
-    <div className="w-full">
-      <Card>
+    <div className="flex w-full flex-col items-start justify-center gap-6 lg:flex-row">
+      <Card className="w-full max-w-2xl self-center lg:flex-1 lg:self-start">
         <CardHeader>
           <CardTitle>Analyze suspicious content</CardTitle>
         </CardHeader>
@@ -187,13 +198,41 @@ export function FraudAnalyzer() {
             <TabsContent value="file" className="space-y-3">
               <Label htmlFor="scam-file">File upload</Label>
               <div
-                className="flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-border bg-muted/40 px-4 py-8 text-center"
+                className={cn(
+                  "flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-border bg-muted/40 px-4 py-8 text-center transition-colors",
+                  dragging && "border-2 border-trust bg-accent",
+                )}
+                onDragOver={(event) => {
+                  event.preventDefault();
+                  if (!loading) setDragging(true);
+                }}
+                onDragLeave={(event) => {
+                  // Ignore leave events fired when moving over child elements.
+                  if (!event.currentTarget.contains(event.relatedTarget as Node)) {
+                    setDragging(false);
+                  }
+                }}
+                onDrop={(event) => {
+                  event.preventDefault();
+                  setDragging(false);
+                  const dropped = event.dataTransfer.files;
+                  if (loading || dropped.length === 0) return;
+                  // Mirror the drop into the input so it shows the file name too.
+                  if (fileInputRef.current) fileInputRef.current.files = dropped;
+                  setFile(dropped[0]);
+                }}
               >
-                <FileUpIcon className="size-8 text-muted-foreground" aria-hidden />
+                <FileUpIcon
+                  className="size-8 text-muted-foreground"
+                  aria-hidden
+                />
                 <p className="text-[15px] text-muted-foreground">
+                  Drag a file here, or choose one below.
+                  <br />
                   Image, PDF, audio, .txt, or .eml
                 </p>
                 <Input
+                  ref={fileInputRef}
                   id="scam-file"
                   type="file"
                   accept={ACCEPTED_FILE_TYPES}
@@ -224,7 +263,7 @@ export function FraudAnalyzer() {
               {loading ? (
                 <>
                   <Loader2Icon className="animate-spin" aria-hidden />
-                  Analyzing…
+                  Running analysis 1 of 2…
                 </>
               ) : tab === "file" ? (
                 "Analyze file"
@@ -241,10 +280,6 @@ export function FraudAnalyzer() {
             </Alert>
           ) : null}
 
-          {result ? (
-            <AnalysisVerdict result={result} reviewing={reviewing} />
-          ) : null}
-
           <div className="space-y-2 border-t border-border pt-4 text-sm text-muted-foreground">
             <p>
               Paste a message or upload a screenshot, PDF, audio, plain text
@@ -257,6 +292,32 @@ export function FraudAnalyzer() {
           </div>
         </CardContent>
       </Card>
+
+      {result ? (
+        <Card className="animate-results-in w-full max-w-2xl min-w-0 self-center overflow-hidden lg:sticky lg:top-6 lg:flex-1 lg:self-start">
+          <CardHeader className="items-center text-center">
+            <CardTitle className="text-3xl text-[#b8650a]">
+              <h2>Analysis Results</h2>
+            </CardTitle>
+            {stage ? (
+              <p className="text-[17px] font-medium text-muted-foreground">
+                {stage}
+              </p>
+            ) : null}
+          </CardHeader>
+          <CardContent>
+            <AnalysisVerdict
+              result={result}
+              reviewing={reviewing}
+              onCheckAgain={() => {
+                setResult(null);
+                setSawReview(false);
+                setError(null);
+              }}
+            />
+          </CardContent>
+        </Card>
+      ) : null}
     </div>
   );
 }

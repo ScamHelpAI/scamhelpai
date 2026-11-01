@@ -2,20 +2,14 @@ import type { CSSProperties } from "react";
 import type { VerdictTone } from "@/shared/verdict.ts";
 import { cn } from "cn";
 
-const RING_SIZE = 132;
-const RING_STROKE = 10;
+const RING_SIZE = 140;
+const RING_STROKE = 12;
 const RING_RADIUS = (RING_SIZE - RING_STROKE) / 2 - 2;
 
 const toneRingClass: Record<VerdictTone, string> = {
   danger: "text-risk-high",
   warn: "text-risk-medium",
   safe: "text-risk-low",
-};
-
-const toneTrackClass: Record<VerdictTone, string> = {
-  danger: "text-risk-high/20",
-  warn: "text-risk-medium/20",
-  safe: "text-risk-low/20",
 };
 
 function clampUnit(value: number): number {
@@ -42,7 +36,7 @@ function ScoreGauge({
   return (
     <span
       className={cn(
-        "relative inline-flex size-[132px] shrink-0 items-center justify-center",
+        "relative inline-flex size-[140px] shrink-0 items-center justify-center",
         className,
       )}
       role="img"
@@ -60,7 +54,7 @@ function ScoreGauge({
           cy={center}
           r={RING_RADIUS}
           fill="none"
-          className={toneTrackClass[tone]}
+          className="text-muted"
           stroke="currentColor"
           strokeWidth={RING_STROKE}
         />
@@ -84,12 +78,15 @@ function ScoreGauge({
         />
       </svg>
       <span className="relative flex flex-col items-center leading-none">
-        <span className="font-heading text-[2.75rem] font-semibold tracking-tight text-foreground tabular-nums">
+        <span
+          className={cn(
+            "font-heading text-[2.5rem] font-bold tracking-tight tabular-nums",
+            toneRingClass[tone],
+          )}
+        >
           {display}
         </span>
-        <span className="mt-0.5 text-sm font-semibold text-muted-foreground">
-          / 100
-        </span>
+        <span className="mt-1 text-base text-muted-foreground">/ 100</span>
       </span>
     </span>
   );

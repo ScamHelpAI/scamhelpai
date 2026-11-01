@@ -1,5 +1,6 @@
 @import "../../popup/styles.css";
 
+@source "../../components/ui/button.tsx";
 @source "../../components/ui/popover.tsx";
 @source "../../components/verdict-summary.tsx";
 @source "../../components/score-gauge.tsx";

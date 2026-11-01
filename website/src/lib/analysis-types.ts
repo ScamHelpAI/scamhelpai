@@ -1,11 +1,7 @@
 export type RiskLevel = "low" | "medium" | "high" | "critical";
 
 export type AnalysisStatus =
-  | "queued"
-  | "analyzing"
-  | "reviewing"
-  | "completed"
-  | "failed";
+  "queued" | "analyzing" | "reviewing" | "completed" | "failed";
 
 export type AnalysisResult = {
   id: string;
@@ -21,6 +17,9 @@ export type AnalysisResult = {
   };
   claimedIdentity?: string;
   summary: string;
+  /** Absent when the API server predates risky-part annotations. */
+  decision?: { title: string; dont: string; do: string };
+  riskyParts?: { quote: string; message: string }[];
   evidence: {
     id: string;
     summary: string;
@@ -28,10 +27,7 @@ export type AnalysisResult = {
   }[];
   review?: {
     verdict:
-      | "agree"
-      | "agree_with_adjustments"
-      | "disagree"
-      | "insufficient_evidence";
+      "agree" | "agree_with_adjustments" | "disagree" | "insufficient_evidence";
     unsupportedClaims: string[];
     contradictions: string[];
     confidenceAdjustment: number;

@@ -84,9 +84,10 @@ export function classificationLabel(primary: string): string {
 
 export function toVerdict(result: AnalysisResult): Verdict {
   const copy = copyForLevel(result.risk.level);
-  const reasons = result.evidence
-    .map((item) => item.summary)
-    .filter(isUsefulReason);
+  // Reviewer-written risky-part notes are plain language; raw evidence summaries are the fallback.
+  const reasons = result.riskyParts?.length
+    ? result.riskyParts.map((part) => part.message)
+    : result.evidence.map((item) => item.summary).filter(isUsefulReason);
 
   return {
     title: copy.title,

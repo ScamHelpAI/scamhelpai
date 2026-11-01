@@ -11,7 +11,7 @@ export default function Home() {
 
       <section
         id="analyze"
-        className="mx-auto w-full max-w-2xl flex-1 scroll-mt-6 px-5 pb-24 sm:px-8"
+        className="mx-auto w-full max-w-6xl flex-1 scroll-mt-6 px-5 pb-24 sm:px-8"
       >
         <FraudAnalyzer />
       </section>

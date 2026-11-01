@@ -221,7 +221,7 @@
   }
   button,
   [data-slot="button"] {
-    @apply font-heading font-bold;
+    @apply font-bold;
   }
   [data-slot="alert-title"],
   [data-slot="card-title"] {
@@ -253,6 +253,21 @@
   .animate-score-ring {
     animation: score-ring var(--duration-score) var(--ease-senior)
       var(--duration-score-delay) both;
+  }
+
+  .animate-results-in {
+    animation: results-in-y var(--duration-panel) var(--ease-senior) both;
+  }
+
+  .animate-edge-flow {
+    animation: edge-flow 0.6s linear infinite;
+  }
+
+  /* Side-by-side: grow from zero width so the input card glides left instead of jumping. */
+  @media (min-width: 64rem) {
+    .animate-results-in {
+      animation-name: results-in-x;
+    }
   }
 }
 
@@ -287,7 +302,39 @@
   }
 }
 
+@keyframes edge-flow {
+  to {
+    stroke-dashoffset: -16;
+  }
+}
+
+@keyframes results-in-y {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes results-in-x {
+  from {
+    opacity: 0;
+    max-width: 0;
+    transform: translateX(48px);
+  }
+  to {
+    opacity: 1;
+    max-width: 42rem;
+    transform: translateX(0);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .animate-edge-flow,
+  .animate-results-in,
   .animate-panel-in,
   .animate-stagger-in,
   .animate-score-ring {
