@@ -35,6 +35,11 @@ export type ScanActivePageMessage = {
   type: "scanActivePage";
 };
 
+/** Background → Gmail tab: the "Analyze Email" context menu item was clicked. */
+export type AnalyzeOpenEmailMessage = {
+  type: "analyzeOpenEmail";
+};
+
 export type CheckUrlsMessage = {
   type: "checkUrls";
   urls: string[];
@@ -61,4 +66,5 @@ export type ExtensionRequest =
   | ReadActivePageMessage
   | ScanActivePageMessage
   | CheckUrlsMessage
-  | ApplyPageAnnotationsMessage;
+  | ApplyPageAnnotationsMessage
+  | AnalyzeOpenEmailMessage;

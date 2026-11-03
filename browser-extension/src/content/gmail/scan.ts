@@ -6,7 +6,7 @@ import {
 } from "../../shared/analysis-poll.ts";
 import { applyAnnotations } from "../annotations/decorate.ts";
 import { findOpenMessage, markAnnotateRoot } from "./dom.ts";
-import { getButtonStatusEl, setButtonState } from "./button.ts";
+import { getButtonStatusEl, SCAN_STEPS, setButtonState } from "./button.ts";
 import { clearGmailVerdict, renderGmailVerdict } from "./mount-verdict.tsx";
 
 /** Same /v1/analyses text path as page scan — headers are baked into content. */
@@ -93,12 +93,42 @@ function applyHighlights(
   });
 }
 
+const SCAN_STEP_MS = 1400;
+
+/** Advance the status text while the request is pending; holds on the last step until stopped. */
+function cycleScanSteps(statusEl: HTMLElement | null): () => void {
+  let step = 0;
+  const timer = setInterval(() => {
+    step = Math.min(step + 1, SCAN_STEPS.length - 1);
+    if (statusEl) statusEl.textContent = SCAN_STEPS[step];
+  }, SCAN_STEP_MS);
+  return () => clearInterval(timer);
+}
+
+/** Tint + sweeping scan line over the email body (styles in content/ui/motion.css). */
+function showScanOverlay(body: HTMLElement, doc: Document): () => void {
+  const overlay = doc.createElement("div");
+  overlay.className = "sh-scan";
+  overlay.setAttribute("aria-hidden", "true");
+  const line = doc.createElement("div");
+  line.className = "sh-scanline";
+  overlay.append(line);
+  body.classList.add("sh-scanning");
+  body.append(overlay);
+  return () => {
+    overlay.remove();
+    body.classList.remove("sh-scanning");
+  };
+}
+
 export async function scanOpenGmailEmail(
   button: HTMLButtonElement,
   doc: Document = document,
 ): Promise<void> {
   const statusEl = getButtonStatusEl(button);
   setButtonState(button, "loading", statusEl);
+  const stopSteps = cycleScanSteps(statusEl);
+  let stopScan = () => {};
   renderGmailVerdict(doc, button, {
     loading: true,
     reviewing: false,
@@ -112,10 +142,12 @@ export async function scanOpenGmailEmail(
     }
 
     markAnnotateRoot(open.body, doc);
+    stopScan = showScanOverlay(open.body, doc);
 
     const initial = await requestAnalyze(
       textAnalyzeRequest(open.text, doc.location.href),
     );
+    stopSteps();
 
     if (initial.status === "failed") {
       throw new Error("Analysis failed. Try again in a moment.");
@@ -155,6 +187,7 @@ export async function scanOpenGmailEmail(
       throw new Error("The check is taking too long. Try again in a moment.");
     }
 
+    stopScan();
     const highlighted = applyHighlights(result, open.body, doc);
     const footerMessage = doneStatusMessage(highlighted);
 
@@ -174,5 +207,8 @@ export async function scanOpenGmailEmail(
       message:
         error instanceof Error ? error.message : "Could not check this email.",
     });
+  } finally {
+    stopSteps();
+    stopScan();
   }
 }

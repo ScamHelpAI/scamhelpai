@@ -12,7 +12,9 @@
 /*
   Prioritze higher readabiloy for like senior citizens.
 */
-:root {
+/* :host so the tokens also apply inside the content-script shadow roots. */
+:root,
+:host {
   /* Surfaces */
   --background: #f1eee8;
   --foreground: #1c1c1c;

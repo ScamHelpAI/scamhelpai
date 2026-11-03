@@ -61,6 +61,19 @@ export function ensureContentUiHost(doc: Document = document): HTMLElement {
   return container;
 }
 
+const MOTION_LINK_ID = "scamhelp-motion-styles";
+
+/** sh- keyframes for UI that lives in the page DOM (shadow roots get them via content-ui.css). */
+export function ensurePageMotionStyles(doc: Document = document): void {
+  if (doc.getElementById(MOTION_LINK_ID)) return;
+  if (typeof chrome === "undefined" || !chrome.runtime?.getURL) return;
+  const link = doc.createElement("link");
+  link.id = MOTION_LINK_ID;
+  link.rel = "stylesheet";
+  link.href = chrome.runtime.getURL("content/motion.css");
+  doc.documentElement.appendChild(link);
+}
+
 export function resetContentUiHost(): void {
   portalContainer = null;
 }

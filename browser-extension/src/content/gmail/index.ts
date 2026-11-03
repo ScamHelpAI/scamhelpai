@@ -1,5 +1,6 @@
 import { BUTTON_ATTR, injectScanButton } from "./button.ts";
 import { findOpenMessage } from "./dom.ts";
+import type { AnalyzeOpenEmailMessage } from "../../shared/messages.ts";
 import { scanOpenGmailEmail } from "./scan.ts";
 
 const INSTALLED_FLAG = "__scamhelpGmailInstalled";
@@ -10,13 +11,14 @@ type GmailWindow = Window & {
 
 let syncScheduled = false;
 
-function ensureButtonForOpenEmail(): void {
+function ensureButtonForOpenEmail(): HTMLButtonElement | null {
   const open = findOpenMessage(document);
-  if (!open) return;
+  if (!open) return null;
 
-  if (open.container.querySelector(`[${BUTTON_ATTR}]`)) return;
+  const existing = open.container.querySelector(`[${BUTTON_ATTR}]`);
+  if (existing instanceof HTMLButtonElement) return existing;
 
-  injectScanButton(open.container, (button) => {
+  return injectScanButton(open.container, (button) => {
     void scanOpenGmailEmail(button, document);
   });
 }
@@ -43,6 +45,14 @@ function startGmailIntegration(): void {
 
   window.addEventListener("hashchange", () => {
     scheduleEnsureButton();
+  });
+
+  // Right-click "Analyze Email": run exactly what the button click runs.
+  chrome.runtime.onMessage.addListener((message: AnalyzeOpenEmailMessage) => {
+    if (message?.type !== "analyzeOpenEmail") return false;
+    const button = ensureButtonForOpenEmail();
+    if (button && !button.disabled) void scanOpenGmailEmail(button, document);
+    return false;
   });
 }
 

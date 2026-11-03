@@ -12,6 +12,7 @@ import {
 } from "../shared/check.ts";
 import type {
   AnalyzeMessage,
+  AnalyzeOpenEmailMessage,
   AnalyzeResponse,
   ApplyPageAnnotationsMessage,
   ApplyPageAnnotationsResponse,
@@ -202,6 +203,31 @@ async function checkUrls(urls: string[]): Promise<CheckUrlResult[]> {
 
   return results;
 }
+
+const ANALYZE_EMAIL_MENU_ID = "scamhelp-analyze-email";
+
+chrome.runtime.onInstalled.addListener(() => {
+  chrome.contextMenus.removeAll(() => {
+    chrome.contextMenus.create({
+      id: ANALYZE_EMAIL_MENU_ID,
+      title: "Analyze Email",
+      contexts: ["all"],
+      documentUrlPatterns: ["https://mail.google.com/*"],
+    });
+  });
+});
+
+chrome.contextMenus.onClicked.addListener((info, tab) => {
+  if (info.menuItemId !== ANALYZE_EMAIL_MENU_ID || tab?.id === undefined) return;
+  // Same scan → panel sequence as the in-page button (handled by content/gmail.js).
+  chrome.tabs
+    .sendMessage(tab.id, {
+      type: "analyzeOpenEmail",
+    } satisfies AnalyzeOpenEmailMessage)
+    .catch(() => {
+      // Gmail tab opened before the extension loaded; a reload injects the script.
+    });
+});
 
 chrome.storage.onChanged.addListener((changes, area) => {
   if (area !== "sync" || !(LINK_SCAN_ENABLED_KEY in changes)) return;

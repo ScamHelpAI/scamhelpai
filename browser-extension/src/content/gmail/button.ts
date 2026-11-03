@@ -1,5 +1,6 @@
 import { FONT_FAMILY } from "../../shared/font-family.ts";
 import type { VerdictTone } from "../../shared/verdict.ts";
+import { ensurePageMotionStyles } from "../ui/host.ts";
 
 export const BUTTON_ATTR = "data-scamhelp-gmail-btn";
 export const BUTTON_HOST_ATTR = "data-scamhelp-gmail-btn-host";
@@ -16,6 +17,14 @@ export type SetButtonStateOptions = {
 
 const STYLE_ID = "scamhelp-gmail-button-styles";
 
+/** Status text cycled while the analyze request is in flight (see scan.ts). */
+export const SCAN_STEPS = [
+  "Reading the email…",
+  "Checking the sender…",
+  "Checking links…",
+  "Comparing to known scams…",
+] as const;
+
 /** Match popup risk tokens from popup/styles.css */
 const TONE_STYLES: Record<
   VerdictTone | "brand",
@@ -28,6 +37,7 @@ const TONE_STYLES: Record<
 };
 
 export function ensureButtonStyles(doc: Document = document): void {
+  ensurePageMotionStyles(doc);
   if (doc.getElementById(STYLE_ID)) return;
   const style = doc.createElement("style");
   style.id = STYLE_ID;
@@ -96,6 +106,13 @@ export function ensureButtonStyles(doc: Document = document): void {
   doc.documentElement.appendChild(style);
 }
 
+function showBusy(button: HTMLButtonElement): void {
+  const spinner = button.ownerDocument.createElement("span");
+  spinner.className = "sh-spin";
+  spinner.setAttribute("aria-hidden", "true");
+  button.replaceChildren(spinner, "Checking…");
+}
+
 function applyButtonTone(
   button: HTMLButtonElement,
   tone: VerdictTone | "brand",
@@ -120,13 +137,13 @@ export function setButtonState(
     case "loading":
       applyButtonTone(button, "brand");
       button.disabled = true;
-      button.textContent = "Checking…";
-      if (statusEl) statusEl.textContent = "Sending this email to ScamHelp…";
+      showBusy(button);
+      if (statusEl) statusEl.textContent = SCAN_STEPS[0];
       break;
     case "reviewing":
       applyButtonTone(button, "brand");
       button.disabled = true;
-      button.textContent = "Checking…";
+      showBusy(button);
       if (statusEl) {
         statusEl.textContent =
           options?.message ?? "Double-checking with ScamHelp…";
@@ -174,6 +191,7 @@ export function injectScanButton(
   const button = doc.createElement("button");
   button.type = "button";
   button.setAttribute(BUTTON_ATTR, "1");
+  button.className = "sh-fab";
   button.addEventListener("click", (event) => {
     event.preventDefault();
     event.stopPropagation();
@@ -182,6 +200,8 @@ export function injectScanButton(
 
   const status = doc.createElement("span");
   status.setAttribute("data-scamhelp-gmail-status", "1");
+  status.setAttribute("role", "status");
+  status.setAttribute("aria-live", "polite");
 
   setButtonState(button, "idle", status);
   row.append(button, status);

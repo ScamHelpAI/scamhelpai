@@ -1,4 +1,5 @@
 @import "../../popup/styles.css";
+@import "../ui/motion.css";
 
 @source "../../components/ui/button.tsx";
 @source "../../components/ui/popover.tsx";

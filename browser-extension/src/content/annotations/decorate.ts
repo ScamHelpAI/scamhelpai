@@ -1,7 +1,9 @@
 import type { AnalysisDecision, RiskyPart } from "../../shared/types.ts";
+import { ensurePageMotionStyles } from "../ui/host.ts";
 import {
   ANNOTATION_HOST_ATTR,
   PAGE_GLOW_CLASS,
+  SCAMHELP_ANNOTATION,
   STYLE_ID,
 } from "./constants.ts";
 import {
@@ -36,6 +38,7 @@ export type ApplyAnnotationsOptions = {
 };
 
 export function ensureStyles(doc: Document = document): void {
+  ensurePageMotionStyles(doc);
   if (doc.getElementById(STYLE_ID)) return;
 
   const style = doc.createElement("style");
@@ -172,6 +175,13 @@ export function applyAnnotations(
   if (applied > 0) {
     glowTargetForRoot(root, doc)?.classList.add(PAGE_GLOW_CLASS);
   }
+
+  // Sweep highlights in one after another, in reading order (applied longest-first above).
+  root
+    .querySelectorAll<HTMLElement>(`[${SCAMHELP_ANNOTATION}="highlight"]`)
+    .forEach((mark, i) => {
+      mark.style.animationDelay = `${i * 150}ms`;
+    });
 
   return applied;
 }

@@ -45,6 +45,29 @@ describe("applyAnnotations scoping", () => {
     expect(document.body.classList.contains(PAGE_GLOW_CLASS)).toBe(false);
   });
 
+  it("staggers highlight sweep delays in reading order", () => {
+    document.body.innerHTML = `<div id="email">first act now, then within 24 hours or closed</div>`;
+    const root = document.getElementById("email")!;
+
+    applyAnnotations(
+      decision,
+      [
+        { quote: "act now", message: "Pressure." },
+        { quote: "within 24 hours or closed", message: "Fake deadline." },
+      ],
+      { root },
+    );
+
+    const marks = [
+      ...root.querySelectorAll<HTMLElement>(`mark[${SCAMHELP_ANNOTATION}]`),
+    ];
+    expect(marks.map((m) => [m.textContent, m.style.animationDelay])).toEqual([
+      ["act now", "0ms"],
+      ["within 24 hours or closed", "150ms"],
+    ]);
+    expect(marks[0].classList.contains("sh-hl")).toBe(true);
+  });
+
   it("resolves rootSelector the same way", () => {
     document.body.innerHTML = `
       <div id="email" ${ANNOTATE_ROOT_ATTR}="1">act within 24 hours now</div>

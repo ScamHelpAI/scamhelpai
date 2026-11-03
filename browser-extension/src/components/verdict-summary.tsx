@@ -95,7 +95,8 @@ function classificationIcon(primary: string): LucideIcon {
 
 const FTC_REPORT_URL = "https://reportfraud.ftc.gov/";
 
-/** Results panel: risk pill, score ring, scam type, findings, and Don't/Do guidance. */
+/** Results panel: risk pill, score ring, scam type, findings, and Don't/Do guidance.
+ * sh-* classes stagger sections in the Gmail panel (content/ui/motion.css); inert in the popup. */
 function VerdictSummary({
   result,
   reviewing,
@@ -115,13 +116,13 @@ function VerdictSummary({
       role="status"
       aria-live="polite"
     >
-      <h2 className="font-heading text-[1.75rem] font-bold text-[#b8650a]">
+      <h2 className="sh-up font-heading text-[1.75rem] font-bold text-[#b8650a]">
         Analysis Results
       </h2>
 
       <span
         className={cn(
-          "inline-flex h-12 items-center justify-center gap-2.5 rounded-full border-2 px-6 font-heading text-lg font-bold tracking-wide",
+          "sh-pop sh-d1 inline-flex h-12 items-center justify-center gap-2.5 rounded-full border-2 px-6 font-heading text-lg font-bold tracking-wide",
           tonePillClass[verdict.tone],
         )}
       >
@@ -129,19 +130,23 @@ function VerdictSummary({
         {verdict.badgeLabel}
       </span>
 
-      <ScoreGauge score={result.risk.score} tone={verdict.tone} />
+      <ScoreGauge
+        className="sh-up sh-d1"
+        score={result.risk.score}
+        tone={verdict.tone}
+      />
 
       {reviewing ? (
-        <p className="flex items-center gap-2 text-[17px] text-muted-foreground">
+        <p className="sh-up sh-d2 flex items-center gap-2 text-[17px] text-muted-foreground">
           <Loader2Icon className="size-5 animate-spin" aria-hidden />
           Double-checking…
         </p>
       ) : result.classification.primary !== "unknown" ? (
-        <div className="flex flex-col items-center gap-2">
+        <div className="sh-up sh-d2 flex flex-col items-center gap-2">
           <p className="text-[17px] font-semibold">Scam type detected:</p>
           <span
             className={cn(
-              "inline-flex h-13 items-center gap-2.5 rounded-full px-6 font-heading text-lg font-bold tracking-wide shadow-md",
+              "sh-pop sh-d2 inline-flex h-13 items-center gap-2.5 rounded-full px-6 font-heading text-lg font-bold tracking-wide shadow-md",
               toneFillClass[verdict.tone],
             )}
           >
@@ -152,7 +157,7 @@ function VerdictSummary({
       ) : null}
 
       {verdict.reasons.length > 0 ? (
-        <section className="w-full space-y-2.5 border-t border-border pt-3">
+        <section className="sh-up sh-d3 w-full space-y-2.5 border-t border-border pt-3">
           <h3 className="font-heading text-xl font-semibold">What we found</h3>
           <ol className="space-y-2.5">
             {verdict.reasons.slice(0, MAX_FINDINGS).map((reason, i) => (
@@ -174,7 +179,7 @@ function VerdictSummary({
       ) : null}
 
       {decision ? (
-        <section className="w-full space-y-2.5 rounded-2xl bg-next-steps px-4 py-4">
+        <section className="sh-up sh-d4 w-full space-y-2.5 rounded-2xl bg-next-steps px-4 py-4">
           <h3 className="font-heading text-xl font-semibold text-trust">
             What to do now
           </h3>
@@ -204,7 +209,12 @@ function VerdictSummary({
       ) : null}
 
       {verdict.tone !== "safe" ? (
-        <Button asChild variant="trust" size="lg" className="w-full">
+        <Button
+          asChild
+          variant="trust"
+          size="lg"
+          className="sh-up sh-d5 w-full"
+        >
           <a href={FTC_REPORT_URL} target="_blank" rel="noopener noreferrer">
             Report this scam to the FTC
           </a>

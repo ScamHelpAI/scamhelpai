@@ -1,5 +1,5 @@
 import { spawnSync } from "node:child_process";
-import { mkdir } from "node:fs/promises";
+import { copyFile, mkdir } from "node:fs/promises";
 import path, { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import * as esbuild from "esbuild";
@@ -86,6 +86,12 @@ function bundleExtensionScripts(): Plugin {
       if (tailwind.status !== 0) {
         throw new Error("Failed to compile content annotation styles.");
       }
+
+      // Page-level copy of the sh- motion styles (Gmail DOM pieces live outside the shadow root).
+      await copyFile(
+        resolve(root, "src/content/ui/motion.css"),
+        resolve(outDir, "content/motion.css"),
+      );
 
       await esbuild.build({
         absWorkingDir: root,

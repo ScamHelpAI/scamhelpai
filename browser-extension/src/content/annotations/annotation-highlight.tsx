@@ -9,7 +9,6 @@ import {
 } from "@/components/ui/popover.tsx";
 import { SCAMHELP_ANNOTATION } from "./constants.ts";
 import type { AnalysisDecision } from "@/shared/types.ts";
-import { cn } from "cn";
 
 type AnnotationHighlightProps = {
   text: string;
@@ -33,10 +32,7 @@ function AnnotationHighlight({
           data-slot="annotation-highlight"
           {...{ [SCAMHELP_ANNOTATION]: "highlight" }}
           tabIndex={0}
-          className={cn(
-            "cursor-pointer rounded-sm bg-risk-high-bg text-inherit",
-            "underline decoration-risk-high decoration-[3px] underline-offset-2",
-          )}
+          className="sh-hl"
           onFocus={() => setOpen(true)}
         >
           {text}
