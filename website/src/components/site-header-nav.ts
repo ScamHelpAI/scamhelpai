@@ -1,7 +1,7 @@
 export const siteHeaderNavItems = [
   { href: "/how-it-works", label: "How it works" },
   { href: "/extension", label: "Extension" },
-  { href: "#", label: "About" },
+  { href: "/about", label: "About" },
   {
     href: "https://studentsagainstscams.org",
     label: "Students Against Scams",
