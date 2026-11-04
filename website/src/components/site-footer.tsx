@@ -14,7 +14,12 @@ export function SiteFooter() {
         </p>
 
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-sm text-muted-foreground">© 2026 Scam Help.AI</p>
+          <div className="text-sm leading-relaxed text-muted-foreground">
+            <p>©️2026 ScamHelp.AI</p>
+            <p>Students Against Scams Org.</p>
+            <p>501(c)(3) non-profit organization.</p>
+            <p>EIN: 39-4504213</p>
+          </div>
           <nav
             aria-label="Legal"
             className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-muted-foreground"
