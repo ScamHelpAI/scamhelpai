@@ -1,9 +1,7 @@
 @font-face {
   font-family: "Mikado";
-  src:
-    local("Mikado Bold"),
-    local("Mikado-Bold"),
-    url("/fonts/mikado-bold.woff2") format("woff2");
+  /* No local(): an installed Mikado (e.g. Black Italic) would win over the bundled Bold. */
+  src: url("/fonts/mikado-bold.woff2") format("woff2");
   font-weight: 700;
   font-style: normal;
   font-display: swap;

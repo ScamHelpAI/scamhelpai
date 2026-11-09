@@ -2,6 +2,8 @@ import { DEFAULT_API_BASE } from "./api-url.ts";
 
 export const LINK_SCAN_ENABLED_KEY = "linkScanEnabled";
 export const API_BASE_KEY = "apiBase";
+/** Optional host access the link scanner asks for when the user turns it on. */
+export const ALL_SITES = ["http://*/*", "https://*/*"];
 
 export function normalizeApiBase(value: string): string {
   return value.trim().replace(/\/+$/, "");

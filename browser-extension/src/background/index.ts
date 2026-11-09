@@ -24,7 +24,12 @@ import type {
   ScanActivePageMessage,
 } from "../shared/messages.ts";
 import { pageHtmlToAnalyzeRequest } from "../shared/page-request.ts";
-import { LINK_SCAN_ENABLED_KEY } from "../shared/settings.ts";
+import {
+  ALL_SITES,
+  getLinkScanEnabled,
+  LINK_SCAN_ENABLED_KEY,
+  setLinkScanEnabled,
+} from "../shared/settings.ts";
 import type { AnalysisResult, AnalyzeRequest } from "../shared/types.ts";
 
 async function injectLinkScannerIntoOpenTabs(): Promise<void> {
@@ -42,6 +47,35 @@ async function injectLinkScannerIntoOpenTabs(): Promise<void> {
       }
     }),
   );
+}
+
+const LINK_SCRIPT_ID = "links";
+
+/** Runs the link scanner on every page only while it is on and site access is granted. */
+async function syncLinkScanner(): Promise<void> {
+  const enabled = await getLinkScanEnabled();
+  const granted = await chrome.permissions.contains({ origins: ALL_SITES });
+  if (enabled && !granted) {
+    // Access was revoked (or never granted after an update): turn the setting off to match.
+    await setLinkScanEnabled(false);
+    return;
+  }
+  const registered = await chrome.scripting.getRegisteredContentScripts({
+    ids: [LINK_SCRIPT_ID],
+  });
+  if (enabled && registered.length === 0) {
+    await chrome.scripting.registerContentScripts([
+      {
+        id: LINK_SCRIPT_ID,
+        js: ["content/links.js"],
+        matches: ALL_SITES,
+        runAt: "document_idle",
+      },
+    ]);
+    await injectLinkScannerIntoOpenTabs();
+  } else if (!enabled && registered.length > 0) {
+    await chrome.scripting.unregisterContentScripts({ ids: [LINK_SCRIPT_ID] });
+  }
 }
 
 async function getApiBase(): Promise<string> {
@@ -207,6 +241,7 @@ async function checkUrls(urls: string[]): Promise<CheckUrlResult[]> {
 const ANALYZE_EMAIL_MENU_ID = "scamhelp-analyze-email";
 
 chrome.runtime.onInstalled.addListener(() => {
+  void syncLinkScanner();
   chrome.contextMenus.removeAll(() => {
     chrome.contextMenus.create({
       id: ANALYZE_EMAIL_MENU_ID,
@@ -231,10 +266,10 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
 
 chrome.storage.onChanged.addListener((changes, area) => {
   if (area !== "sync" || !(LINK_SCAN_ENABLED_KEY in changes)) return;
-  if (changes[LINK_SCAN_ENABLED_KEY]?.newValue === true) {
-    void injectLinkScannerIntoOpenTabs();
-  }
+  void syncLinkScanner();
 });
+
+chrome.permissions.onRemoved.addListener(() => void syncLinkScanner());
 
 chrome.runtime.onMessage.addListener(
   (

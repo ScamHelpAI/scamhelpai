@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { DEFAULT_API_BASE } from "@/shared/api-url.ts";
 import {
+  ALL_SITES,
   getApiBaseSetting,
   getLinkScanEnabled,
   setApiBaseSetting,
@@ -70,11 +71,24 @@ export default function App() {
   }
 
   async function toggleLinkScan(next: boolean) {
+    // permissions.request must run first, while the click still counts as a user gesture.
+    if (next && !(await chrome.permissions.request({ origins: ALL_SITES }))) return;
     setLinkScanEnabledState(next);
     await setLinkScanEnabled(next);
+    if (!next) await chrome.permissions.remove({ origins: ALL_SITES });
   }
 
   async function saveApiBase() {
+    // A custom analyzer host (e.g. localhost) needs its own host access; the API has no CORS.
+    let origin: string | null = null;
+    try {
+      origin = `${new URL(apiBase.trim()).origin}/*`;
+    } catch {
+      // Invalid URL: save as-is; requests will fail with a clear error.
+    }
+    if (origin && !apiBase.trim().startsWith(DEFAULT_API_BASE)) {
+      await chrome.permissions.request({ origins: [origin] });
+    }
     await setApiBaseSetting(apiBase);
     const saved = await getApiBaseSetting();
     setApiBase(saved);
