@@ -1,4 +1,4 @@
-import { ClockIcon } from "lucide-react";
+import { ClockIcon, ExternalLinkIcon } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 
@@ -9,13 +9,16 @@ export const metadata: Metadata = {
   description: "How to add the Scam Help.AI extension to Google Chrome.",
 };
 
+const CHROME_STORE_URL =
+  "https://chromewebstore.google.com/detail/elniaddejeijjkfjemfomnlnfniddbcd";
+
 const steps = [
   {
     title: "Open the Chrome Web Store page",
-    body: "Use Google Chrome on a computer. Once the extension is published, the button on this page will take you straight to it.",
+    body: "Use Google Chrome on a computer. Click the “Add to Chrome” button at the top of this page. It opens ScamHelp.AI in the Chrome Web Store.",
   },
   {
-    title: "Click “Add to Chrome”",
+    title: "Click “Add to Chrome” in the store",
     body: "Chrome will ask if you want to add ScamHelp AI. Click “Add extension” to confirm.",
   },
   {
@@ -47,14 +50,22 @@ export default function ExtensionPage() {
           >
             <ClockIcon className="mt-0.5 size-6 shrink-0" aria-hidden />
             <p>
-              <strong>Coming soon.</strong> We are uploading the extension to
-              the Chrome Web Store. It is not available to download yet.
+              <strong>Using Firefox?</strong> Firefox support is in the works.
+              For now, the extension works in Google Chrome.
             </p>
           </div>
 
           <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-            <Button size="lg" disabled>
-              Uploading to the Chrome Web Store…
+            <Button asChild size="lg">
+              <a
+                href={CHROME_STORE_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Add to Chrome
+                <ExternalLinkIcon aria-hidden />
+                <span className="sr-only">(opens in a new tab)</span>
+              </a>
             </Button>
             <Button asChild variant="outline" size="lg" className="border-2">
               <Link href="/#analyze">Check a message now</Link>
